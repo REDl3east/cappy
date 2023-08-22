@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "SDL3/SDL.h"
 #include "capture.h"
 
 int main() {
