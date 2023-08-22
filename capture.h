@@ -15,16 +15,16 @@ struct RGB {
 struct Capture {
 public:
   ~Capture();
-  
+
   bool capture();
   bool write_pnm(const std::string& filename);
 
-private:
   bool captured = false;
   int width;
   int height;
   int stride;
   RGB* pixels;
+private:
 };
 
 
