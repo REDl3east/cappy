@@ -1,14 +1,21 @@
+#include <bitset>
+#include <iomanip>
 #include <iostream>
 #include <memory>
+#include <sstream>
 
 #include "SDL3/SDL.h"
 #include "camera.h"
 #include "capture.h"
 
-std::shared_ptr<SDL_Texture> create_capture_texture(std::shared_ptr<SDL_Renderer> renderer, Capture& capture) {
-  std::shared_ptr<SDL_Surface> surface = std::shared_ptr<SDL_Surface>(SDL_CreateSurfaceFrom(capture.pixels, capture.width, capture.height, capture.stride * 3, SDL_PIXELFORMAT_RGB24), SDL_DestroySurface);
-  return std::shared_ptr<SDL_Texture>(SDL_CreateTextureFromSurface(renderer.get(), surface.get()), SDL_DestroyTexture);
-}
+std::shared_ptr<SDL_Texture> create_capture_texture(std::shared_ptr<SDL_Renderer> renderer, Capture& capture);
+
+std::string toDecimalString(const RGB& color);
+std::string toDecimalSepString(const RGB& color);
+std::string toHexString(const RGB& color);
+std::string toHexSepString(const RGB& color);
+std::string toBinaryString(const RGB& color);
+std::string toBinarySepString(const RGB& color);
 
 int main() {
   Capture capture;
@@ -52,6 +59,7 @@ int main() {
   while (!quit) {
     float mx, my;
     SDL_GetMouseState(&mx, &my);
+    SDL_FPoint mouse = camera.screen_to_world(mx, my);
     while (SDL_PollEvent(&event)) {
       switch (event.type) {
         case SDL_EVENT_QUIT: {
@@ -60,16 +68,38 @@ int main() {
         }
         case SDL_EVENT_KEY_DOWN: {
           SDL_Keycode code = event.key.keysym.sym;
+          SDL_Keymod mod   = SDL_GetModState();
           if (code == SDLK_q) {
             quit = true;
-            break;
           } else if (code == SDLK_r) {
             camera.reset();
-            break;
           } else if (code == SDLK_c) {
             show_color = !show_color;
-            break;
+          } else {
+            RGB rgb;
+            if (!capture.at(mouse.x, mouse.y, rgb)) break;
+            if (code == SDLK_d && mod & SDL_KMOD_CTRL) {
+              if (mod & SDL_KMOD_SHIFT) {
+                SDL_SetClipboardText(toDecimalSepString(rgb).c_str());
+              } else {
+                SDL_SetClipboardText(toDecimalString(rgb).c_str());
+              }
+            } else if (code == SDLK_h && mod & SDL_KMOD_CTRL) {
+              if (mod & SDL_KMOD_SHIFT) {
+                SDL_SetClipboardText(toHexSepString(rgb).c_str());
+              } else {
+                SDL_SetClipboardText(toHexString(rgb).c_str());
+              }
+            } else if (code == SDLK_b && mod & SDL_KMOD_CTRL) {
+              if (mod & SDL_KMOD_SHIFT) {
+                SDL_SetClipboardText(toBinarySepString(rgb).c_str());
+              } else {
+                SDL_SetClipboardText(toBinaryString(rgb).c_str());
+              }
+            }
           }
+
+          break;
         }
         case SDL_EVENT_KEY_UP: {
           SDL_Keycode code = event.key.keysym.sym;
@@ -100,8 +130,6 @@ int main() {
       }
     }
 
-    SDL_FPoint mouse = camera.screen_to_world(mx, my);
-
     SDL_SetRenderDrawColor(renderer.get(), 211, 211, 211, 255);
     SDL_RenderClear(renderer.get());
 
@@ -130,4 +158,48 @@ int main() {
   SDL_Quit();
 
   return 0;
+}
+
+std::shared_ptr<SDL_Texture> create_capture_texture(std::shared_ptr<SDL_Renderer> renderer, Capture& capture) {
+  std::shared_ptr<SDL_Surface> surface = std::shared_ptr<SDL_Surface>(SDL_CreateSurfaceFrom(capture.pixels, capture.width, capture.height, capture.stride * 3, SDL_PIXELFORMAT_RGB24), SDL_DestroySurface);
+  return std::shared_ptr<SDL_Texture>(SDL_CreateTextureFromSurface(renderer.get(), surface.get()), SDL_DestroyTexture);
+}
+
+std::string toDecimalString(const RGB& color) {
+  int x = (color.r << 16) | (color.g << 8) | color.b;
+  std::stringstream stream;
+  stream << x;
+  return stream.str();
+}
+
+std::string toDecimalSepString(const RGB& color) {
+  std::stringstream stream;
+  stream << static_cast<int>(color.r) << ", " << static_cast<int>(color.g) << ", " << static_cast<int>(color.b);
+  return stream.str();
+}
+
+std::string toHexString(const RGB& color) {
+  std::stringstream stream;
+  stream << "0x" << std::setfill('0') << std::setw(2) << std::hex;
+  stream << static_cast<int>(color.r) << std::setw(2) << static_cast<int>(color.g) << std::setw(2) << static_cast<int>(color.b);
+  return stream.str();
+}
+
+std::string toHexSepString(const RGB& color) {
+  std::stringstream stream;
+  stream << "0x" << std::setfill('0') << std::setw(2) << std::hex;
+  stream << static_cast<int>(color.r) << std::setw(2) << ", ";
+  stream << "0x" << std::setfill('0') << std::setw(2) << std::hex;
+  stream << static_cast<int>(color.g) << std::setw(2) << ", ";
+  stream << "0x" << std::setfill('0') << std::setw(2) << std::hex;
+  stream << static_cast<int>(color.b) << std::setw(2);
+  return stream.str();
+}
+
+std::string toBinaryString(const RGB& color) {
+  return "0b" + std::bitset<8>(color.r).to_string() + std::bitset<8>(color.g).to_string() + std::bitset<8>(color.b).to_string();
+}
+
+std::string toBinarySepString(const RGB& color) {
+  return "0b" + std::bitset<8>(color.r).to_string() + ", 0b" + std::bitset<8>(color.g).to_string() + ", 0b" + std::bitset<8>(color.b).to_string();
 }
