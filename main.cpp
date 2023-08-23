@@ -73,16 +73,16 @@ int main() {
         }
         case SDL_EVENT_MOUSE_WHEEL: {
           float scale = camera.get_scale();
-          float mouseX, mouseY;
-          SDL_GetMouseState(&mouseX, &mouseY);
+          float mx, my;
+          SDL_GetMouseState(&mx, &my);
 
           if (event.wheel.y > 0) {
             if (scale <= 25.0f) {
-              camera.zoom(0.1, mouseX, mouseY);
+              camera.zoom(0.1, mx, my);
             }
           } else if (event.wheel.y < 0) {
             if (scale >= 0.25) {
-              camera.zoom(-0.1, mouseX, mouseY);
+              camera.zoom(-0.1, mx, my);
             }
           }
           break;
@@ -90,13 +90,29 @@ int main() {
       }
     }
 
+    float mx, my;
+    SDL_GetMouseState(&mx, &my);
+    SDL_FPoint mouse = camera.screen_to_world(mx, my);
+
     SDL_SetRenderDrawColor(renderer.get(), 211, 211, 211, 255);
     SDL_RenderClear(renderer.get());
 
     SDL_FPoint pos = camera.world_to_screen(0, 0);
     SDL_FRect r    = {pos.x, pos.y, (float)capture.width * camera.get_scale(), (float)capture.height * camera.get_scale()};
-
     SDL_RenderTexture(renderer.get(), texture.get(), NULL, &r);
+
+    RGB rgb;
+    if (capture.at(mouse.x, mouse.y, rgb)) {
+      float size     = 100.0f;
+      float offset   = 50.0f;
+      SDL_FRect rect = {mx + offset, my - size - offset, size, size};
+
+      SDL_SetRenderDrawColor(renderer.get(), rgb.r, rgb.g, rgb.b, 255);
+      SDL_RenderFillRect(renderer.get(), &rect);
+
+      SDL_SetRenderDrawColor(renderer.get(), 255, 0, 0, 255);
+      SDL_RenderRect(renderer.get(), &rect);
+    }
 
     SDL_RenderPresent(renderer.get());
   }
