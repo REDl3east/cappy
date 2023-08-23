@@ -9,6 +9,7 @@
 **Scroll Wheel** - Zoom  
 
 #### Color Mode
+
 You can hover your mouse over a pixel and a pop-up of the color will appear near the mouse.  
 
 **Ctrl+D**       - Copy color to clipboard as a decimal number  
