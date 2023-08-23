@@ -98,11 +98,6 @@ int main() {
 
     SDL_RenderTexture(renderer.get(), texture.get(), NULL, &r);
 
-    pos = camera.world_to_screen(100, 100);
-    r   = {pos.x, pos.y, 50, 50};
-    SDL_SetRenderDrawColor(renderer.get(), 255, 0, 0, 255);
-    SDL_RenderRect(renderer.get(), &r);
-
     SDL_RenderPresent(renderer.get());
   }
 

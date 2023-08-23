@@ -49,23 +49,3 @@ bool Capture::capture() {
 
   return true;
 }
-
-bool Capture::write_pnm(const std::string& filename) {
-  std::ofstream file(filename, std::ios::binary);
-
-  if (!file) return false;
-
-  file << "P6\n";
-  file << width << " " << height << "\n";
-  file << "255\n";
-
-  for (int i = 0; i < width * height; i++) {
-    file.put(pixels[i].r);
-    file.put(pixels[i].g);
-    file.put(pixels[i].b);
-  }
-
-  file.close();
-
-  return true;
-}

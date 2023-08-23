@@ -17,17 +17,14 @@ public:
   ~Capture();
 
   bool capture();
-  bool write_pnm(const std::string& filename);
 
   bool captured = false;
   int width;
   int height;
   int stride;
   RGB* pixels;
+
 private:
 };
-
-
-
 
 #endif
