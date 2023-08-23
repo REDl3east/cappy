@@ -46,9 +46,12 @@ int main() {
   Camera camera;
 
   SDL_Event event;
-  bool quit = false;
+  bool quit       = false;
+  bool show_color = false;
 
   while (!quit) {
+    float mx, my;
+    SDL_GetMouseState(&mx, &my);
     while (SDL_PollEvent(&event)) {
       switch (event.type) {
         case SDL_EVENT_QUIT: {
@@ -63,6 +66,15 @@ int main() {
           } else if (code == SDLK_r) {
             camera.reset();
             break;
+          } else if (code == SDLK_c) {
+            show_color = !show_color;
+            break;
+          }
+        }
+        case SDL_EVENT_KEY_UP: {
+          SDL_Keycode code = event.key.keysym.sym;
+          if (code == SDLK_c) {
+            break;
           }
         }
         case SDL_EVENT_MOUSE_MOTION: {
@@ -73,8 +85,6 @@ int main() {
         }
         case SDL_EVENT_MOUSE_WHEEL: {
           float scale = camera.get_scale();
-          float mx, my;
-          SDL_GetMouseState(&mx, &my);
 
           if (event.wheel.y > 0) {
             if (scale <= 25.0f) {
@@ -90,8 +100,6 @@ int main() {
       }
     }
 
-    float mx, my;
-    SDL_GetMouseState(&mx, &my);
     SDL_FPoint mouse = camera.screen_to_world(mx, my);
 
     SDL_SetRenderDrawColor(renderer.get(), 211, 211, 211, 255);
@@ -101,17 +109,19 @@ int main() {
     SDL_FRect r    = {pos.x, pos.y, (float)capture.width * camera.get_scale(), (float)capture.height * camera.get_scale()};
     SDL_RenderTexture(renderer.get(), texture.get(), NULL, &r);
 
-    RGB rgb;
-    if (capture.at(mouse.x, mouse.y, rgb)) {
-      float size     = 100.0f;
-      float offset   = 50.0f;
-      SDL_FRect rect = {mx + offset, my - size - offset, size, size};
+    if (show_color) {
+      RGB rgb;
+      if (capture.at(mouse.x, mouse.y, rgb)) {
+        float size     = 100.0f;
+        float offset   = 50.0f;
+        SDL_FRect rect = {mx + offset, my - size - offset, size, size};
 
-      SDL_SetRenderDrawColor(renderer.get(), rgb.r, rgb.g, rgb.b, 255);
-      SDL_RenderFillRect(renderer.get(), &rect);
+        SDL_SetRenderDrawColor(renderer.get(), rgb.r, rgb.g, rgb.b, 255);
+        SDL_RenderFillRect(renderer.get(), &rect);
 
-      SDL_SetRenderDrawColor(renderer.get(), 255, 0, 0, 255);
-      SDL_RenderRect(renderer.get(), &rect);
+        SDL_SetRenderDrawColor(renderer.get(), 255, 0, 0, 255);
+        SDL_RenderRect(renderer.get(), &rect);
+      }
     }
 
     SDL_RenderPresent(renderer.get());
