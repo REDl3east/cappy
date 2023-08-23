@@ -7,6 +7,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs)
 
 set(MAIN_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/camera.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/capture.cpp
 )
 
