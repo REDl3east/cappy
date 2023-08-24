@@ -104,8 +104,9 @@ int main() {
         case SDL_EVENT_KEY_UP: {
           SDL_Keycode code = event.key.keysym.sym;
           if (code == SDLK_c) {
-            break;
           }
+          
+          break;
         }
         case SDL_EVENT_MOUSE_MOTION: {
           if ((event.motion.state & SDL_BUTTON(SDL_BUTTON_LEFT))) {
