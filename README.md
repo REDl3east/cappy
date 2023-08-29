@@ -29,6 +29,6 @@ You can focus in on a specific point in flashlight mode
 **LShift+Scroll Wheel**    - Increase/Decrease flashlight size   
 
 ## TODO
+- [x] Show color data, with text, near color panel
 - [ ] Add ability to save screenshot
 - [ ] Add screen selection
-- [ ] Show color data, with text, near color panel

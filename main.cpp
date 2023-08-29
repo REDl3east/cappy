@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "SDL3/SDL.h"
+#include "SDL3_ttf/SDL_ttf.h"
 #include "camera.h"
 #include "capture.h"
 
@@ -62,17 +63,47 @@ int main() {
     return 1;
   }
 
-  std::shared_ptr<SDL_Cursor> move_cursor = std::shared_ptr<SDL_Cursor>(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEALL), SDL_DestroyCursor);
+  if (TTF_Init() < 0) {
+    std::cerr << "Failed to init TTF!\n";
+    return 1;
+  }
+
+  TTF_Font* font = TTF_OpenFont("/home/dalton/projects/cappy/fonts/advanced_pixel-7.ttf", 36);
+  if (!font) {
+    std::cerr << "Failed to load font: " << TTF_GetError() << '\n';
+    return 1;
+  }
+
+  // Create a surface for rendering text
+  std::shared_ptr<SDL_Surface> text_surface;
+  std::shared_ptr<SDL_Texture> text_texture;
+
+  auto recompute_text = [&text_surface, &text_texture, &font, &renderer](const char* text) -> bool {
+    text_surface = std::shared_ptr<SDL_Surface>(TTF_RenderText_Solid(font, text, {255, 255, 255, 255}), SDL_DestroySurface);
+    if (!text_surface) return false;
+
+    text_texture = std::shared_ptr<SDL_Texture>(SDL_CreateTextureFromSurface(renderer.get(), text_surface.get()), SDL_DestroyTexture);
+    if (!text_texture) return false;
+
+    return true;
+  };
+
+  if (!recompute_text("hello")) {
+    std::cerr << "Failed to recompute text\n"
+              << '\n';
+    return 1;
+  }
 
   Camera camera;
-
-  SDL_Event event;
   bool quit             = false;
   bool show_color       = false;
   bool show_flashlight  = false;
   float flashlight_size = 100.0f;
-
   while (!quit) {
+    std::shared_ptr<SDL_Cursor> move_cursor = std::shared_ptr<SDL_Cursor>(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEALL), SDL_DestroyCursor);
+
+    SDL_Event event;
+
     float mx, my;
     SDL_GetMouseState(&mx, &my);
     SDL_FPoint mouse = camera.screen_to_world(mx, my);
@@ -92,6 +123,11 @@ int main() {
           } else if (code == SDLK_c) {
             show_color      = !show_color;
             show_flashlight = false;
+            if (show_color) {
+              RGB rgb;
+              if (!capture.at(mouse.x, mouse.y, rgb)) break;
+              recompute_text(toDecimalSepString(rgb).c_str());
+            }
             SDL_ShowCursor();
           } else if (code == SDLK_f) {
             show_flashlight = !show_flashlight;
@@ -137,6 +173,10 @@ int main() {
           if ((event.motion.state & SDL_BUTTON(SDL_BUTTON_LEFT))) {
             camera.pan(event.motion.xrel, event.motion.yrel);
           }
+
+          RGB rgb;
+          if (!capture.at(mouse.x, mouse.y, rgb)) break;
+          recompute_text(toDecimalSepString(rgb).c_str());
           break;
         }
         case SDL_EVENT_MOUSE_BUTTON_DOWN: {
@@ -190,8 +230,19 @@ int main() {
         SDL_SetRenderDrawColor(renderer.get(), rgb.r, rgb.g, rgb.b, 255);
         SDL_RenderFillRect(renderer.get(), &rect);
 
-        SDL_SetRenderDrawColor(renderer.get(), 255, 0, 0, 255);
+        SDL_SetRenderDrawColor(renderer.get(), 200, 200, 200, 255);
         SDL_RenderRect(renderer.get(), &rect);
+
+        SDL_FRect text_rect = {mx + offset + (0.5f * (size - text_surface->w)), my - size - offset - text_surface->h, (float)text_surface->w, (float)text_surface->h};
+
+        SDL_FRect text_rect_back = {mx + offset, my - size - offset - text_surface->h, size, (float)text_surface->h};
+        SDL_SetRenderDrawColor(renderer.get(), 0, 0, 0, 255);
+        SDL_RenderFillRect(renderer.get(), &text_rect_back);
+
+        SDL_SetRenderDrawColor(renderer.get(), 200, 200, 200, 255);
+        SDL_RenderRect(renderer.get(), &text_rect_back);
+
+        SDL_RenderTexture(renderer.get(), text_texture.get(), NULL, &text_rect);
       }
     } else if (show_flashlight) {
       float x, y;
@@ -205,6 +256,8 @@ int main() {
     SDL_RenderPresent(renderer.get());
   }
 
+  TTF_CloseFont(font);
+  TTF_Quit();
   SDL_Quit();
 
   return 0;

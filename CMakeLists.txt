@@ -4,6 +4,7 @@ project(cappy VERSION 0.1.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 
 set(SDL3_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs/sdl3)
+set(SDL3_TTF_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs/sdl3_ttf)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs)
 
@@ -14,4 +15,4 @@ set(MAIN_SRC
 )
 
 add_executable(cappy ${MAIN_SRC})
-target_link_libraries(cappy SDL3-static X11)
+target_link_libraries(cappy SDL3-static SDL3_ttf-static X11)
