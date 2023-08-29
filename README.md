@@ -1,6 +1,6 @@
 # cappy
 
-A screen capping tool that lets you immediately explore the pixels of the current screen. You can pan/zoom around and extract the colors of the pixels.
+A screen capping tool that lets you immediately explore the pixels of the current screen. You can pan/zoom around and extract the colors of each pixel.
 
 ### Controls
 
