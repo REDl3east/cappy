@@ -31,3 +31,4 @@ You can focus in on a specific point in flashlight mode
 ## TODO
 - [ ] Add ability to save screenshot
 - [ ] Add screen selection
+- [ ] Show color data, with text, near color panel
