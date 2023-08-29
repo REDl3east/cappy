@@ -1,8 +1,11 @@
 #include <bitset>
+#include <cmath>
 #include <iomanip>
 #include <iostream>
 #include <memory>
+#include <numbers>
 #include <sstream>
+#include <vector>
 
 #include "SDL3/SDL.h"
 #include "camera.h"
@@ -16,6 +19,13 @@ std::string toHexString(const RGB& color);
 std::string toHexSepString(const RGB& color);
 std::string toBinaryString(const RGB& color);
 std::string toBinarySepString(const RGB& color);
+
+SDL_FPoint SDL_PointMid(float x1, float y1, float x2, float y2);
+SDL_FPoint SDL_PointMid(const SDL_FPoint& p1, const SDL_FPoint& p2);
+
+void drawTriangle(std::shared_ptr<SDL_Renderer> renderer, float x1, float y1, float x2, float y2, float x3, float y3, Uint8 r, Uint8 g, Uint8 b, Uint8 a);
+void drawTriangle(std::shared_ptr<SDL_Renderer> renderer, float x1, float y1, float x2, float y2, float x3, float y3, Uint8 r1, Uint8 g1, Uint8 b1, Uint8 a1, Uint8 r2, Uint8 g2, Uint8 b2, Uint8 a2, Uint8 r3, Uint8 g3, Uint8 b3, Uint8 a3);
+void draw_flashlight(std::shared_ptr<SDL_Renderer> renderer, float x, float y, float radius, int edges, uint8_t cr, uint8_t cg, uint8_t cb, uint8_t ca, uint8_t cor, uint8_t cog, uint8_t cob, uint8_t coa, uint8_t otr, uint8_t otg, uint8_t otb, uint8_t ota);
 
 int main() {
   Capture capture;
@@ -43,6 +53,8 @@ int main() {
     return 1;
   }
 
+  SDL_SetRenderDrawBlendMode(renderer.get(), SDL_BLENDMODE_BLEND);
+
   std::shared_ptr<SDL_Texture> texture = create_capture_texture(renderer, capture);
 
   if (!texture) {
@@ -53,8 +65,10 @@ int main() {
   Camera camera;
 
   SDL_Event event;
-  bool quit       = false;
-  bool show_color = false;
+  bool quit             = false;
+  bool show_color       = false;
+  bool show_flashlight  = false;
+  float flashlight_size = 100.0f;
 
   while (!quit) {
     float mx, my;
@@ -74,7 +88,16 @@ int main() {
           } else if (code == SDLK_r) {
             camera.reset();
           } else if (code == SDLK_c) {
-            show_color = !show_color;
+            show_color      = !show_color;
+            show_flashlight = false;
+            SDL_ShowCursor();
+          } else if (code == SDLK_f) {
+            show_flashlight = !show_flashlight;
+            show_color      = false;
+            if (show_flashlight)
+              SDL_HideCursor();
+            else
+              SDL_ShowCursor();
           } else {
             RGB rgb;
             if (!capture.at(mouse.x, mouse.y, rgb)) break;
@@ -105,7 +128,7 @@ int main() {
           SDL_Keycode code = event.key.keysym.sym;
           if (code == SDLK_c) {
           }
-          
+
           break;
         }
         case SDL_EVENT_MOUSE_MOTION: {
@@ -117,13 +140,18 @@ int main() {
         case SDL_EVENT_MOUSE_WHEEL: {
           float scale = camera.get_scale();
 
-          if (event.wheel.y > 0) {
-            if (scale <= 25.0f) {
-              camera.zoom(0.1, mx, my);
-            }
-          } else if (event.wheel.y < 0) {
-            if (scale >= 0.25) {
-              camera.zoom(-0.1, mx, my);
+          if (show_flashlight && (SDL_GetModState() & SDL_KMOD_LSHIFT)) {
+            flashlight_size += event.wheel.y > 0 ? -10.0f : 10.f;
+            if (flashlight_size <= 0) flashlight_size = 0.0f;
+          } else {
+            if (event.wheel.y > 0) {
+              if (scale <= 100.0f) {
+                camera.zoom(0.1, mx, my);
+              }
+            } else if (event.wheel.y < 0) {
+              if (scale >= 0.25) {
+                camera.zoom(-0.1, mx, my);
+              }
             }
           }
           break;
@@ -131,7 +159,7 @@ int main() {
       }
     }
 
-    SDL_SetRenderDrawColor(renderer.get(), 211, 211, 211, 255);
+    SDL_SetRenderDrawColor(renderer.get(), 125, 125, 125, 255);
     SDL_RenderClear(renderer.get());
 
     SDL_FPoint pos = camera.world_to_screen(0, 0);
@@ -141,7 +169,7 @@ int main() {
     if (show_color) {
       RGB rgb;
       if (capture.at(mouse.x, mouse.y, rgb)) {
-        float size     = 100.0f;
+        float size     = 200.0f;
         float offset   = 50.0f;
         SDL_FRect rect = {mx + offset, my - size - offset, size, size};
 
@@ -151,6 +179,13 @@ int main() {
         SDL_SetRenderDrawColor(renderer.get(), 255, 0, 0, 255);
         SDL_RenderRect(renderer.get(), &rect);
       }
+    } else if (show_flashlight) {
+      float x, y;
+      SDL_GetMouseState(&x, &y);
+      draw_flashlight(renderer, x, y, flashlight_size, 100,
+                      255, 255, 255, 0,
+                      255, 255, 255, 0,
+                      0, 0, 0, 200);
     }
 
     SDL_RenderPresent(renderer.get());
@@ -203,4 +238,163 @@ std::string toBinaryString(const RGB& color) {
 
 std::string toBinarySepString(const RGB& color) {
   return "0b" + std::bitset<8>(color.r).to_string() + ", 0b" + std::bitset<8>(color.g).to_string() + ", 0b" + std::bitset<8>(color.b).to_string();
+}
+
+SDL_FPoint SDL_PointMid(float x1, float y1, float x2, float y2) {
+  return SDL_FPoint{
+      (x1 + x2) * 0.5f,
+      (y1 + y2) * 0.5f,
+  };
+}
+
+SDL_FPoint SDL_PointMid(const SDL_FPoint& p1, const SDL_FPoint& p2) {
+  return SDL_PointMid(p1.x, p1.y, p2.x, p2.y);
+}
+
+void drawTriangle(std::shared_ptr<SDL_Renderer> renderer, float x1, float y1, float x2, float y2, float x3, float y3, Uint8 r, Uint8 g, Uint8 b, Uint8 a) {
+  SDL_Vertex v[3] = {0};
+  v[0].position   = {x1, y1};
+  v[1].position   = {x2, y2};
+  v[2].position   = {x3, y3};
+  v[0].color      = {r, g, b, a};
+  v[1].color      = {r, g, b, a};
+  v[2].color      = {r, g, b, a};
+  SDL_RenderGeometry(renderer.get(), nullptr, v, 3, nullptr, 0);
+}
+
+void drawTriangle(std::shared_ptr<SDL_Renderer> renderer,
+                  float x1, float y1, float x2, float y2, float x3, float y3,
+                  Uint8 r1, Uint8 g1, Uint8 b1, Uint8 a1,
+                  Uint8 r2, Uint8 g2, Uint8 b2, Uint8 a2,
+                  Uint8 r3, Uint8 g3, Uint8 b3, Uint8 a3) {
+  SDL_Vertex v[3] = {0};
+  v[0].position   = {x1, y1};
+  v[1].position   = {x2, y2};
+  v[2].position   = {x3, y3};
+  v[0].color      = {r1, g1, b1, a1};
+  v[1].color      = {r2, g2, b2, a2};
+  v[2].color      = {r3, g3, b3, a3};
+  SDL_RenderGeometry(renderer.get(), nullptr, v, 3, nullptr, 0);
+}
+
+void draw_flashlight(std::shared_ptr<SDL_Renderer> renderer, float x, float y, float radius, int edges,
+                     uint8_t cr, uint8_t cg, uint8_t cb, uint8_t ca,
+                     uint8_t cor, uint8_t cog, uint8_t cob, uint8_t coa,
+                     uint8_t otr, uint8_t otg, uint8_t otb, uint8_t ota) {
+  if (edges < 5) { // wont work with edges less than 5
+    return;
+  }
+
+  int width, height;
+  SDL_GetCurrentRenderOutputSize(renderer.get(), &width, &height);
+
+  radius = std::abs(radius);
+
+  SDL_FPoint world_bound[4] = {
+      {0, 0},
+      {(float)width, 0},
+      {(float)width, (float)height},
+      {0, (float)height},
+  };
+
+  SDL_FPoint world_bound_mid[4] = {
+      SDL_PointMid(world_bound[0], world_bound[1]),
+      SDL_PointMid(world_bound[1], world_bound[2]),
+      SDL_PointMid(world_bound[2], world_bound[3]),
+      SDL_PointMid(world_bound[3], world_bound[0]),
+  };
+
+  SDL_FPoint bounds[4] = {
+      {x - radius, y - radius},
+      {x + radius, y - radius},
+      {x + radius, y + radius},
+      {x - radius, y + radius},
+  };
+
+  SDL_FPoint bound_mids[4] = {
+      SDL_PointMid(bounds[0], bounds[1]),
+      SDL_PointMid(bounds[1], bounds[2]),
+      SDL_PointMid(bounds[2], bounds[3]),
+      SDL_PointMid(bounds[3], bounds[0]),
+  };
+
+  std::vector<SDL_Vertex> v;
+
+  // LIGHT
+
+  for (int i = 0; i < 4; i++) {
+    drawTriangle(renderer,
+                 world_bound[i].x, world_bound[i].y,
+                 world_bound[(i + 1) % 4].x, world_bound[(i + 1) % 4].y,
+                 bound_mids[i].x, bound_mids[i].y,
+                 otr, otg, otb, ota);
+  }
+
+  float a0 = 2 * std::numbers::pi_v<float> / edges;
+  float r1 = std::numbers::pi_v<float> * 0.5f + (std::numbers::pi_v<float> / edges);
+  for (int i = 0; i < edges; ++i) {
+    float a1 = std::fmod((a0 * i + r1), 2.0f * std::numbers::pi_v<float>);
+    float a2 = std::fmod((a0 * (i + 1) + r1), 2.0f * std::numbers::pi_v<float>);
+    if (a1 < 0) a1 += 2.0f * std::numbers::pi_v<float>;
+    if (a2 < 0) a2 += 2.0f * std::numbers::pi_v<float>;
+
+    float x1 = x + radius * std::cos(a1);
+    float y1 = y + radius * std::sin(a1);
+    float x2 = x + radius * std::cos(a2);
+    float y2 = y + radius * std::sin(a2);
+
+    // OUTSIDE LIGHT IN BOUNDS
+
+    int index         = -1;
+    bool in_same_quad = false;
+
+    if (a1 < std::numbers::pi_v<float> / 2) {
+      in_same_quad = a2 < std::numbers::pi_v<float> / 2;
+      index        = 0;
+    } else if (a1 < std::numbers::pi_v<float>) {
+      in_same_quad = a2 < std::numbers::pi_v<float>;
+      index        = 1;
+    } else if (a1 < 3 * std::numbers::pi_v<float> / 2) {
+      in_same_quad = a2 < 3 * std::numbers::pi_v<float> / 2;
+      index        = 2;
+    } else {
+      in_same_quad = a2 >= std::numbers::pi_v<float> / 2;
+      index        = 3;
+    }
+
+    if (in_same_quad) {
+      drawTriangle(renderer,
+                   x1, y1,
+                   x2, y2,
+                   world_bound[(index + 2) % 4].x, world_bound[(index + 2) % 4].y,
+                   otr, otg, otb, ota);
+    } else {
+      drawTriangle(renderer,
+                   x1, y1,
+                   bound_mids[(index + 2) % 4].x, bound_mids[(index + 2) % 4].y,
+                   world_bound[(index + 2) % 4].x, world_bound[(index + 2) % 4].y,
+                   otr, otg, otb, ota);
+
+      drawTriangle(renderer,
+                   x1, y1,
+                   x2, y2,
+                   bound_mids[(index + 2) % 4].x, bound_mids[(index + 2) % 4].y,
+                   otr, otg, otb, ota);
+
+      drawTriangle(renderer,
+                   x2, y2,
+                   bound_mids[(index + 2) % 4].x, bound_mids[(index + 2) % 4].y,
+                   world_bound[(index + 3) % 4].x, world_bound[(index + 3) % 4].y,
+                   otr, otg, otb, ota);
+    }
+
+    // LIGHT
+    drawTriangle(renderer,
+                 x, y,
+                 x1, y1,
+                 x2, y2,
+                 cr, cg, cb, ca,
+                 cor, cog, cob, coa,
+                 cor, cog, cob, coa);
+  }
 }
