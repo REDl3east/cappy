@@ -62,6 +62,8 @@ int main() {
     return 1;
   }
 
+  std::shared_ptr<SDL_Cursor> move_cursor = std::shared_ptr<SDL_Cursor>(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEALL), SDL_DestroyCursor);
+
   Camera camera;
 
   SDL_Event event;
@@ -135,6 +137,14 @@ int main() {
           if ((event.motion.state & SDL_BUTTON(SDL_BUTTON_LEFT))) {
             camera.pan(event.motion.xrel, event.motion.yrel);
           }
+          break;
+        }
+        case SDL_EVENT_MOUSE_BUTTON_DOWN: {
+          SDL_SetCursor(move_cursor.get());
+          break;
+        }
+        case SDL_EVENT_MOUSE_BUTTON_UP: {
+          SDL_SetCursor(SDL_GetDefaultCursor());
           break;
         }
         case SDL_EVENT_MOUSE_WHEEL: {
