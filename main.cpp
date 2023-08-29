@@ -140,11 +140,15 @@ int main() {
           break;
         }
         case SDL_EVENT_MOUSE_BUTTON_DOWN: {
-          SDL_SetCursor(move_cursor.get());
+          if (event.button.button == SDL_BUTTON_LEFT) {
+            SDL_SetCursor(move_cursor.get());
+          }
           break;
         }
         case SDL_EVENT_MOUSE_BUTTON_UP: {
-          SDL_SetCursor(SDL_GetDefaultCursor());
+          if (event.button.button == SDL_BUTTON_LEFT) {
+            SDL_SetCursor(SDL_GetDefaultCursor());
+          }
           break;
         }
         case SDL_EVENT_MOUSE_WHEEL: {
