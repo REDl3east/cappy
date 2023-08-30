@@ -101,14 +101,15 @@ int main() {
     return 1;
   }
 
+  std::shared_ptr<SDL_Cursor> move_cursor = std::shared_ptr<SDL_Cursor>(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEALL), SDL_DestroyCursor);
+  SDL_Cursor* default_cursor              = SDL_GetDefaultCursor();
+
   Camera camera;
   bool quit             = false;
   bool show_color       = false;
   bool show_flashlight  = false;
   float flashlight_size = 100.0f;
   while (!quit) {
-    std::shared_ptr<SDL_Cursor> move_cursor = std::shared_ptr<SDL_Cursor>(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEALL), SDL_DestroyCursor);
-
     SDL_Event event;
 
     float mx, my;
@@ -188,13 +189,17 @@ int main() {
         }
         case SDL_EVENT_MOUSE_BUTTON_DOWN: {
           if (event.button.button == SDL_BUTTON_LEFT) {
-            SDL_SetCursor(move_cursor.get());
+            std::cout << "here 1\n";
+            if (SDL_SetCursor(move_cursor.get()) < 0) {
+              std::cout << "here 2\n";
+            }
           }
           break;
         }
         case SDL_EVENT_MOUSE_BUTTON_UP: {
           if (event.button.button == SDL_BUTTON_LEFT) {
-            SDL_SetCursor(SDL_GetDefaultCursor());
+            std::cout << "here 2\n";
+            SDL_SetCursor(default_cursor);
           }
           break;
         }
