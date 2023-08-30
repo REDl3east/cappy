@@ -94,13 +94,7 @@ int main() {
 
     return true;
   };
-
-  if (!recompute_text("hello")) {
-    std::cerr << "Failed to recompute text\n"
-              << '\n';
-    return 1;
-  }
-
+  
   std::shared_ptr<SDL_Cursor> move_cursor = std::shared_ptr<SDL_Cursor>(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEALL), SDL_DestroyCursor);
   SDL_Cursor* default_cursor              = SDL_GetDefaultCursor();
 
