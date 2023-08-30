@@ -13,9 +13,6 @@
 #include "camera.h"
 #include "capture.h"
 
-#include <fileapi.h>
-#include <windows.h>
-
 std::shared_ptr<SDL_Texture> create_capture_texture(std::shared_ptr<SDL_Renderer> renderer, Capture& capture);
 
 std::string toDecimalString(const RGB& color);
