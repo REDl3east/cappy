@@ -9,8 +9,12 @@
 
 #include "SDL3/SDL.h"
 #include "SDL3_ttf/SDL_ttf.h"
+#include "advanced_pixel_7.h"
 #include "camera.h"
 #include "capture.h"
+
+#include <fileapi.h>
+#include <windows.h>
 
 std::shared_ptr<SDL_Texture> create_capture_texture(std::shared_ptr<SDL_Renderer> renderer, Capture& capture);
 
@@ -68,7 +72,13 @@ int main() {
     return 1;
   }
 
-  TTF_Font* font = TTF_OpenFont("/home/dalton/projects/cappy/fonts/advanced_pixel-7.ttf", 36);
+  SDL_RWops* font_mem = SDL_RWFromConstMem(advanced_pixel_7, sizeof(advanced_pixel_7));
+  if (!font_mem) {
+    std::cerr << "Failed to get font from memory\n";
+    return 1;
+  }
+
+  TTF_Font* font = TTF_OpenFontRW(font_mem, SDL_TRUE, 36);
   if (!font) {
     std::cerr << "Failed to load font: " << TTF_GetError() << '\n';
     return 1;

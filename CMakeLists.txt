@@ -15,4 +15,12 @@ set(MAIN_SRC
 )
 
 add_executable(cappy ${MAIN_SRC})
-target_link_libraries(cappy SDL3-static SDL3_ttf-static X11)
+target_include_directories(cappy PRIVATE 
+  ${SDL3_SRC_DIR}/include
+  ${SDL3_TTF_SRC_DIR}/include
+)
+if (UNIX)
+    target_link_libraries(cappy SDL3-static SDL3_ttf-static X11)
+elseif(WIN32)
+    target_link_libraries(cappy SDL3-static SDL3_ttf-static)
+endif()

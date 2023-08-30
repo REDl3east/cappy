@@ -1,8 +1,7 @@
 #ifndef _CAPTURE_H_
 #define _CAPTURE_H_
 
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
+
 #include <fstream>
 #include <iostream>
 
