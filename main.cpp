@@ -27,7 +27,8 @@ SDL_FPoint SDL_PointMid(const SDL_FPoint& p1, const SDL_FPoint& p2);
 
 void drawTriangle(std::shared_ptr<SDL_Renderer> renderer, float x1, float y1, float x2, float y2, float x3, float y3, Uint8 r, Uint8 g, Uint8 b, Uint8 a);
 void drawTriangle(std::shared_ptr<SDL_Renderer> renderer, float x1, float y1, float x2, float y2, float x3, float y3, Uint8 r1, Uint8 g1, Uint8 b1, Uint8 a1, Uint8 r2, Uint8 g2, Uint8 b2, Uint8 a2, Uint8 r3, Uint8 g3, Uint8 b3, Uint8 a3);
-void draw_flashlight(std::shared_ptr<SDL_Renderer> renderer, float x, float y, float radius, int edges, uint8_t cr, uint8_t cg, uint8_t cb, uint8_t ca, uint8_t cor, uint8_t cog, uint8_t cob, uint8_t coa, uint8_t otr, uint8_t otg, uint8_t otb, uint8_t ota);
+void draw_circle_flashlight(std::shared_ptr<SDL_Renderer> renderer, float x, float y, float radius, int edges, uint8_t cr, uint8_t cg, uint8_t cb, uint8_t ca, uint8_t cor, uint8_t cog, uint8_t cob, uint8_t coa, uint8_t otr, uint8_t otg, uint8_t otb, uint8_t ota);
+void draw_rect_flashlight(std::shared_ptr<SDL_Renderer> renderer, float x, float y, float w, float h, uint8_t inr, uint8_t ing, uint8_t inb, uint8_t ina, uint8_t outr, uint8_t outg, uint8_t outb, uint8_t outa);
 
 int main() {
   Capture capture;
@@ -94,7 +95,7 @@ int main() {
 
     return true;
   };
-  
+
   std::shared_ptr<SDL_Cursor> move_cursor = std::shared_ptr<SDL_Cursor>(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEALL), SDL_DestroyCursor);
   SDL_Cursor* default_cursor              = SDL_GetDefaultCursor();
 
@@ -253,10 +254,13 @@ int main() {
     } else if (show_flashlight) {
       float x, y;
       SDL_GetMouseState(&x, &y);
-      draw_flashlight(renderer, x, y, flashlight_size, 100,
-                      255, 255, 255, 0,
-                      255, 255, 255, 0,
-                      0, 0, 0, 200);
+      draw_circle_flashlight(renderer, x, y, flashlight_size, 100,
+                             255, 255, 255, 0,
+                             255, 255, 255, 0,
+                             0, 0, 0, 200);
+      // draw_rect_flashlight(renderer, x, y, flashlight_size, 2.0f * flashlight_size,
+      //                      50, 50, 50, 128,
+      //                      0, 0, 0, 128);
     }
 
     SDL_RenderPresent(renderer.get());
@@ -350,10 +354,10 @@ void drawTriangle(std::shared_ptr<SDL_Renderer> renderer,
   SDL_RenderGeometry(renderer.get(), nullptr, v, 3, nullptr, 0);
 }
 
-void draw_flashlight(std::shared_ptr<SDL_Renderer> renderer, float x, float y, float radius, int edges,
-                     uint8_t cr, uint8_t cg, uint8_t cb, uint8_t ca,
-                     uint8_t cor, uint8_t cog, uint8_t cob, uint8_t coa,
-                     uint8_t otr, uint8_t otg, uint8_t otb, uint8_t ota) {
+void draw_circle_flashlight(std::shared_ptr<SDL_Renderer> renderer, float x, float y, float radius, int edges,
+                            uint8_t cr, uint8_t cg, uint8_t cb, uint8_t ca,
+                            uint8_t cor, uint8_t cog, uint8_t cob, uint8_t coa,
+                            uint8_t otr, uint8_t otg, uint8_t otb, uint8_t ota) {
   if (edges < 5) { // wont work with edges less than 5
     return;
   }
@@ -470,4 +474,71 @@ void draw_flashlight(std::shared_ptr<SDL_Renderer> renderer, float x, float y, f
                  cor, cog, cob, coa,
                  cor, cog, cob, coa);
   }
+}
+
+void draw_rect_flashlight(std::shared_ptr<SDL_Renderer> renderer, float x, float y, float w, float h, uint8_t inr, uint8_t ing, uint8_t inb, uint8_t ina, uint8_t outr, uint8_t outg, uint8_t outb, uint8_t outa) {
+  SDL_FPoint rect_bounds[4] = {
+      {x, y},
+      {x + w, y},
+      {x + w, y + h},
+      {x, y + h},
+  };
+
+  int width, height;
+  SDL_GetCurrentRenderOutputSize(renderer.get(), &width, &height);
+
+  drawTriangle(renderer,
+               rect_bounds[0].x, rect_bounds[0].y,
+               rect_bounds[1].x, rect_bounds[1].y,
+               rect_bounds[2].x, rect_bounds[2].y,
+               inr, ing, inb, ina);
+  drawTriangle(renderer,
+               rect_bounds[0].x, rect_bounds[0].y,
+               rect_bounds[2].x, rect_bounds[2].y,
+               rect_bounds[3].x, rect_bounds[3].y,
+               inr, ing, inb, ina);
+
+  drawTriangle(renderer,
+               0.0f, 0.0f,
+               width, 0.0f,
+               width, rect_bounds[0].y,
+               outr, outg, outb, outa);
+  drawTriangle(renderer,
+               0.0f, 0.0f,
+               0.0f, rect_bounds[0].y,
+               width, rect_bounds[0].y,
+               outr, outg, outb, outa);
+
+  drawTriangle(renderer,
+               width, height,
+               width, rect_bounds[2].y,
+               0.0f, rect_bounds[2].y,
+               outr, outg, outb, outa);
+  drawTriangle(renderer,
+               width, height,
+               0.0f, height,
+               0.0f, rect_bounds[2].y,
+               outr, outg, outb, outa);
+
+  drawTriangle(renderer,
+               0.0f, rect_bounds[0].y,
+               rect_bounds[0].x, rect_bounds[0].y,
+               rect_bounds[3].x, rect_bounds[3].y,
+               outr, outg, outb, outa);
+  drawTriangle(renderer,
+               0.0f, rect_bounds[0].y,
+               0.0f, rect_bounds[3].y,
+               rect_bounds[3].x, rect_bounds[3].y,
+               outr, outg, outb, outa);
+
+  drawTriangle(renderer,
+               rect_bounds[1].x, rect_bounds[1].y,
+               width, rect_bounds[1].y,
+               width, rect_bounds[2].y,
+               outr, outg, outb, outa);
+  drawTriangle(renderer,
+               rect_bounds[1].x, rect_bounds[1].y,
+               rect_bounds[2].x, rect_bounds[2].y,
+               width, rect_bounds[2].y,
+               outr, outg, outb, outa);
 }
