@@ -184,16 +184,12 @@ int main() {
         }
         case SDL_EVENT_MOUSE_BUTTON_DOWN: {
           if (event.button.button == SDL_BUTTON_LEFT) {
-            std::cout << "here 1\n";
-            if (SDL_SetCursor(move_cursor.get()) < 0) {
-              std::cout << "here 2\n";
-            }
+            SDL_SetCursor(move_cursor.get());
           }
           break;
         }
         case SDL_EVENT_MOUSE_BUTTON_UP: {
           if (event.button.button == SDL_BUTTON_LEFT) {
-            std::cout << "here 2\n";
             SDL_SetCursor(default_cursor);
           }
           break;
