@@ -12,6 +12,7 @@
 #include "advanced_pixel_7.h"
 #include "camera.h"
 #include "capture.h"
+#include "machine.h"
 
 std::shared_ptr<SDL_Texture> create_capture_texture(std::shared_ptr<SDL_Renderer> renderer, Capture& capture);
 
@@ -31,11 +32,14 @@ void draw_circle_flashlight(std::shared_ptr<SDL_Renderer> renderer, float x, flo
 void draw_rect_flashlight(std::shared_ptr<SDL_Renderer> renderer, float x, float y, float w, float h, uint8_t inr, uint8_t ing, uint8_t inb, uint8_t ina, uint8_t outr, uint8_t outg, uint8_t outb, uint8_t outa);
 
 int main() {
+  
   Capture capture;
   if (!capture.capture()) {
     std::cerr << "Failed to capture screen!\n";
     return 1;
   }
+
+  CappyMachine machine(capture);
 
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
     std::cerr << "Failed to init SDL!\n";
@@ -103,7 +107,7 @@ int main() {
   bool quit             = false;
   bool show_color       = false;
   bool show_flashlight  = false;
-  float flashlight_size = 100.0f;
+  float flashlight_size = 300.0f;
   while (!quit) {
     SDL_Event event;
 
