@@ -32,14 +32,11 @@ void draw_circle_flashlight(std::shared_ptr<SDL_Renderer> renderer, float x, flo
 void draw_rect_flashlight(std::shared_ptr<SDL_Renderer> renderer, float x, float y, float w, float h, uint8_t inr, uint8_t ing, uint8_t inb, uint8_t ina, uint8_t outr, uint8_t outg, uint8_t outb, uint8_t outa);
 
 int main() {
-  
   Capture capture;
   if (!capture.capture()) {
     std::cerr << "Failed to capture screen!\n";
     return 1;
   }
-
-  CappyMachine machine(capture);
 
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
     std::cerr << "Failed to init SDL!\n";
@@ -69,39 +66,42 @@ int main() {
     return 1;
   }
 
-  if (TTF_Init() < 0) {
-    std::cerr << "Failed to init TTF!\n";
-    return 1;
-  }
+  auto machine = std::make_shared<CappyMachine>(capture, texture);
+  machine->set_state<MoveState>();
 
-  SDL_RWops* font_mem = SDL_RWFromConstMem(advanced_pixel_7, sizeof(advanced_pixel_7));
-  if (!font_mem) {
-    std::cerr << "Failed to get font from memory\n";
-    return 1;
-  }
+  // if (TTF_Init() < 0) {
+  //   std::cerr << "Failed to init TTF!\n";
+  //   return 1;
+  // }
 
-  TTF_Font* font = TTF_OpenFontRW(font_mem, SDL_TRUE, 36);
-  if (!font) {
-    std::cerr << "Failed to load font: " << TTF_GetError() << '\n';
-    return 1;
-  }
+  // SDL_RWops* font_mem = SDL_RWFromConstMem(advanced_pixel_7, sizeof(advanced_pixel_7));
+  // if (!font_mem) {
+  //   std::cerr << "Failed to get font from memory\n";
+  //   return 1;
+  // }
 
-  // Create a surface for rendering text
-  std::shared_ptr<SDL_Surface> text_surface;
-  std::shared_ptr<SDL_Texture> text_texture;
+  // TTF_Font* font = TTF_OpenFontRW(font_mem, SDL_TRUE, 36);
+  // if (!font) {
+  //   std::cerr << "Failed to load font: " << TTF_GetError() << '\n';
+  //   return 1;
+  // }
 
-  auto recompute_text = [&text_surface, &text_texture, &font, &renderer](const char* text) -> bool {
-    text_surface = std::shared_ptr<SDL_Surface>(TTF_RenderText_Solid(font, text, {255, 255, 255, 255}), SDL_DestroySurface);
-    if (!text_surface) return false;
+  // // Create a surface for rendering text
+  // std::shared_ptr<SDL_Surface> text_surface;
+  // std::shared_ptr<SDL_Texture> text_texture;
 
-    text_texture = std::shared_ptr<SDL_Texture>(SDL_CreateTextureFromSurface(renderer.get(), text_surface.get()), SDL_DestroyTexture);
-    if (!text_texture) return false;
+  // auto recompute_text = [&text_surface, &text_texture, &font, &renderer](const char* text) -> bool {
+  //   text_surface = std::shared_ptr<SDL_Surface>(TTF_RenderText_Solid(font, text, {255, 255, 255, 255}), SDL_DestroySurface);
+  //   if (!text_surface) return false;
 
-    return true;
-  };
+  //   text_texture = std::shared_ptr<SDL_Texture>(SDL_CreateTextureFromSurface(renderer.get(), text_surface.get()), SDL_DestroyTexture);
+  //   if (!text_texture) return false;
 
-  std::shared_ptr<SDL_Cursor> move_cursor = std::shared_ptr<SDL_Cursor>(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEALL), SDL_DestroyCursor);
-  SDL_Cursor* default_cursor              = SDL_GetDefaultCursor();
+  //   return true;
+  // };
+
+  // std::shared_ptr<SDL_Cursor> move_cursor = std::shared_ptr<SDL_Cursor>(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEALL), SDL_DestroyCursor);
+  // SDL_Cursor* default_cursor              = SDL_GetDefaultCursor();
 
   Camera camera;
   bool quit             = false;
@@ -115,6 +115,9 @@ int main() {
     SDL_GetMouseState(&mx, &my);
     SDL_FPoint mouse = camera.screen_to_world(mx, my);
     while (SDL_PollEvent(&event)) {
+      bool handled = machine->handle_event(event);
+      if (handled) continue;
+
       switch (event.type) {
         case SDL_EVENT_QUIT: {
           quit = true;
@@ -125,148 +128,146 @@ int main() {
           SDL_Keymod mod   = SDL_GetModState();
           if (code == SDLK_q) {
             quit = true;
-          } else if (code == SDLK_r) {
-            camera.reset();
-          } else if (code == SDLK_c) {
-            show_color      = !show_color;
-            show_flashlight = false;
-            if (show_color) {
-              RGB rgb;
-              if (!capture.at(mouse.x, mouse.y, rgb)) break;
-              recompute_text(toDecimalSepString(rgb).c_str());
-            }
-            SDL_ShowCursor();
-          } else if (code == SDLK_f) {
-            show_flashlight = !show_flashlight;
-            show_color      = false;
-            if (show_flashlight)
-              SDL_HideCursor();
-            else
-              SDL_ShowCursor();
-          } else {
-            RGB rgb;
-            if (!capture.at(mouse.x, mouse.y, rgb)) break;
-            if (code == SDLK_d && mod & SDL_KMOD_CTRL) {
-              if (mod & SDL_KMOD_SHIFT) {
-                SDL_SetClipboardText(toDecimalSepString(rgb).c_str());
-              } else {
-                SDL_SetClipboardText(toDecimalString(rgb).c_str());
-              }
-            } else if (code == SDLK_h && mod & SDL_KMOD_CTRL) {
-              if (mod & SDL_KMOD_SHIFT) {
-                SDL_SetClipboardText(toHexSepString(rgb).c_str());
-              } else {
-                SDL_SetClipboardText(toHexString(rgb).c_str());
-              }
-            } else if (code == SDLK_b && mod & SDL_KMOD_CTRL) {
-              if (mod & SDL_KMOD_SHIFT) {
-                SDL_SetClipboardText(toBinarySepString(rgb).c_str());
-              } else {
-                SDL_SetClipboardText(toBinaryString(rgb).c_str());
-              }
-            }
           }
+          // else if (code == SDLK_r) {
+          //   camera.reset();
+          // } else if (code == SDLK_c) {
+          //   show_color      = !show_color;
+          //   show_flashlight = false;
+          //   if (show_color) {
+          //     RGB rgb;
+          //     if (!capture.at(mouse.x, mouse.y, rgb)) break;
+          //     recompute_text(toDecimalSepString(rgb).c_str());
+          //   }
+          //   SDL_ShowCursor();
+          // } else if (code == SDLK_f) {
+          //   show_flashlight = !show_flashlight;
+          //   show_color      = false;
+          //   if (show_flashlight)
+          //     SDL_HideCursor();
+          //   else
+          //     SDL_ShowCursor();
+          // } else {
+          //   RGB rgb;
+          //   if (!capture.at(mouse.x, mouse.y, rgb)) break;
+          //   if (code == SDLK_d && mod & SDL_KMOD_CTRL) {
+          //     if (mod & SDL_KMOD_SHIFT) {
+          //       SDL_SetClipboardText(toDecimalSepString(rgb).c_str());
+          //     } else {
+          //       SDL_SetClipboardText(toDecimalString(rgb).c_str());
+          //     }
+          //   } else if (code == SDLK_h && mod & SDL_KMOD_CTRL) {
+          //     if (mod & SDL_KMOD_SHIFT) {
+          //       SDL_SetClipboardText(toHexSepString(rgb).c_str());
+          //     } else {
+          //       SDL_SetClipboardText(toHexString(rgb).c_str());
+          //     }
+          //   } else if (code == SDLK_b && mod & SDL_KMOD_CTRL) {
+          //     if (mod & SDL_KMOD_SHIFT) {
+          //       SDL_SetClipboardText(toBinarySepString(rgb).c_str());
+          //     } else {
+          //       SDL_SetClipboardText(toBinaryString(rgb).c_str());
+          //     }
+          //   }
+          // }
 
           break;
         }
         case SDL_EVENT_KEY_UP: {
-          SDL_Keycode code = event.key.keysym.sym;
-          if (code == SDLK_c) {
-          }
+          // SDL_Keycode code = event.key.keysym.sym;
+          // if (code == SDLK_c) {
+          // }
 
           break;
         }
         case SDL_EVENT_MOUSE_MOTION: {
-          if ((event.motion.state & SDL_BUTTON(SDL_BUTTON_LEFT))) {
-            camera.pan(event.motion.xrel, event.motion.yrel);
-          }
+          // if ((event.motion.state & SDL_BUTTON(SDL_BUTTON_LEFT))) {
+          //   camera.pan(event.motion.xrel, event.motion.yrel);
+          // }
 
-          RGB rgb;
-          if (!capture.at(mouse.x, mouse.y, rgb)) break;
-          recompute_text(toDecimalSepString(rgb).c_str());
+          // RGB rgb;
+          // if (!capture.at(mouse.x, mouse.y, rgb)) break;
+          // recompute_text(toDecimalSepString(rgb).c_str());
           break;
         }
         case SDL_EVENT_MOUSE_BUTTON_DOWN: {
-          if (event.button.button == SDL_BUTTON_LEFT) {
-            SDL_SetCursor(move_cursor.get());
-          }
+          // if (event.button.button == SDL_BUTTON_LEFT) {
+          //   SDL_SetCursor(move_cursor.get());
+          // }
           break;
         }
         case SDL_EVENT_MOUSE_BUTTON_UP: {
-          if (event.button.button == SDL_BUTTON_LEFT) {
-            SDL_SetCursor(default_cursor);
-          }
+          // if (event.button.button == SDL_BUTTON_LEFT) {
+          //   SDL_SetCursor(default_cursor);
+          // }
           break;
         }
         case SDL_EVENT_MOUSE_WHEEL: {
-          float scale = camera.get_scale();
+          // float scale = camera.get_scale();
 
-          if (show_flashlight && (SDL_GetModState() & SDL_KMOD_LSHIFT)) {
-            flashlight_size += event.wheel.y > 0 ? -10.0f : 10.f;
-            if (flashlight_size <= 0) flashlight_size = 0.0f;
-          } else {
-            if (event.wheel.y > 0) {
-              if (scale <= 100.0f) {
-                camera.zoom(0.1, mx, my);
-              }
-            } else if (event.wheel.y < 0) {
-              if (scale >= 0.25) {
-                camera.zoom(-0.1, mx, my);
-              }
-            }
-          }
+          // if (show_flashlight && (SDL_GetModState() & SDL_KMOD_LSHIFT)) {
+          //   flashlight_size += event.wheel.y > 0 ? -10.0f : 10.f;
+          //   if (flashlight_size <= 0) flashlight_size = 0.0f;
+          // } else {
+          //   if (event.wheel.y > 0) {
+          //     if (scale <= 100.0f) {
+          //       camera.zoom(0.1, mx, my);
+          //     }
+          //   } else if (event.wheel.y < 0) {
+          //     if (scale >= 0.25) {
+          //       camera.zoom(-0.1, mx, my);
+          //     }
+          //   }
+          // }
           break;
         }
       }
     }
 
-    SDL_SetRenderDrawColor(renderer.get(), 125, 125, 125, 255);
-    SDL_RenderClear(renderer.get());
+    machine->draw_frame(renderer, camera);
 
-    SDL_FPoint pos = camera.world_to_screen(0, 0);
-    SDL_FRect r    = {pos.x, pos.y, (float)capture.width * camera.get_scale(), (float)capture.height * camera.get_scale()};
-    SDL_RenderTexture(renderer.get(), texture.get(), NULL, &r);
 
-    if (show_color) {
-      RGB rgb;
-      if (capture.at(mouse.x, mouse.y, rgb)) {
-        float size     = 200.0f;
-        float offset   = 50.0f;
-        SDL_FRect rect = {mx + offset, my - size - offset, size, size};
 
-        SDL_SetRenderDrawColor(renderer.get(), rgb.r, rgb.g, rgb.b, 255);
-        SDL_RenderFillRect(renderer.get(), &rect);
+    // if (show_color) {
+    //   RGB rgb;
+    //   if (capture.at(mouse.x, mouse.y, rgb)) {
+    //     float size     = 200.0f;
+    //     float offset   = 50.0f;
+    //     SDL_FRect rect = {mx + offset, my - size - offset, size, size};
 
-        SDL_SetRenderDrawColor(renderer.get(), 200, 200, 200, 255);
-        SDL_RenderRect(renderer.get(), &rect);
+    //     SDL_SetRenderDrawColor(renderer.get(), rgb.r, rgb.g, rgb.b, 255);
+    //     SDL_RenderFillRect(renderer.get(), &rect);
 
-        SDL_FRect text_rect = {mx + offset + (0.5f * (size - text_surface->w)), my - size - offset - text_surface->h, (float)text_surface->w, (float)text_surface->h};
+    //     SDL_SetRenderDrawColor(renderer.get(), 200, 200, 200, 255);
+    //     SDL_RenderRect(renderer.get(), &rect);
 
-        SDL_FRect text_rect_back = {mx + offset, my - size - offset - text_surface->h, size, (float)text_surface->h};
-        SDL_SetRenderDrawColor(renderer.get(), 0, 0, 0, 255);
-        SDL_RenderFillRect(renderer.get(), &text_rect_back);
+    //     SDL_FRect text_rect = {mx + offset + (0.5f * (size - text_surface->w)), my - size - offset - text_surface->h, (float)text_surface->w, (float)text_surface->h};
 
-        SDL_SetRenderDrawColor(renderer.get(), 200, 200, 200, 255);
-        SDL_RenderRect(renderer.get(), &text_rect_back);
+    //     SDL_FRect text_rect_back = {mx + offset, my - size - offset - text_surface->h, size, (float)text_surface->h};
+    //     SDL_SetRenderDrawColor(renderer.get(), 0, 0, 0, 255);
+    //     SDL_RenderFillRect(renderer.get(), &text_rect_back);
 
-        SDL_RenderTexture(renderer.get(), text_texture.get(), NULL, &text_rect);
-      }
-    } else if (show_flashlight) {
-      float x, y;
-      SDL_GetMouseState(&x, &y);
-      draw_circle_flashlight(renderer, x, y, flashlight_size, 100,
-                             255, 255, 255, 0,
-                             255, 255, 255, 0,
-                             0, 0, 0, 200);
-      // draw_rect_flashlight(renderer, x, y, flashlight_size, 2.0f * flashlight_size,
-      //                      50, 50, 50, 128,
-      //                      0, 0, 0, 128);
-    }
+    //     SDL_SetRenderDrawColor(renderer.get(), 200, 200, 200, 255);
+    //     SDL_RenderRect(renderer.get(), &text_rect_back);
+
+    //     SDL_RenderTexture(renderer.get(), text_texture.get(), NULL, &text_rect);
+    //   }
+    // } else if (show_flashlight) {
+    //   float x, y;
+    //   SDL_GetMouseState(&x, &y);
+    //   draw_circle_flashlight(renderer, x, y, flashlight_size, 100,
+    //                          255, 255, 255, 0,
+    //                          255, 255, 255, 0,
+    //                          0, 0, 0, 200);
+    //   // draw_rect_flashlight(renderer, x, y, flashlight_size, 2.0f * flashlight_size,
+    //   //                      50, 50, 50, 128,
+    //   //                      0, 0, 0, 128);
+    // }
 
     SDL_RenderPresent(renderer.get());
   }
 
-  TTF_CloseFont(font);
+  // TTF_CloseFont(font);
   TTF_Quit();
   SDL_Quit();
 
