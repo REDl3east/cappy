@@ -74,8 +74,8 @@ int main() {
   auto machine = std::make_shared<CappyMachine>(capture, texture);
   machine->set_state<MoveState>();
 
-  // std::shared_ptr<SDL_Cursor> move_cursor = std::shared_ptr<SDL_Cursor>(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEALL), SDL_DestroyCursor);
-  // SDL_Cursor* default_cursor              = SDL_GetDefaultCursor();
+  std::shared_ptr<SDL_Cursor> move_cursor = std::shared_ptr<SDL_Cursor>(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEALL), SDL_DestroyCursor);
+  SDL_Cursor* default_cursor              = SDL_GetDefaultCursor();
 
   Camera camera;
   bool quit             = false;
@@ -145,6 +145,18 @@ int main() {
 
           break;
         }
+        case SDL_EVENT_MOUSE_BUTTON_DOWN: {
+          if (event.button.button == SDL_BUTTON_LEFT) {
+            SDL_SetCursor(move_cursor.get());
+          }
+          break;
+        }
+        case SDL_EVENT_MOUSE_BUTTON_UP: {
+          if (event.button.button == SDL_BUTTON_LEFT) {
+            SDL_SetCursor(default_cursor);
+          }
+          break;
+        }
         case SDL_EVENT_MOUSE_MOTION: {
           if ((event.motion.state & SDL_BUTTON(SDL_BUTTON_LEFT))) {
             camera.pan(event.motion.xrel, event.motion.yrel);
@@ -172,7 +184,6 @@ int main() {
     }
 
     machine->draw_frame(machine, renderer, camera);
-
   }
 
   TTF_CloseFont(machine->get_font());
