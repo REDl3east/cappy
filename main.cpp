@@ -66,13 +66,13 @@ int main() {
     return 1;
   }
 
-  auto machine = std::make_shared<CappyMachine>(capture, texture);
-  machine->set_state<MoveState>();
-
   if (TTF_Init() < 0) {
     std::cerr << "Failed to init TTF!\n";
     return 1;
   }
+
+  auto machine = std::make_shared<CappyMachine>(capture, texture);
+  machine->set_state<MoveState>();
 
   // SDL_RWops* font_mem = SDL_RWFromConstMem(advanced_pixel_7, sizeof(advanced_pixel_7));
   // if (!font_mem) {
@@ -131,10 +131,13 @@ int main() {
           } else if (code == SDLK_f) {
             machine->set_state<FlashlightState>();
             continue;
+          } else if (code == SDLK_c) {
+            machine->set_state<ColorState>();
+            continue;
+          } else if (code == SDLK_r) {
+            camera.reset();
           }
-          // else if (code == SDLK_r) {
-          //   camera.reset();
-          // } else if (code == SDLK_c) {
+          //  } else if (code == SDLK_c) {
           //   show_color      = !show_color;
           //   show_flashlight = false;
           //   if (show_color) {
@@ -264,7 +267,7 @@ int main() {
     // SDL_RenderPresent(renderer.get());
   }
 
-  // TTF_CloseFont(font);
+  TTF_CloseFont(machine->get_font());
   TTF_Quit();
   SDL_Quit();
 

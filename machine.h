@@ -72,13 +72,30 @@ public:
 
 class CappyMachine : public Machine<CappyMachine> {
 public:
-  CappyMachine(Capture& c, std::shared_ptr<SDL_Texture> t) : capture(c), texture(t) {}
+  CappyMachine(Capture& c, std::shared_ptr<SDL_Texture> t) : capture(c), texture(t) {
+    SDL_RWops* font_mem = SDL_RWFromConstMem(advanced_pixel_7, sizeof(advanced_pixel_7));
+    if (!font_mem) {
+      std::cerr << "Failed to get font from memory\n";
+      return;
+    }
+
+    font = TTF_OpenFontRW(font_mem, SDL_TRUE, 36);
+    if (!font) {
+      std::cerr << "Failed to load font: " << TTF_GetError() << '\n';
+      return;
+    }
+  }
+  ~CappyMachine() {
+    // TTF_CloseFont(font);
+  }
   Capture& get_capture() { return capture; }
   std::shared_ptr<SDL_Texture> get_texture() { return texture; }
+  TTF_Font* get_font() { return font; }
 
 private:
   Capture& capture;
   std::shared_ptr<SDL_Texture> texture;
+  TTF_Font* font;
 };
 
 DEFINE_STATE(MoveState, CappyMachine) {
@@ -87,6 +104,18 @@ DEFINE_STATE(MoveState, CappyMachine) {
 
 DEFINE_STATE(ColorState, CappyMachine) {
   DEFINE_STATE_INNER(ColorState, CappyMachine);
+
+public:
+  ColorState() {
+  }
+
+private:
+  float panel_size   = 200.0f;
+  float panel_offset = 50.0f;
+
+  std::shared_ptr<SDL_Surface> text_surface;
+  std::shared_ptr<SDL_Texture> text_texture;
+  bool recompute = true;
 };
 
 DEFINE_STATE(FlashlightState, CappyMachine) {
@@ -114,8 +143,8 @@ bool MoveState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Event& e
       SDL_Keycode code = event.key.keysym.sym;
       SDL_Keymod mod   = SDL_GetModState();
       if (code == SDLK_SPACE) {
-        machine->set_state<ColorState>();
-        return true;
+        // machine->set_state<ColorState>();
+        // return true;
       }
     }
   }
@@ -141,14 +170,21 @@ bool ColorState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Event& 
     case SDL_EVENT_KEY_DOWN: {
       SDL_Keycode code = event.key.keysym.sym;
       SDL_Keymod mod   = SDL_GetModState();
-      if (code == SDLK_SPACE) {
+      if (code == SDLK_c) {
         machine->set_state<MoveState>();
         return true;
       }
+      break;
+    }
+    case SDL_EVENT_MOUSE_MOTION: {
+      recompute = true;
+      break;
     }
   }
   return false;
 }
+
+std::string toDecimalSepString(const RGB& color);
 
 void ColorState::draw_frame(std::shared_ptr<CappyMachine> machine, std::shared_ptr<SDL_Renderer> renderer, Camera& camera) {
   SDL_SetRenderDrawColor(renderer.get(), 255, 0, 0, 255);
@@ -160,6 +196,37 @@ void ColorState::draw_frame(std::shared_ptr<CappyMachine> machine, std::shared_p
   SDL_FPoint pos = camera.world_to_screen(0, 0);
   SDL_FRect r    = {pos.x, pos.y, (float)capture.width * camera.get_scale(), (float)capture.height * camera.get_scale()};
   SDL_RenderTexture(renderer.get(), texture.get(), NULL, &r);
+
+  float mx, my;
+  SDL_GetMouseState(&mx, &my);
+  SDL_FPoint mouse = camera.screen_to_world(mx, my);
+
+  RGB rgb;
+  if (capture.at(mouse.x, mouse.y, rgb)) {
+    if (recompute) {
+      text_surface = std::shared_ptr<SDL_Surface>(TTF_RenderText_Solid(machine->get_font(), toDecimalSepString(rgb).c_str(), {255, 255, 255, 255}), SDL_DestroySurface);
+      text_texture = std::shared_ptr<SDL_Texture>(SDL_CreateTextureFromSurface(renderer.get(), text_surface.get()), SDL_DestroyTexture);
+      recompute    = false;
+    }
+    SDL_FRect rect = {mx + panel_offset, my - panel_size - panel_offset, panel_size, panel_size};
+
+    SDL_SetRenderDrawColor(renderer.get(), rgb.r, rgb.g, rgb.b, 255);
+    SDL_RenderFillRect(renderer.get(), &rect);
+
+    SDL_SetRenderDrawColor(renderer.get(), 200, 200, 200, 255);
+    SDL_RenderRect(renderer.get(), &rect);
+
+    SDL_FRect text_rect = {mx + panel_offset + (0.5f * (panel_size - text_surface->w)), my - panel_size - panel_offset - text_surface->h, (float)text_surface->w, (float)text_surface->h};
+
+    SDL_FRect text_rect_back = {mx + panel_offset, my - panel_size - panel_offset - text_surface->h, panel_size, (float)text_surface->h};
+    SDL_SetRenderDrawColor(renderer.get(), 0, 0, 0, 255);
+    SDL_RenderFillRect(renderer.get(), &text_rect_back);
+
+    SDL_SetRenderDrawColor(renderer.get(), 200, 200, 200, 255);
+    SDL_RenderRect(renderer.get(), &text_rect_back);
+
+    SDL_RenderTexture(renderer.get(), text_texture.get(), NULL, &text_rect);
+  }
 
   SDL_RenderPresent(renderer.get());
 }
