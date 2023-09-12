@@ -224,7 +224,7 @@ int main() {
       }
     }
 
-    machine->draw_frame(renderer, camera);
+    machine->draw_frame(machine, renderer, camera);
 
 
 

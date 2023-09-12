@@ -5,15 +5,15 @@
 
 #define DEFINE_STATE(state_name, machine_name) class state_name : public State<machine_name>
 
-#define DEFINE_STATE_INNER(state_name, machine_name)                                   \
-public:                                                                                \
-  static constexpr StateType type = StateType::state_name;                             \
-  StateType get_state_type() const override {                                          \
-    return type;                                                                       \
-  }                                                                                    \
-  bool handle_event(std::shared_ptr<machine_name> machine, SDL_Event& event) override; \
-  void draw_frame(std::shared_ptr<SDL_Renderer> renderer, Camera& camera) override;    \
-                                                                                       \
+#define DEFINE_STATE_INNER(state_name, machine_name)                                                                       \
+public:                                                                                                                    \
+  static constexpr StateType type = StateType::state_name;                                                                 \
+  StateType get_state_type() const override {                                                                              \
+    return type;                                                                                                           \
+  }                                                                                                                        \
+  bool handle_event(std::shared_ptr<machine_name> machine, SDL_Event& event) override;                                     \
+  void draw_frame(std::shared_ptr<CappyMachine> machine, std::shared_ptr<SDL_Renderer> renderer, Camera& camera) override; \
+                                                                                                                           \
 private:
 
 enum class StateType {
@@ -27,10 +27,10 @@ enum class StateType {
 template <class T>
 class State {
 public:
-  virtual ~State()                                                                = default;
-  virtual bool handle_event(std::shared_ptr<T> machine, SDL_Event& event)         = 0;
-  virtual void draw_frame(std::shared_ptr<SDL_Renderer> renderer, Camera& camera) = 0;
-  virtual StateType get_state_type() const                                        = 0;
+  virtual ~State()                                                                                            = default;
+  virtual bool handle_event(std::shared_ptr<T> machine, SDL_Event& event)                                     = 0;
+  virtual void draw_frame(std::shared_ptr<T> machine, std::shared_ptr<SDL_Renderer> renderer, Camera& camera) = 0;
+  virtual StateType get_state_type() const                                                                    = 0;
 };
 
 template <class T>
@@ -48,8 +48,8 @@ public:
     return currentState->handle_event(this->shared_from_this(), event);
   }
 
-  void draw_frame(std::shared_ptr<SDL_Renderer> renderer, Camera& camera) {
-    currentState->draw_frame(renderer, camera);
+  void draw_frame(std::shared_ptr<T> machine, std::shared_ptr<SDL_Renderer> renderer, Camera& camera) {
+    currentState->draw_frame(machine, renderer, camera);
   }
 
   StateType get_current_state_type() const {
@@ -115,9 +115,17 @@ bool MoveState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Event& e
   return false;
 }
 
-void MoveState::draw_frame(std::shared_ptr<SDL_Renderer> renderer, Camera& camera) {
+void MoveState::draw_frame(std::shared_ptr<CappyMachine> machine, std::shared_ptr<SDL_Renderer> renderer, Camera& camera) {
   SDL_SetRenderDrawColor(renderer.get(), 0, 0, 0, 255);
   SDL_RenderClear(renderer.get());
+
+  Capture& capture                     = machine->get_capture();
+  std::shared_ptr<SDL_Texture> texture = machine->get_texture();
+
+  SDL_FPoint pos = camera.world_to_screen(0, 0);
+  SDL_FRect r    = {pos.x, pos.y, (float)capture.width * camera.get_scale(), (float)capture.height * camera.get_scale()};
+  SDL_RenderTexture(renderer.get(), texture.get(), NULL, &r);
+
   SDL_RenderPresent(renderer.get());
 }
 
@@ -135,9 +143,17 @@ bool ColorState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Event& 
   return false;
 }
 
-void ColorState::draw_frame(std::shared_ptr<SDL_Renderer> renderer, Camera& camera) {
-  SDL_SetRenderDrawColor(renderer.get(), 255, 0, 0, 255);
+void ColorState::draw_frame(std::shared_ptr<CappyMachine> machine, std::shared_ptr<SDL_Renderer> renderer, Camera& camera) {
+  SDL_SetRenderDrawColor(renderer.get(), 0, 0, 0, 255);
   SDL_RenderClear(renderer.get());
+
+  Capture& capture                     = machine->get_capture();
+  std::shared_ptr<SDL_Texture> texture = machine->get_texture();
+
+  SDL_FPoint pos = camera.world_to_screen(0, 0);
+  SDL_FRect r    = {pos.x, pos.y, (float)capture.width * camera.get_scale(), (float)capture.height * camera.get_scale()};
+  SDL_RenderTexture(renderer.get(), texture.get(), NULL, &r);
+
   SDL_RenderPresent(renderer.get());
 }
 
@@ -145,9 +161,17 @@ bool FlashlightState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Ev
   return false;
 }
 
-void FlashlightState::draw_frame(std::shared_ptr<SDL_Renderer> renderer, Camera& camera) {
+void FlashlightState::draw_frame(std::shared_ptr<CappyMachine> machine, std::shared_ptr<SDL_Renderer> renderer, Camera& camera) {
   SDL_SetRenderDrawColor(renderer.get(), 0, 0, 0, 255);
   SDL_RenderClear(renderer.get());
+
+  Capture& capture                     = machine->get_capture();
+  std::shared_ptr<SDL_Texture> texture = machine->get_texture();
+
+  SDL_FPoint pos = camera.world_to_screen(0, 0);
+  SDL_FRect r    = {pos.x, pos.y, (float)capture.width * camera.get_scale(), (float)capture.height * camera.get_scale()};
+  SDL_RenderTexture(renderer.get(), texture.get(), NULL, &r);
+
   SDL_RenderPresent(renderer.get());
 }
 
@@ -155,9 +179,17 @@ bool DrawCrop::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Event& ev
   return false;
 }
 
-void DrawCrop::draw_frame(std::shared_ptr<SDL_Renderer> renderer, Camera& camera) {
+void DrawCrop::draw_frame(std::shared_ptr<CappyMachine> machine, std::shared_ptr<SDL_Renderer> renderer, Camera& camera) {
   SDL_SetRenderDrawColor(renderer.get(), 0, 0, 0, 255);
   SDL_RenderClear(renderer.get());
+
+  Capture& capture                     = machine->get_capture();
+  std::shared_ptr<SDL_Texture> texture = machine->get_texture();
+
+  SDL_FPoint pos = camera.world_to_screen(0, 0);
+  SDL_FRect r    = {pos.x, pos.y, (float)capture.width * camera.get_scale(), (float)capture.height * camera.get_scale()};
+  SDL_RenderTexture(renderer.get(), texture.get(), NULL, &r);
+
   SDL_RenderPresent(renderer.get());
 }
 
@@ -165,9 +197,17 @@ bool ShowCrop::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Event& ev
   return false;
 }
 
-void ShowCrop::draw_frame(std::shared_ptr<SDL_Renderer> renderer, Camera& camera) {
+void ShowCrop::draw_frame(std::shared_ptr<CappyMachine> machine, std::shared_ptr<SDL_Renderer> renderer, Camera& camera) {
   SDL_SetRenderDrawColor(renderer.get(), 0, 0, 0, 255);
   SDL_RenderClear(renderer.get());
+
+  Capture& capture                     = machine->get_capture();
+  std::shared_ptr<SDL_Texture> texture = machine->get_texture();
+
+  SDL_FPoint pos = camera.world_to_screen(0, 0);
+  SDL_FRect r    = {pos.x, pos.y, (float)capture.width * camera.get_scale(), (float)capture.height * camera.get_scale()};
+  SDL_RenderTexture(renderer.get(), texture.get(), NULL, &r);
+
   SDL_RenderPresent(renderer.get());
 }
 
