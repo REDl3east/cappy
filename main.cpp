@@ -69,10 +69,10 @@ int main() {
   auto machine = std::make_shared<CappyMachine>(capture, texture);
   machine->set_state<MoveState>();
 
-  // if (TTF_Init() < 0) {
-  //   std::cerr << "Failed to init TTF!\n";
-  //   return 1;
-  // }
+  if (TTF_Init() < 0) {
+    std::cerr << "Failed to init TTF!\n";
+    return 1;
+  }
 
   // SDL_RWops* font_mem = SDL_RWFromConstMem(advanced_pixel_7, sizeof(advanced_pixel_7));
   // if (!font_mem) {
