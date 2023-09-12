@@ -181,9 +181,9 @@ int main() {
           break;
         }
         case SDL_EVENT_MOUSE_MOTION: {
-          // if ((event.motion.state & SDL_BUTTON(SDL_BUTTON_LEFT))) {
-          //   camera.pan(event.motion.xrel, event.motion.yrel);
-          // }
+          if ((event.motion.state & SDL_BUTTON(SDL_BUTTON_LEFT))) {
+            camera.pan(event.motion.xrel, event.motion.yrel);
+          }
 
           // RGB rgb;
           // if (!capture.at(mouse.x, mouse.y, rgb)) break;
@@ -203,30 +203,24 @@ int main() {
           break;
         }
         case SDL_EVENT_MOUSE_WHEEL: {
-          // float scale = camera.get_scale();
+          float scale = camera.get_scale();
 
-          // if (show_flashlight && (SDL_GetModState() & SDL_KMOD_LSHIFT)) {
-          //   flashlight_size += event.wheel.y > 0 ? -10.0f : 10.f;
-          //   if (flashlight_size <= 0) flashlight_size = 0.0f;
-          // } else {
-          //   if (event.wheel.y > 0) {
-          //     if (scale <= 100.0f) {
-          //       camera.zoom(0.1, mx, my);
-          //     }
-          //   } else if (event.wheel.y < 0) {
-          //     if (scale >= 0.25) {
-          //       camera.zoom(-0.1, mx, my);
-          //     }
-          //   }
-          // }
+          if (event.wheel.y > 0) {
+            if (scale <= 100.0f) {
+              camera.zoom(0.1, mx, my);
+            }
+          } else if (event.wheel.y < 0) {
+            if (scale >= 0.25) {
+              camera.zoom(-0.1, mx, my);
+            }
+          }
+
           break;
         }
       }
     }
 
     machine->draw_frame(machine, renderer, camera);
-
-
 
     // if (show_color) {
     //   RGB rgb;
@@ -264,7 +258,7 @@ int main() {
     //   //                      0, 0, 0, 128);
     // }
 
-    SDL_RenderPresent(renderer.get());
+    // SDL_RenderPresent(renderer.get());
   }
 
   // TTF_CloseFont(font);
