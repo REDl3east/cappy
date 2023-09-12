@@ -16,13 +16,6 @@
 
 std::shared_ptr<SDL_Texture> create_capture_texture(std::shared_ptr<SDL_Renderer> renderer, Capture& capture);
 
-std::string toDecimalString(const RGB& color);
-std::string toDecimalSepString(const RGB& color);
-std::string toHexString(const RGB& color);
-std::string toHexSepString(const RGB& color);
-std::string toBinaryString(const RGB& color);
-std::string toBinarySepString(const RGB& color);
-
 SDL_FPoint SDL_PointMid(float x1, float y1, float x2, float y2);
 SDL_FPoint SDL_PointMid(const SDL_FPoint& p1, const SDL_FPoint& p2);
 
@@ -196,52 +189,6 @@ int main() {
 std::shared_ptr<SDL_Texture> create_capture_texture(std::shared_ptr<SDL_Renderer> renderer, Capture& capture) {
   std::shared_ptr<SDL_Surface> surface = std::shared_ptr<SDL_Surface>(SDL_CreateSurfaceFrom(capture.pixels, capture.width, capture.height, capture.stride * 3, SDL_PIXELFORMAT_RGB24), SDL_DestroySurface);
   return std::shared_ptr<SDL_Texture>(SDL_CreateTextureFromSurface(renderer.get(), surface.get()), SDL_DestroyTexture);
-}
-
-std::string toDecimalString(const RGB& color) {
-  int x = (color.r << 16) | (color.g << 8) | color.b;
-  std::stringstream stream;
-  stream << x;
-  return stream.str();
-}
-
-std::string toDecimalSepString(const RGB& color) {
-  std::stringstream stream;
-  stream << static_cast<int>(color.r) << ", " << static_cast<int>(color.g) << ", " << static_cast<int>(color.b);
-  return stream.str();
-}
-
-std::string toHexString(const RGB& color) {
-  std::stringstream stream;
-  stream << "0x" << std::setfill('0') << std::setw(2) << std::hex;
-  stream << static_cast<int>(color.r) << std::setw(2) << static_cast<int>(color.g) << std::setw(2) << static_cast<int>(color.b);
-  return stream.str();
-}
-
-std::string toHexSepString(const RGB& color) {
-  std::stringstream stream;
-  stream << "0x" << std::setfill('0') << std::setw(2) << std::hex;
-  stream << static_cast<int>(color.r) << std::setw(2) << ", ";
-  stream << "0x" << std::setfill('0') << std::setw(2) << std::hex;
-  stream << static_cast<int>(color.g) << std::setw(2) << ", ";
-  stream << "0x" << std::setfill('0') << std::setw(2) << std::hex;
-  stream << static_cast<int>(color.b) << std::setw(2);
-  return stream.str();
-}
-
-std::string toBinaryString(const RGB& color) {
-  return "0b" + std::bitset<8>(color.r).to_string() + std::bitset<8>(color.g).to_string() + std::bitset<8>(color.b).to_string();
-}
-
-std::string toBinarySepString(const RGB& color) {
-  return "0b" + std::bitset<8>(color.r).to_string() + ", 0b" + std::bitset<8>(color.g).to_string() + ", 0b" + std::bitset<8>(color.b).to_string();
-}
-
-SDL_FPoint SDL_PointMid(float x1, float y1, float x2, float y2) {
-  return SDL_FPoint{
-      (x1 + x2) * 0.5f,
-      (y1 + y2) * 0.5f,
-  };
 }
 
 SDL_FPoint SDL_PointMid(const SDL_FPoint& p1, const SDL_FPoint& p2) {

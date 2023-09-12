@@ -3,6 +3,13 @@
 
 #include <memory>
 
+std::string toDecimalString(const RGB& color);
+std::string toDecimalSepString(const RGB& color);
+std::string toHexString(const RGB& color);
+std::string toHexSepString(const RGB& color);
+std::string toBinaryString(const RGB& color);
+std::string toBinarySepString(const RGB& color);
+
 #define DEFINE_STATE(state_name, machine_name) class state_name : public State<machine_name>
 
 #define DEFINE_STATE_INNER(state_name, machine_name)                                                                       \
@@ -86,7 +93,6 @@ public:
     }
   }
   ~CappyMachine() {
-    // TTF_CloseFont(font);
   }
   Capture& get_capture() { return capture; }
   std::shared_ptr<SDL_Texture> get_texture() { return texture; }
@@ -115,7 +121,7 @@ private:
 
   std::shared_ptr<SDL_Surface> text_surface;
   std::shared_ptr<SDL_Texture> text_texture;
-  bool recompute = true;
+  bool recompute_text = true;
 };
 
 DEFINE_STATE(FlashlightState, CappyMachine) {
@@ -126,7 +132,7 @@ public:
   ~FlashlightState();
 
 private:
-  float size = 100.0f;
+  float size = 300.0f;
 };
 
 DEFINE_STATE(DrawCrop, CappyMachine) {
@@ -152,7 +158,7 @@ bool MoveState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Event& e
 }
 
 void MoveState::draw_frame(std::shared_ptr<CappyMachine> machine, std::shared_ptr<SDL_Renderer> renderer, Camera& camera) {
-  SDL_SetRenderDrawColor(renderer.get(), 0, 0, 0, 255);
+  SDL_SetRenderDrawColor(renderer.get(), 125, 125, 125, 255);
   SDL_RenderClear(renderer.get());
 
   Capture& capture                     = machine->get_capture();
@@ -177,17 +183,15 @@ bool ColorState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Event& 
       break;
     }
     case SDL_EVENT_MOUSE_MOTION: {
-      recompute = true;
+      recompute_text = true;
       break;
     }
   }
   return false;
 }
 
-std::string toDecimalSepString(const RGB& color);
-
 void ColorState::draw_frame(std::shared_ptr<CappyMachine> machine, std::shared_ptr<SDL_Renderer> renderer, Camera& camera) {
-  SDL_SetRenderDrawColor(renderer.get(), 255, 0, 0, 255);
+  SDL_SetRenderDrawColor(renderer.get(), 125, 125, 125, 255);
   SDL_RenderClear(renderer.get());
 
   Capture& capture                     = machine->get_capture();
@@ -203,26 +207,49 @@ void ColorState::draw_frame(std::shared_ptr<CappyMachine> machine, std::shared_p
 
   RGB rgb;
   if (capture.at(mouse.x, mouse.y, rgb)) {
-    if (recompute) {
+    const Uint8* key_state = SDL_GetKeyboardState(NULL);
+    SDL_Keymod mod         = SDL_GetModState();
+    if (key_state[SDL_SCANCODE_D] && mod & SDL_KMOD_CTRL) {
+      if (mod & SDL_KMOD_SHIFT) {
+        SDL_SetClipboardText(toDecimalSepString(rgb).c_str());
+      } else {
+        SDL_SetClipboardText(toDecimalString(rgb).c_str());
+      }
+    } else if (key_state[SDL_SCANCODE_H] && mod & SDL_KMOD_CTRL) {
+      if (mod & SDL_KMOD_SHIFT) {
+        SDL_SetClipboardText(toHexSepString(rgb).c_str());
+      } else {
+        SDL_SetClipboardText(toHexString(rgb).c_str());
+      }
+    } else if (key_state[SDL_SCANCODE_B] && mod & SDL_KMOD_CTRL) {
+      if (mod & SDL_KMOD_SHIFT) {
+        SDL_SetClipboardText(toBinarySepString(rgb).c_str());
+      } else {
+        SDL_SetClipboardText(toBinaryString(rgb).c_str());
+      }
+    }
+
+    if (recompute_text) {
       text_surface = std::shared_ptr<SDL_Surface>(TTF_RenderText_Solid(machine->get_font(), toDecimalSepString(rgb).c_str(), {255, 255, 255, 255}), SDL_DestroySurface);
       text_texture = std::shared_ptr<SDL_Texture>(SDL_CreateTextureFromSurface(renderer.get(), text_surface.get()), SDL_DestroyTexture);
-      recompute    = false;
+      recompute_text    = false;
     }
+
     SDL_FRect rect = {mx + panel_offset, my - panel_size - panel_offset, panel_size, panel_size};
 
     SDL_SetRenderDrawColor(renderer.get(), rgb.r, rgb.g, rgb.b, 255);
     SDL_RenderFillRect(renderer.get(), &rect);
 
-    SDL_SetRenderDrawColor(renderer.get(), 200, 200, 200, 255);
+    SDL_SetRenderDrawColor(renderer.get(), 125, 125, 125, 255);
     SDL_RenderRect(renderer.get(), &rect);
 
     SDL_FRect text_rect = {mx + panel_offset + (0.5f * (panel_size - text_surface->w)), my - panel_size - panel_offset - text_surface->h, (float)text_surface->w, (float)text_surface->h};
 
     SDL_FRect text_rect_back = {mx + panel_offset, my - panel_size - panel_offset - text_surface->h, panel_size, (float)text_surface->h};
-    SDL_SetRenderDrawColor(renderer.get(), 0, 0, 0, 255);
+    SDL_SetRenderDrawColor(renderer.get(), 125, 125, 125, 255);
     SDL_RenderFillRect(renderer.get(), &text_rect_back);
 
-    SDL_SetRenderDrawColor(renderer.get(), 200, 200, 200, 255);
+    SDL_SetRenderDrawColor(renderer.get(), 125, 125, 125, 255);
     SDL_RenderRect(renderer.get(), &text_rect_back);
 
     SDL_RenderTexture(renderer.get(), text_texture.get(), NULL, &text_rect);
@@ -266,7 +293,7 @@ bool FlashlightState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Ev
 void draw_circle_flashlight(std::shared_ptr<SDL_Renderer> renderer, float x, float y, float radius, int edges, uint8_t cr, uint8_t cg, uint8_t cb, uint8_t ca, uint8_t cor, uint8_t cog, uint8_t cob, uint8_t coa, uint8_t otr, uint8_t otg, uint8_t otb, uint8_t ota);
 
 void FlashlightState::draw_frame(std::shared_ptr<CappyMachine> machine, std::shared_ptr<SDL_Renderer> renderer, Camera& camera) {
-  SDL_SetRenderDrawColor(renderer.get(), 0, 255, 0, 255);
+  SDL_SetRenderDrawColor(renderer.get(), 125, 125, 125, 255);
   SDL_RenderClear(renderer.get());
 
   Capture& capture                     = machine->get_capture();
@@ -291,7 +318,7 @@ bool DrawCrop::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Event& ev
 }
 
 void DrawCrop::draw_frame(std::shared_ptr<CappyMachine> machine, std::shared_ptr<SDL_Renderer> renderer, Camera& camera) {
-  SDL_SetRenderDrawColor(renderer.get(), 0, 0, 0, 255);
+  SDL_SetRenderDrawColor(renderer.get(), 125, 125, 125, 255);
   SDL_RenderClear(renderer.get());
 
   Capture& capture                     = machine->get_capture();
@@ -309,7 +336,7 @@ bool ShowCrop::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Event& ev
 }
 
 void ShowCrop::draw_frame(std::shared_ptr<CappyMachine> machine, std::shared_ptr<SDL_Renderer> renderer, Camera& camera) {
-  SDL_SetRenderDrawColor(renderer.get(), 0, 0, 0, 255);
+  SDL_SetRenderDrawColor(renderer.get(), 125, 125, 125, 255);
   SDL_RenderClear(renderer.get());
 
   Capture& capture                     = machine->get_capture();
@@ -320,6 +347,52 @@ void ShowCrop::draw_frame(std::shared_ptr<CappyMachine> machine, std::shared_ptr
   SDL_RenderTexture(renderer.get(), texture.get(), NULL, &r);
 
   SDL_RenderPresent(renderer.get());
+}
+
+std::string toDecimalString(const RGB& color) {
+  int x = (color.r << 16) | (color.g << 8) | color.b;
+  std::stringstream stream;
+  stream << x;
+  return stream.str();
+}
+
+std::string toDecimalSepString(const RGB& color) {
+  std::stringstream stream;
+  stream << static_cast<int>(color.r) << ", " << static_cast<int>(color.g) << ", " << static_cast<int>(color.b);
+  return stream.str();
+}
+
+std::string toHexString(const RGB& color) {
+  std::stringstream stream;
+  stream << "0x" << std::setfill('0') << std::setw(2) << std::hex;
+  stream << static_cast<int>(color.r) << std::setw(2) << static_cast<int>(color.g) << std::setw(2) << static_cast<int>(color.b);
+  return stream.str();
+}
+
+std::string toHexSepString(const RGB& color) {
+  std::stringstream stream;
+  stream << "0x" << std::setfill('0') << std::setw(2) << std::hex;
+  stream << static_cast<int>(color.r) << std::setw(2) << ", ";
+  stream << "0x" << std::setfill('0') << std::setw(2) << std::hex;
+  stream << static_cast<int>(color.g) << std::setw(2) << ", ";
+  stream << "0x" << std::setfill('0') << std::setw(2) << std::hex;
+  stream << static_cast<int>(color.b) << std::setw(2);
+  return stream.str();
+}
+
+std::string toBinaryString(const RGB& color) {
+  return "0b" + std::bitset<8>(color.r).to_string() + std::bitset<8>(color.g).to_string() + std::bitset<8>(color.b).to_string();
+}
+
+std::string toBinarySepString(const RGB& color) {
+  return "0b" + std::bitset<8>(color.r).to_string() + ", 0b" + std::bitset<8>(color.g).to_string() + ", 0b" + std::bitset<8>(color.b).to_string();
+}
+
+SDL_FPoint SDL_PointMid(float x1, float y1, float x2, float y2) {
+  return SDL_FPoint{
+      (x1 + x2) * 0.5f,
+      (y1 + y2) * 0.5f,
+  };
 }
 
 #endif
