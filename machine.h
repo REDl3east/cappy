@@ -102,17 +102,43 @@ DEFINE_STATE(ShowCrop, CappyMachine) {
 };
 
 bool MoveState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Event& event) {
+  switch (event.type) {
+    case SDL_EVENT_KEY_DOWN: {
+      SDL_Keycode code = event.key.keysym.sym;
+      SDL_Keymod mod   = SDL_GetModState();
+      if (code == SDLK_SPACE) {
+        machine->set_state<ColorState>();
+        return true;
+      }
+    }
+  }
   return false;
 }
 
 void MoveState::draw_frame(std::shared_ptr<SDL_Renderer> renderer, Camera& camera) {
+  SDL_SetRenderDrawColor(renderer.get(), 0, 0, 0, 255);
+  SDL_RenderClear(renderer.get());
+  SDL_RenderPresent(renderer.get());
 }
 
 bool ColorState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Event& event) {
+  switch (event.type) {
+    case SDL_EVENT_KEY_DOWN: {
+      SDL_Keycode code = event.key.keysym.sym;
+      SDL_Keymod mod   = SDL_GetModState();
+      if (code == SDLK_SPACE) {
+        machine->set_state<MoveState>();
+        return true;
+      }
+    }
+  }
   return false;
 }
 
 void ColorState::draw_frame(std::shared_ptr<SDL_Renderer> renderer, Camera& camera) {
+  SDL_SetRenderDrawColor(renderer.get(), 255, 0, 0, 255);
+  SDL_RenderClear(renderer.get());
+  SDL_RenderPresent(renderer.get());
 }
 
 bool FlashlightState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Event& event) {
@@ -120,6 +146,9 @@ bool FlashlightState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Ev
 }
 
 void FlashlightState::draw_frame(std::shared_ptr<SDL_Renderer> renderer, Camera& camera) {
+  SDL_SetRenderDrawColor(renderer.get(), 0, 0, 0, 255);
+  SDL_RenderClear(renderer.get());
+  SDL_RenderPresent(renderer.get());
 }
 
 bool DrawCrop::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Event& event) {
@@ -127,6 +156,9 @@ bool DrawCrop::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Event& ev
 }
 
 void DrawCrop::draw_frame(std::shared_ptr<SDL_Renderer> renderer, Camera& camera) {
+  SDL_SetRenderDrawColor(renderer.get(), 0, 0, 0, 255);
+  SDL_RenderClear(renderer.get());
+  SDL_RenderPresent(renderer.get());
 }
 
 bool ShowCrop::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Event& event) {
@@ -134,6 +166,9 @@ bool ShowCrop::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Event& ev
 }
 
 void ShowCrop::draw_frame(std::shared_ptr<SDL_Renderer> renderer, Camera& camera) {
+  SDL_SetRenderDrawColor(renderer.get(), 0, 0, 0, 255);
+  SDL_RenderClear(renderer.get());
+  SDL_RenderPresent(renderer.get());
 }
 
 #endif
