@@ -128,6 +128,9 @@ int main() {
           SDL_Keymod mod   = SDL_GetModState();
           if (code == SDLK_q) {
             quit = true;
+          } else if (code == SDLK_f) {
+            machine->set_state<FlashlightState>();
+            continue;
           }
           // else if (code == SDLK_r) {
           //   camera.reset();

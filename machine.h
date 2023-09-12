@@ -91,6 +91,13 @@ DEFINE_STATE(ColorState, CappyMachine) {
 
 DEFINE_STATE(FlashlightState, CappyMachine) {
   DEFINE_STATE_INNER(FlashlightState, CappyMachine);
+
+public:
+  FlashlightState();
+  ~FlashlightState();
+
+private:
+  float size = 100.0f;
 };
 
 DEFINE_STATE(DrawCrop, CappyMachine) {
@@ -157,12 +164,42 @@ void ColorState::draw_frame(std::shared_ptr<CappyMachine> machine, std::shared_p
   SDL_RenderPresent(renderer.get());
 }
 
+FlashlightState::FlashlightState() {
+  SDL_HideCursor();
+}
+
+FlashlightState::~FlashlightState() {
+  SDL_ShowCursor();
+}
+
 bool FlashlightState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Event& event) {
+  switch (event.type) {
+    case SDL_EVENT_KEY_DOWN: {
+      SDL_Keycode code = event.key.keysym.sym;
+      SDL_Keymod mod   = SDL_GetModState();
+      if (code == SDLK_f) {
+        machine->set_state<MoveState>();
+        return true;
+      }
+      break;
+    }
+    case SDL_EVENT_MOUSE_WHEEL: {
+      if ((SDL_GetModState() & SDL_KMOD_LSHIFT)) {
+        size += event.wheel.y > 0 ? -10.0f : 10.f;
+        if (size <= 0) size = 0.0f;
+        return true;
+      }
+
+      break;
+    }
+  }
   return false;
 }
 
+void draw_circle_flashlight(std::shared_ptr<SDL_Renderer> renderer, float x, float y, float radius, int edges, uint8_t cr, uint8_t cg, uint8_t cb, uint8_t ca, uint8_t cor, uint8_t cog, uint8_t cob, uint8_t coa, uint8_t otr, uint8_t otg, uint8_t otb, uint8_t ota);
+
 void FlashlightState::draw_frame(std::shared_ptr<CappyMachine> machine, std::shared_ptr<SDL_Renderer> renderer, Camera& camera) {
-  SDL_SetRenderDrawColor(renderer.get(), 0, 0, 0, 255);
+  SDL_SetRenderDrawColor(renderer.get(), 0, 255, 0, 255);
   SDL_RenderClear(renderer.get());
 
   Capture& capture                     = machine->get_capture();
@@ -171,6 +208,13 @@ void FlashlightState::draw_frame(std::shared_ptr<CappyMachine> machine, std::sha
   SDL_FPoint pos = camera.world_to_screen(0, 0);
   SDL_FRect r    = {pos.x, pos.y, (float)capture.width * camera.get_scale(), (float)capture.height * camera.get_scale()};
   SDL_RenderTexture(renderer.get(), texture.get(), NULL, &r);
+
+  float x, y;
+  SDL_GetMouseState(&x, &y);
+  draw_circle_flashlight(renderer, x, y, size, 100,
+                         255, 255, 255, 0,
+                         255, 255, 255, 0,
+                         0, 0, 0, 200);
 
   SDL_RenderPresent(renderer.get());
 }
