@@ -5,15 +5,15 @@
 
 #define DEFINE_STATE(state_name, machine_name) class state_name : public State<machine_name>
 
-#define DEFINE_STATE_INNER(state_name, machine_name)                                  \
-public:                                                                               \
-  static constexpr StateType type = StateType::state_name;                            \
-  StateType get_state_type() const override {                                         \
-    return type;                                                                      \
-  }                                                                                   \
+#define DEFINE_STATE_INNER(state_name, machine_name)                                   \
+public:                                                                                \
+  static constexpr StateType type = StateType::state_name;                             \
+  StateType get_state_type() const override {                                          \
+    return type;                                                                       \
+  }                                                                                    \
   bool handle_event(std::shared_ptr<machine_name> machine, SDL_Event& event) override; \
-  void draw_frame(std::shared_ptr<SDL_Renderer> renderer, Camera& camera) override;                   \
-                                                                                      \
+  void draw_frame(std::shared_ptr<SDL_Renderer> renderer, Camera& camera) override;    \
+                                                                                       \
 private:
 
 enum class StateType {
@@ -27,10 +27,10 @@ enum class StateType {
 template <class T>
 class State {
 public:
-  virtual ~State()                                                       = default;
-  virtual bool handle_event(std::shared_ptr<T> machine, SDL_Event& event) = 0;
-  virtual void draw_frame(std::shared_ptr<SDL_Renderer> renderer, Camera& camera)        = 0;
-  virtual StateType get_state_type() const                               = 0;
+  virtual ~State()                                                                = default;
+  virtual bool handle_event(std::shared_ptr<T> machine, SDL_Event& event)         = 0;
+  virtual void draw_frame(std::shared_ptr<SDL_Renderer> renderer, Camera& camera) = 0;
+  virtual StateType get_state_type() const                                        = 0;
 };
 
 template <class T>
@@ -106,7 +106,6 @@ bool MoveState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Event& e
 }
 
 void MoveState::draw_frame(std::shared_ptr<SDL_Renderer> renderer, Camera& camera) {
-  
 }
 
 bool ColorState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Event& event) {
