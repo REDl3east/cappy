@@ -3,7 +3,11 @@
 
 #include <memory>
 
+#include "SDL3_ttf/SDL_ttf.h"
+#include "advanced_pixel_7.h"
+
 #include "camera.h"
+#include "capture.h"
 
 std::string toDecimalString(const RGB& color);
 std::string toDecimalSepString(const RGB& color);

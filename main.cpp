@@ -8,10 +8,7 @@
 #include <vector>
 
 #include "SDL3/SDL.h"
-#include "SDL3_ttf/SDL_ttf.h"
-#include "advanced_pixel_7.h"
 
-#include "capture.h"
 #include "machine.h"
 
 std::shared_ptr<SDL_Texture> create_capture_texture(std::shared_ptr<SDL_Renderer> renderer, Capture& capture);
