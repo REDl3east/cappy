@@ -10,7 +10,7 @@
 #include "SDL3/SDL.h"
 #include "SDL3_ttf/SDL_ttf.h"
 #include "advanced_pixel_7.h"
-#include "camera.h"
+
 #include "capture.h"
 #include "machine.h"
 
@@ -56,13 +56,13 @@ int main() {
     return 1;
   }
 
-  auto machine = std::make_shared<CappyMachine>(capture, texture);
+  Camera camera;
+  auto machine = std::make_shared<CappyMachine>(capture, texture, camera);
   machine->set_state<MoveState>();
 
   std::shared_ptr<SDL_Cursor> move_cursor = std::shared_ptr<SDL_Cursor>(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEALL), SDL_DestroyCursor);
   SDL_Cursor* default_cursor              = SDL_GetDefaultCursor();
 
-  Camera camera;
   bool quit             = false;
   bool show_color       = false;
   bool show_flashlight  = false;
@@ -147,7 +147,7 @@ int main() {
       }
     }
 
-    machine->draw_frame(machine, renderer, camera);
+    machine->draw_frame(machine, renderer);
   }
 
   TTF_CloseFont(machine->get_font());
