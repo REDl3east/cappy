@@ -328,7 +328,7 @@ bool DrawCropState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Even
       if (event.button.button == SDL_BUTTON_RIGHT) {
         if (start.x == end.x && start.y == end.y) {
           machine->set_state<MoveState>();
-          return false; // we want to icon to change in main event loop
+          return true;
         }
 
         drawing = false;
