@@ -33,9 +33,9 @@ You can focus in on a specific point in flashlight mode
 
 Select a region of the capture.
 
-**Release Right Click** - Finish drawing crop region
-**Drag**                - Continue drawing region
-**Right Click (Rapid)** - Exit Crop Drawing Mode
+**Release Right Click** - Finish drawing crop region  
+**Drag**                - Continue drawing region  
+**Right Click (Rapid)** - Exit Crop Drawing Mode  
 
 ## TODO
 - [x] Show color data, with text, near color panel
