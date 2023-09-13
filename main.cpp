@@ -130,18 +130,7 @@ int main() {
         }
 
         case SDL_EVENT_MOUSE_WHEEL: {
-          float scale = camera.get_scale();
-
-          if (event.wheel.y > 0) {
-            if (scale <= 100.0f) {
-              camera.zoom(0.1, mx, my);
-            }
-          } else if (event.wheel.y < 0) {
-            if (scale >= 0.25) {
-              camera.zoom(-0.1, mx, my);
-            }
-          }
-
+          machine->zoom(event.wheel.y > 0, mx, my);
           break;
         }
       }

@@ -99,11 +99,28 @@ public:
   std::shared_ptr<SDL_Texture> get_texture() { return texture; }
   TTF_Font* get_font() { return font; }
 
+  void zoom(bool zoom_in, float mousex, float mousey) {
+    float scale = camera.get_scale();
+    if (zoom_in) {
+      if (scale <= max_scale) {
+        camera.zoom(zoom_factor, mousex, mousey);
+      }
+    } else {
+      if (scale >= min_scale) {
+        camera.zoom(-1.0f * zoom_factor, mousex, mousey);
+      }
+    }
+  }
+
 private:
   Capture& capture;
   Camera& camera;
   std::shared_ptr<SDL_Texture> texture;
   TTF_Font* font;
+
+  float max_scale   = 100.0f;
+  float min_scale   = 0.25f;
+  float zoom_factor = 0.1;
 };
 
 DEFINE_STATE(MoveState, CappyMachine) {
@@ -112,10 +129,6 @@ DEFINE_STATE(MoveState, CappyMachine) {
 
 DEFINE_STATE(ColorState, CappyMachine) {
   DEFINE_STATE_INNER(ColorState, CappyMachine);
-
-public:
-  ColorState() {
-  }
 
 private:
   float panel_size   = 200.0f;
@@ -371,7 +384,16 @@ bool DrawCropState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Even
 
     case SDL_EVENT_MOUSE_WHEEL: {
       if (drawing) {
+        Camera& camera = machine->get_camera();
 
+        float mx, my;
+        SDL_GetMouseState(&mx, &my);
+
+        SDL_FPoint p1 = camera.screen_to_world(start);
+        machine->zoom(event.wheel.y > 0, mx, my);
+        start = camera.world_to_screen(p1);
+
+        return true;
       }
       break;
     }
