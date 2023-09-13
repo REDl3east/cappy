@@ -323,12 +323,6 @@ void FlashlightState::draw_frame(std::shared_ptr<CappyMachine> machine, std::sha
 bool DrawCropState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Event& event) {
   switch (event.type) {
     case SDL_EVENT_MOUSE_BUTTON_DOWN: {
-      if (drawing && event.button.button == SDL_BUTTON_LEFT) return true; // we ignore left down when drawing
-
-      if (event.button.button == SDL_BUTTON_LEFT) {
-        machine->set_state<MoveState>();
-        return false; // we want to icon to change in main event loop
-      }
       break;
     }
     case SDL_EVENT_MOUSE_BUTTON_UP: {
@@ -347,17 +341,38 @@ bool DrawCropState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Even
         start    = {x1, y1};
         end      = {x2, y2};
 
+        start = machine->get_camera().screen_to_world(start);
+        end   = machine->get_camera().screen_to_world(end);
+
+        start = {std::floor(start.x), std::floor(start.y)};
+        end   = {std::ceil(end.x), std::ceil(end.y)};
+
+        if (start.x < 0) start.x = 0;
+        if (start.x >= machine->get_capture().width) start.x = machine->get_capture().width;
+        if (start.y < 0) start.y = 0;
+        if (start.y >= machine->get_capture().height) start.y = machine->get_capture().height;
+        if (end.x < 0) end.x = 0;
+        if (end.x >= machine->get_capture().width) end.x = machine->get_capture().width;
+        if (end.y < 0) end.y = 0;
+        if (end.y >= machine->get_capture().height) end.y = machine->get_capture().height;
+
         return true;
       }
       break;
     }
     case SDL_EVENT_MOUSE_MOTION: {
-      if (drawing && (event.motion.state & SDL_BUTTON(SDL_BUTTON_LEFT))) return true; // we ignore left motion when drawing
+      if (drawing && event.motion.state & SDL_BUTTON(SDL_BUTTON_LEFT)) {
+        start.x += event.motion.xrel;
+        start.y += event.motion.yrel;
+        return false; // we still want to move the capture.
+      }
       break;
     }
 
     case SDL_EVENT_MOUSE_WHEEL: {
-      if (drawing) return true; // we ignore scroll wheel when drawing
+      if (drawing) {
+
+      }
       break;
     }
   }
@@ -365,7 +380,7 @@ bool DrawCropState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Even
 }
 
 void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine, std::shared_ptr<SDL_Renderer> renderer) {
-  SDL_SetRenderDrawColor(renderer.get(), 255, 125, 125, 255);
+  SDL_SetRenderDrawColor(renderer.get(), 125, 125, 125, 255);
   SDL_RenderClear(renderer.get());
 
   Capture& capture                     = machine->get_capture();
@@ -388,7 +403,9 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine, std::share
 
     draw_rect_flashlight(renderer, x1, y1, x2 - x1, y2 - y1, 0, 0, 0, 0, 128, 128, 128, 128);
   } else {
-    draw_rect_flashlight(renderer, start.x, start.y, end.x - start.x, end.y - start.y, 0, 0, 0, 0, 128, 128, 128, 128);
+    SDL_FPoint start_screen = camera.world_to_screen(start);
+    SDL_FPoint end_screen   = camera.world_to_screen(end);
+    draw_rect_flashlight(renderer, start_screen.x, start_screen.y, end_screen.x - start_screen.x, end_screen.y - start_screen.y, 0, 0, 0, 0, 128, 128, 128, 128);
   }
 
   SDL_RenderPresent(renderer.get());
