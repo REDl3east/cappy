@@ -80,13 +80,7 @@ public:
 class CappyMachine : public Machine<CappyMachine> {
 public:
   CappyMachine(Capture& c, std::shared_ptr<SDL_Texture> t) : capture(c), texture(t) {
-    SDL_RWops* font_mem = SDL_RWFromConstMem(advanced_pixel_7, sizeof(advanced_pixel_7));
-    if (!font_mem) {
-      std::cerr << "Failed to get font from memory\n";
-      return;
-    }
-
-    font = TTF_OpenFontRW(font_mem, SDL_TRUE, 36);
+    font = TTF_OpenFontRW(SDL_RWFromConstMem(advanced_pixel_7, sizeof(advanced_pixel_7)), SDL_TRUE, 36);
     if (!font) {
       std::cerr << "Failed to load font: " << TTF_GetError() << '\n';
       return;
