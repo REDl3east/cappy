@@ -43,4 +43,11 @@ public:
 private:
 };
 
+std::string toDecimalString(const RGB& color);
+std::string toDecimalSepString(const RGB& color);
+std::string toHexString(const RGB& color);
+std::string toHexSepString(const RGB& color);
+std::string toBinaryString(const RGB& color);
+std::string toBinarySepString(const RGB& color);
+
 #endif

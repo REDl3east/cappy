@@ -1,5 +1,9 @@
 #include "capture.h"
 
+#include <bitset>
+#include <iomanip>
+#include <sstream>
+
 #if __linux__
   #include <X11/Xlib.h>
   #include <X11/Xutil.h>
@@ -112,4 +116,43 @@ bool Capture::capture() {
 #endif
 
   return false;
+}
+
+std::string toDecimalString(const RGB& color) {
+  int x = (color.r << 16) | (color.g << 8) | color.b;
+  std::stringstream stream;
+  stream << x;
+  return stream.str();
+}
+
+std::string toDecimalSepString(const RGB& color) {
+  std::stringstream stream;
+  stream << static_cast<int>(color.r) << ", " << static_cast<int>(color.g) << ", " << static_cast<int>(color.b);
+  return stream.str();
+}
+
+std::string toHexString(const RGB& color) {
+  std::stringstream stream;
+  stream << "0x" << std::setfill('0') << std::setw(2) << std::hex;
+  stream << static_cast<int>(color.r) << std::setw(2) << static_cast<int>(color.g) << std::setw(2) << static_cast<int>(color.b);
+  return stream.str();
+}
+
+std::string toHexSepString(const RGB& color) {
+  std::stringstream stream;
+  stream << "0x" << std::setfill('0') << std::setw(2) << std::hex;
+  stream << static_cast<int>(color.r) << std::setw(2) << ", ";
+  stream << "0x" << std::setfill('0') << std::setw(2) << std::hex;
+  stream << static_cast<int>(color.g) << std::setw(2) << ", ";
+  stream << "0x" << std::setfill('0') << std::setw(2) << std::hex;
+  stream << static_cast<int>(color.b) << std::setw(2);
+  return stream.str();
+}
+
+std::string toBinaryString(const RGB& color) {
+  return "0b" + std::bitset<8>(color.r).to_string() + std::bitset<8>(color.g).to_string() + std::bitset<8>(color.b).to_string();
+}
+
+std::string toBinarySepString(const RGB& color) {
+  return "0b" + std::bitset<8>(color.r).to_string() + ", 0b" + std::bitset<8>(color.g).to_string() + ", 0b" + std::bitset<8>(color.b).to_string();
 }

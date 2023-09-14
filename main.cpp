@@ -53,8 +53,14 @@ int main() {
     return 1;
   }
 
+  TTF_Font* font = TTF_OpenFontRW(SDL_RWFromConstMem(advanced_pixel_7, sizeof(advanced_pixel_7)), SDL_TRUE, 36);
+  if (!font) {
+    std::cerr << "Failed to load font: " << TTF_GetError() << '\n';
+    return 1;
+  }
+
   Camera camera;
-  auto machine = std::make_shared<CappyMachine>(renderer, capture, texture, camera);
+  auto machine = std::make_shared<CappyMachine>(renderer, capture, texture, camera, font);
   machine->set_state<MoveState>();
 
   std::shared_ptr<SDL_Cursor> move_cursor = std::shared_ptr<SDL_Cursor>(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEALL), SDL_DestroyCursor);
@@ -126,7 +132,7 @@ int main() {
     machine->draw_frame(machine);
   }
 
-  TTF_CloseFont(machine->get_font());
+  TTF_CloseFont(font);
   TTF_Quit();
   SDL_Quit();
 

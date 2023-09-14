@@ -12,6 +12,8 @@ set(MAIN_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/camera.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/capture.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/machine.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/renderer.cpp
 )
 
 add_executable(cappy ${MAIN_SRC})
