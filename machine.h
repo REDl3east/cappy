@@ -339,7 +339,15 @@ void FlashlightState::draw_frame(std::shared_ptr<CappyMachine> machine, std::sha
 
 bool DrawCropState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Event& event) {
   switch (event.type) {
-    case SDL_EVENT_MOUSE_BUTTON_DOWN: {
+    case SDL_EVENT_KEY_DOWN: {
+      SDL_Keycode code = event.key.keysym.sym;
+      SDL_Keymod mod   = SDL_GetModState();
+      if (!drawing) {
+        if (code == SDLK_x) {
+          std::cout << "(" << start.x << ", " << start.y << ") ";
+          std::cout << "(" << end.x << ", " << end.y << ")\n";
+        }
+      }
       break;
     }
     case SDL_EVENT_MOUSE_BUTTON_UP: {
