@@ -54,7 +54,7 @@ int main() {
   }
 
   Camera camera;
-  auto machine = std::make_shared<CappyMachine>(capture, texture, camera);
+  auto machine = std::make_shared<CappyMachine>(renderer, capture, texture, camera);
   machine->set_state<MoveState>();
 
   std::shared_ptr<SDL_Cursor> move_cursor = std::shared_ptr<SDL_Cursor>(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEALL), SDL_DestroyCursor);
@@ -133,7 +133,7 @@ int main() {
       }
     }
 
-    machine->draw_frame(machine, renderer);
+    machine->draw_frame(machine);
   }
 
   TTF_CloseFont(machine->get_font());
