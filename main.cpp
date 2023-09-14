@@ -60,16 +60,10 @@ int main() {
   std::shared_ptr<SDL_Cursor> move_cursor = std::shared_ptr<SDL_Cursor>(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEALL), SDL_DestroyCursor);
   SDL_Cursor* default_cursor              = SDL_GetDefaultCursor();
 
-  bool quit             = false;
-  bool show_color       = false;
-  bool show_flashlight  = false;
-  float flashlight_size = 300.0f;
+  bool quit = false;
   while (!quit) {
     SDL_Event event;
 
-    float mx, my;
-    SDL_GetMouseState(&mx, &my);
-    SDL_FPoint mouse = camera.screen_to_world(mx, my);
     while (SDL_PollEvent(&event)) {
       bool handled = machine->handle_event(event);
       if (handled) continue;
@@ -96,17 +90,12 @@ int main() {
 
           break;
         }
-        case SDL_EVENT_KEY_UP: {
-          // SDL_Keycode code = event.key.keysym.sym;
-          // if (code == SDLK_c) {
-          // }
-
-          break;
-        }
         case SDL_EVENT_MOUSE_BUTTON_DOWN: {
           if (event.button.button == SDL_BUTTON_LEFT) {
             SDL_SetCursor(move_cursor.get());
           } else if (event.button.button == SDL_BUTTON_RIGHT) {
+            float mx, my;
+            SDL_GetMouseState(&mx, &my);
             machine->set_state<DrawCropState>(mx, my);
             continue;
           }
@@ -122,11 +111,12 @@ int main() {
           if ((event.motion.state & SDL_BUTTON(SDL_BUTTON_LEFT))) {
             camera.pan(event.motion.xrel, event.motion.yrel);
           }
-
           break;
         }
 
         case SDL_EVENT_MOUSE_WHEEL: {
+          float mx, my;
+          SDL_GetMouseState(&mx, &my);
           machine->zoom(event.wheel.y > 0, mx, my);
           break;
         }
