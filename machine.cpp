@@ -276,6 +276,13 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
   } else {
     SDL_FPoint start_screen = camera.world_to_screen(start);
     SDL_FPoint end_screen   = camera.world_to_screen(end);
+    
+    // SDL_SetRenderDrawColor(machine->get_renderer().get(), 0, 0, 0, 255);
+    // SDL_RenderLine(machine->get_renderer().get(), start_screen.x, start_screen.y, start_screen.x, end_screen.y);
+    // SDL_RenderLine(machine->get_renderer().get(), start_screen.x, start_screen.y, end_screen.x, start_screen.y);
+    // SDL_RenderLine(machine->get_renderer().get(), end_screen.x, end_screen.y, start_screen.x, end_screen.y);
+    // SDL_RenderLine(machine->get_renderer().get(), end_screen.x, end_screen.y, end_screen.x, start_screen.y);
+
     draw_rect_flashlight(machine->get_renderer(), start_screen.x, start_screen.y, end_screen.x - start_screen.x, end_screen.y - start_screen.y, 0, 0, 0, 0, 128, 128, 128, 128);
   }
 
