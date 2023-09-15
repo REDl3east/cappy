@@ -102,6 +102,13 @@ public:
     }
   }
 
+  void render_capture() {
+    SDL_FPoint pos = camera.world_to_screen(current_x, current_y);
+    SDL_FRect r1   = {(float)current_x, (float)current_y, (float)current_w, (float)current_h};
+    SDL_FRect r2   = {pos.x, pos.y, (float)current_w * camera.get_scale(), (float)current_h * camera.get_scale()};
+    SDL_RenderTexture(renderer.get(), texture.get(), &r1, &r2);
+  }
+
   int current_x = 0;
   int current_y = 0;
   int current_w = 0;
