@@ -8,6 +8,7 @@ A screen capping tool that lets you immediately explore the pixels of the curren
 
 **C**            - Enter/Exit color mode  
 **F**            - Enter/Exit flashlight mode  
+**R**            - Reset capture and camera
 **Right Click**  - Enter crop drawing mode
 **Left Drag**    - Pan  
 **Scroll Wheel** - Zoom  
@@ -36,6 +37,7 @@ Select a region of the capture.
 **Release Right Click** - Finish drawing crop region  
 **Drag**                - Continue drawing region  
 **Right Click (Rapid)** - Exit Crop Drawing Mode  
+**X**                   - Crop capture
 
 ## TODO
 - [x] Show color data, with text, near color panel
