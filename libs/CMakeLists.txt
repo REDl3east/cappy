@@ -29,4 +29,14 @@ FetchContent_Declare(
   SOURCE_DIR ${SDL3_TTF_SRC_DIR}
 )
 
-FetchContent_MakeAvailable(SDL3 SDL3_ttf)
+set(NFD_BUILD_TESTS OFF  CACHE BOOL "" FORCE)
+set(NFD_INSTALL     OFF  CACHE BOOL "" FORCE)
+
+FetchContent_Declare(
+  nativefiledialog_extended
+  GIT_REPOSITORY https://github.com/btzy/nativefiledialog-extended
+  GIT_TAG 800f582   # v1.1.0
+  SOURCE_DIR ${NFD_SRC_DIR}
+)
+
+FetchContent_MakeAvailable(SDL3 SDL3_ttf nativefiledialog_extended)

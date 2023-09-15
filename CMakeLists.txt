@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 set(SDL3_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs/sdl3)
 set(SDL3_TTF_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs/sdl3_ttf)
+set(NFD_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs/nativefiledialog-extended)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs)
 
@@ -22,7 +23,7 @@ target_include_directories(cappy PRIVATE
   ${SDL3_TTF_SRC_DIR}/include
 )
 if (UNIX)
-    target_link_libraries(cappy SDL3-static SDL3_ttf-static X11)
+    target_link_libraries(cappy nfd SDL3-static SDL3_ttf-static X11)
 elseif(WIN32)
-    target_link_libraries(cappy SDL3-static SDL3_ttf-static)
+    target_link_libraries(cappy nfd SDL3-static SDL3_ttf-static)
 endif()

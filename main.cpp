@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "SDL3/SDL.h"
+#include "nfd.h"
 
 #include "machine.h"
 
@@ -59,6 +60,11 @@ int main() {
     return 1;
   }
 
+  if (NFD_Init() != NFD_OKAY) {
+    std::cerr << "Failed to init NFD!\n";
+    return 1;
+  }
+
   Camera camera;
   auto machine = std::make_shared<CappyMachine>(renderer, capture, texture, camera, font);
   machine->set_state<MoveState>();
@@ -98,6 +104,14 @@ int main() {
             machine->current_h = capture.height;
             machine->set_state<MoveState>();
             continue;
+          } else if (code == SDLK_s && mod & SDL_KMOD_CTRL) {
+            nfdchar_t* savePath;
+            nfdresult_t result = NFD_SaveDialog(&savePath, NULL, 0, NULL, "untitled.png");
+            if (result == NFD_OKAY) {
+              NFD_FreePath(savePath);
+            } else if (result == NFD_ERROR) {
+              std::cerr << "Failed to save file: " << NFD_GetError() << '\n';
+            }
           }
 
           break;
@@ -139,6 +153,8 @@ int main() {
   }
 
   TTF_CloseFont(font);
+
+  NFD_Quit();
   TTF_Quit();
   SDL_Quit();
 
