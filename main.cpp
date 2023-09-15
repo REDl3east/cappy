@@ -92,6 +92,13 @@ int main() {
             continue;
           } else if (code == SDLK_r) {
             camera.reset();
+            machine->current_x = 0;
+            machine->current_y = 0;
+            machine->current_w = capture.width;
+            machine->current_h = capture.height;
+            machine->get_texture() = create_capture_texture(renderer, capture);
+            machine->set_state<MoveState>();
+            continue;
           }
 
           break;

@@ -25,8 +25,8 @@ void MoveState::draw_frame(std::shared_ptr<CappyMachine> machine) {
   Camera& camera                       = machine->get_camera();
   std::shared_ptr<SDL_Texture> texture = machine->get_texture();
 
-  SDL_FPoint pos = camera.world_to_screen(0, 0);
-  SDL_FRect r    = {pos.x, pos.y, (float)capture.width * camera.get_scale(), (float)capture.height * camera.get_scale()};
+  SDL_FPoint pos = camera.world_to_screen(machine->current_x, machine->current_y);
+  SDL_FRect r    = {pos.x, pos.y, (float)machine->current_w * camera.get_scale(), (float)machine->current_h * camera.get_scale()};
   SDL_RenderTexture(machine->get_renderer().get(), texture.get(), NULL, &r);
 
   SDL_RenderPresent(machine->get_renderer().get());
@@ -59,8 +59,8 @@ void ColorState::draw_frame(std::shared_ptr<CappyMachine> machine) {
   Camera& camera                       = machine->get_camera();
   std::shared_ptr<SDL_Texture> texture = machine->get_texture();
 
-  SDL_FPoint pos = camera.world_to_screen(0, 0);
-  SDL_FRect r    = {pos.x, pos.y, (float)capture.width * camera.get_scale(), (float)capture.height * camera.get_scale()};
+  SDL_FPoint pos = camera.world_to_screen(machine->current_x, machine->current_y);
+  SDL_FRect r    = {pos.x, pos.y, (float)machine->current_w * camera.get_scale(), (float)machine->current_h * camera.get_scale()};
   SDL_RenderTexture(machine->get_renderer().get(), texture.get(), NULL, &r);
 
   float mx, my;
@@ -68,7 +68,7 @@ void ColorState::draw_frame(std::shared_ptr<CappyMachine> machine) {
   SDL_FPoint mouse = camera.screen_to_world(mx, my);
 
   RGB rgb;
-  if (capture.at(mouse.x, mouse.y, rgb)) {
+  if (capture.at(mouse.x, mouse.y, rgb) && !(mouse.x < machine->current_x || mouse.x > machine->current_x + machine->current_w || mouse.y < machine->current_y || mouse.y > machine->current_y + machine->current_h)) {
     const Uint8* key_state = SDL_GetKeyboardState(NULL);
     SDL_Keymod mod         = SDL_GetModState();
     if (key_state[SDL_SCANCODE_D] && mod & SDL_KMOD_CTRL) {
@@ -160,8 +160,8 @@ void FlashlightState::draw_frame(std::shared_ptr<CappyMachine> machine) {
   Camera& camera                       = machine->get_camera();
   std::shared_ptr<SDL_Texture> texture = machine->get_texture();
 
-  SDL_FPoint pos = camera.world_to_screen(0, 0);
-  SDL_FRect r    = {pos.x, pos.y, (float)capture.width * camera.get_scale(), (float)capture.height * camera.get_scale()};
+  SDL_FPoint pos = camera.world_to_screen(machine->current_x, machine->current_y);
+  SDL_FRect r    = {pos.x, pos.y, (float)machine->current_w * camera.get_scale(), (float)machine->current_h * camera.get_scale()};
   SDL_RenderTexture(machine->get_renderer().get(), texture.get(), NULL, &r);
 
   float x, y;
@@ -181,6 +181,18 @@ bool DrawCropState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Even
       SDL_Keymod mod   = SDL_GetModState();
       if (!drawing) {
         if (code == SDLK_x) {
+          auto& renderer   = machine->get_renderer();
+          auto& texture    = machine->get_texture();
+          Capture& capture = machine->get_capture();
+
+          machine->current_x = start.x;
+          machine->current_y = start.y;
+          machine->current_w = end.x - start.x;
+          machine->current_h = end.y - start.y;
+
+          std::shared_ptr<SDL_Surface> surface = std::shared_ptr<SDL_Surface>(SDL_CreateSurfaceFrom(&capture.pixels[machine->current_y * capture.stride + machine->current_x], machine->current_w, machine->current_h, capture.stride * 3, SDL_PIXELFORMAT_RGB24), SDL_DestroySurface);
+          texture                              = std::shared_ptr<SDL_Texture>(SDL_CreateTextureFromSurface(renderer.get(), surface.get()), SDL_DestroyTexture);
+
           std::cout << "(" << start.x << ", " << start.y << ") ";
           std::cout << "(" << end.x << ", " << end.y << ")\n";
         }
@@ -209,14 +221,14 @@ bool DrawCropState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Even
         start = {std::floor(start.x), std::floor(start.y)};
         end   = {std::ceil(end.x), std::ceil(end.y)};
 
-        if (start.x < 0) start.x = 0;
-        if (start.x >= machine->get_capture().width) start.x = machine->get_capture().width;
-        if (start.y < 0) start.y = 0;
-        if (start.y >= machine->get_capture().height) start.y = machine->get_capture().height;
-        if (end.x < 0) end.x = 0;
-        if (end.x >= machine->get_capture().width) end.x = machine->get_capture().width;
-        if (end.y < 0) end.y = 0;
-        if (end.y >= machine->get_capture().height) end.y = machine->get_capture().height;
+        if (start.x < machine->current_x) start.x = machine->current_x;
+        if (start.x >= machine->current_x + machine->current_w) start.x = machine->current_x + machine->current_w;
+        if (start.y < machine->current_y) start.y = machine->current_y;
+        if (start.y >= machine->current_y + machine->current_h) start.y = machine->current_y + machine->current_h;
+        if (end.x < machine->current_x) end.x = machine->current_x;
+        if (end.x >= machine->current_x + machine->current_w) end.x = machine->current_x + machine->current_w;
+        if (end.y < machine->current_y) end.y = machine->current_y;
+        if (end.y >= machine->current_y + machine->current_h) end.y = machine->current_y + machine->current_h;
 
         return true;
       }
@@ -258,8 +270,8 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
   Camera& camera                       = machine->get_camera();
   std::shared_ptr<SDL_Texture> texture = machine->get_texture();
 
-  SDL_FPoint pos = camera.world_to_screen(0, 0);
-  SDL_FRect r    = {pos.x, pos.y, (float)capture.width * camera.get_scale(), (float)capture.height * camera.get_scale()};
+  SDL_FPoint pos = camera.world_to_screen(machine->current_x, machine->current_y);
+  SDL_FRect r    = {pos.x, pos.y, (float)machine->current_w * camera.get_scale(), (float)machine->current_h * camera.get_scale()};
   SDL_RenderTexture(machine->get_renderer().get(), texture.get(), NULL, &r);
 
   if (drawing) {
@@ -276,7 +288,7 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
   } else {
     SDL_FPoint start_screen = camera.world_to_screen(start);
     SDL_FPoint end_screen   = camera.world_to_screen(end);
-    
+
     // SDL_SetRenderDrawColor(machine->get_renderer().get(), 0, 0, 0, 255);
     // SDL_RenderLine(machine->get_renderer().get(), start_screen.x, start_screen.y, start_screen.x, end_screen.y);
     // SDL_RenderLine(machine->get_renderer().get(), start_screen.x, start_screen.y, end_screen.x, start_screen.y);

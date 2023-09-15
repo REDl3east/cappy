@@ -78,14 +78,15 @@ public:
 class CappyMachine : public Machine<CappyMachine> {
 public:
   CappyMachine(std::shared_ptr<SDL_Renderer> r, Capture& c, std::shared_ptr<SDL_Texture> t, Camera& cam, TTF_Font* f) : renderer(r), capture(c), texture(t), camera(cam), font(f) {
-
+    current_w = c.width;
+    current_h = c.height;
   }
   ~CappyMachine() {
   }
   Capture& get_capture() { return capture; }
-  std::shared_ptr<SDL_Renderer> get_renderer() { return renderer; }
+  std::shared_ptr<SDL_Renderer>& get_renderer() { return renderer; }
   Camera& get_camera() { return camera; }
-  std::shared_ptr<SDL_Texture> get_texture() { return texture; }
+  std::shared_ptr<SDL_Texture>& get_texture() { return texture; }
   TTF_Font* get_font() { return font; }
 
   void zoom(bool zoom_in, float mousex, float mousey) {
@@ -100,6 +101,11 @@ public:
       }
     }
   }
+
+  int current_x = 0;
+  int current_y = 0;
+  int current_w = 0;
+  int current_h = 0;
 
 private:
   std::shared_ptr<SDL_Renderer> renderer;
