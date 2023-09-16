@@ -60,6 +60,7 @@ void ColorState::draw_frame(std::shared_ptr<CappyMachine> machine) {
 
   RGB rgb;
   if (capture.at(mouse.x, mouse.y, rgb) && !(mouse.x < machine->current_x || mouse.x > machine->current_x + machine->current_w || mouse.y < machine->current_y || mouse.y > machine->current_y + machine->current_h)) {
+    // TODO: add this key stuff to event handler, it should not check every frame.
     const Uint8* key_state = SDL_GetKeyboardState(NULL);
     SDL_Keymod mod         = SDL_GetModState();
     if (key_state[SDL_SCANCODE_D] && mod & SDL_KMOD_CTRL) {
