@@ -61,14 +61,23 @@ bool Capture::capture() {
   return true;
 #elif _WIN32
   SetProcessDPIAware();
-  HDC hScreenDC      = GetDC(nullptr); // CreateDC("DISPLAY",nullptr,nullptr,nullptr);
-  HDC hMemoryDC      = CreateCompatibleDC(hScreenDC);
-  width              = GetDeviceCaps(hScreenDC, HORZRES);
+  HDC hScreenDC = GetDC(nullptr); // CreateDC("DISPLAY",nullptr,nullptr,nullptr);
+  HDC hMemoryDC = CreateCompatibleDC(hScreenDC);
+
+  // width              = GetDeviceCaps(hScreenDC, HORZRES);
+  // height             = GetDeviceCaps(hScreenDC, VERTRES);
+  // stride             = width;
+  // HBITMAP hBitmap    = CreateCompatibleBitmap(hScreenDC, width, height);
+  // HBITMAP hOldBitmap = static_cast<HBITMAP>(SelectObject(hMemoryDC, hBitmap));
+  // BitBlt(hMemoryDC, 0, 0, width, height, hScreenDC, 0, 0, SRCCOPY);
+  // hBitmap = static_cast<HBITMAP>(SelectObject(hMemoryDC, hOldBitmap));
+
+  width              = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+  height             = GetSystemMetrics(SM_CYVIRTUALSCREEN);
   stride             = width;
-  height             = GetDeviceCaps(hScreenDC, VERTRES);
   HBITMAP hBitmap    = CreateCompatibleBitmap(hScreenDC, width, height);
   HBITMAP hOldBitmap = static_cast<HBITMAP>(SelectObject(hMemoryDC, hBitmap));
-  BitBlt(hMemoryDC, 0, 0, width, height, hScreenDC, 0, 0, SRCCOPY);
+  BitBlt(hMemoryDC, GetSystemMetrics(SM_XVIRTUALSCREEN), GetSystemMetrics(SM_YVIRTUALSCREEN), width, height, hScreenDC, 0, 0, SRCCOPY);
   hBitmap = static_cast<HBITMAP>(SelectObject(hMemoryDC, hOldBitmap));
 
   BITMAPINFO MyBMInfo       = {0};
