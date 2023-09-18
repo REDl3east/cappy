@@ -117,7 +117,7 @@ int main() {
               int ret = stbi_write_png(path,
                                        machine->current_w, machine->current_h,
                                        comp,
-                                       &pixels,
+                                       pixels,
                                        comp * stride);
 
               if (ret == 0) {
