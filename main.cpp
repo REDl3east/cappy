@@ -111,12 +111,14 @@ int main() {
             nfdresult_t result = NFD_SaveDialog(&path, NULL, 0, NULL, "untitled.png");
             if (result == NFD_OKAY) {
               constexpr int comp = 3;
+              int stride         = machine->get_capture().stride;
+              RGB* pixels        = &machine->get_capture().pixels[machine->current_y * stride + machine->current_x];
 
               int ret = stbi_write_png(path,
                                        machine->current_w, machine->current_h,
                                        comp,
-                                       &machine->get_capture().pixels[machine->current_y * machine->get_capture().stride + machine->current_x],
-                                       comp * machine->get_capture().stride);
+                                       &pixels,
+                                       comp * stride);
 
               if (ret == 0) {
                 std::cerr << "Failed to save file: '" << path << "'\n";
