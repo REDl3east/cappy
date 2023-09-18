@@ -12,6 +12,8 @@
 
 #include "machine.h"
 
+#include "stb_image_write.h"
+
 std::shared_ptr<SDL_Texture> create_capture_texture(std::shared_ptr<SDL_Renderer> renderer, Capture& capture);
 
 int main() {
@@ -105,10 +107,22 @@ int main() {
             machine->set_state<MoveState>();
             continue;
           } else if (code == SDLK_s && mod & SDL_KMOD_CTRL) {
-            nfdchar_t* savePath;
-            nfdresult_t result = NFD_SaveDialog(&savePath, NULL, 0, NULL, "untitled.png");
+            nfdchar_t* path;
+            nfdresult_t result = NFD_SaveDialog(&path, NULL, 0, NULL, "untitled.png");
             if (result == NFD_OKAY) {
-              NFD_FreePath(savePath);
+              constexpr int comp = 3;
+
+              int ret = stbi_write_png(path,
+                                       machine->current_w, machine->current_h,
+                                       comp,
+                                       &machine->get_capture().pixels[machine->current_y * machine->get_capture().stride + machine->current_x],
+                                       comp * machine->get_capture().stride);
+
+              if (ret == 0) {
+                std::cerr << "Failed to save file: '" << path << "'\n";
+              }
+
+              NFD_FreePath(path);
             } else if (result == NFD_ERROR) {
               std::cerr << "Failed to save file: " << NFD_GetError() << '\n';
             }

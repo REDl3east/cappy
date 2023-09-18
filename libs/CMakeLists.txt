@@ -39,4 +39,11 @@ FetchContent_Declare(
   SOURCE_DIR ${NFD_SRC_DIR}
 )
 
-FetchContent_MakeAvailable(SDL3 SDL3_ttf nativefiledialog_extended)
+FetchContent_Declare(
+  stb
+  GIT_REPOSITORY https://github.com/nothings/stb
+  GIT_TAG 5736b15   # main - 09-18-23
+  SOURCE_DIR ${STB_SRC_DIR}
+)
+
+FetchContent_MakeAvailable(SDL3 SDL3_ttf nativefiledialog_extended stb)
