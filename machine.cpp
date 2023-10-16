@@ -266,6 +266,47 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
     SDL_FPoint end_screen   = camera.world_to_screen(end);
 
     draw_rect_flashlight(machine->get_renderer(), start_screen.x, start_screen.y, end_screen.x - start_screen.x, end_screen.y - start_screen.y, 0, 0, 0, 0, 128, 128, 128, 128);
+
+    SDL_Renderer* r = machine->get_renderer().get();
+
+    SDL_SetRenderDrawColor(r, 255, 0, 0, 255);
+    SDL_RenderLine(r, start_screen.x, start_screen.y, end_screen.x, start_screen.y);
+    SDL_RenderLine(r, start_screen.x, start_screen.y, start_screen.x, end_screen.y);
+    SDL_RenderLine(r, start_screen.x, end_screen.y, end_screen.x, end_screen.y);
+    SDL_RenderLine(r, end_screen.x, start_screen.y, end_screen.x, end_screen.y);
+
+    float rect_size = 10.0f;
+    float screen_w  = end_screen.x - start_screen.x;
+    float screen_h  = end_screen.y - start_screen.y;
+    float corner_rect_w    = screen_w / 2.0f <= rect_size ? screen_w / 2.0f : rect_size;
+    float corner_rect_h    = screen_h / 2.0f <= rect_size ? screen_h / 2.0f : rect_size;
+
+    float vertical_rect_w = screen_h / 2.0f <= rect_size ? 0.0f : corner_rect_w;
+    float vertical_rect_h = screen_h / 2.0f <= rect_size ? 0.0f : screen_h - 2.0f * corner_rect_h;
+    float horizontal_rect_w = screen_w / 2.0f <= rect_size ? 0.0f : screen_w - 2.0f * corner_rect_w;
+    float horizontal_rect_h = screen_w / 2.0f <= rect_size ? 0.0f : corner_rect_h;
+
+    SDL_SetRenderDrawColor(r, 255, 0, 255, 255);
+    SDL_FRect r1; 
+    r1 = {start_screen.x, start_screen.y + corner_rect_h, vertical_rect_w, vertical_rect_h};
+    SDL_RenderRect(r, &r1);
+    r1 = {end_screen.x - vertical_rect_w, start_screen.y + corner_rect_h, vertical_rect_w, vertical_rect_h};
+    SDL_RenderRect(r, &r1);
+
+    r1 = {start_screen.x + corner_rect_w, start_screen.y, horizontal_rect_w, horizontal_rect_h};
+    SDL_RenderRect(r, &r1);
+    r1 = {start_screen.x + corner_rect_w, end_screen.y - corner_rect_h, horizontal_rect_w, horizontal_rect_h};
+    SDL_RenderRect(r, &r1);
+
+    SDL_SetRenderDrawColor(r, 255, 0, 0, 255);
+    r1 = {start_screen.x, start_screen.y, corner_rect_w, corner_rect_h};
+    SDL_RenderRect(r, &r1);
+    r1 = {start_screen.x, end_screen.y - corner_rect_h, corner_rect_w, corner_rect_h};
+    SDL_RenderRect(r, &r1);
+    r1 = {end_screen.x - corner_rect_w, end_screen.y - corner_rect_h, corner_rect_w, corner_rect_h};
+    SDL_RenderRect(r, &r1);
+    r1 = {end_screen.x - corner_rect_w, start_screen.y, corner_rect_w, corner_rect_h};
+    SDL_RenderRect(r, &r1);
   }
 
   SDL_RenderPresent(machine->get_renderer().get());
