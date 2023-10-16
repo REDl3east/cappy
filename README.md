@@ -43,6 +43,6 @@ Select a region of the capture.
 - [x] Show color data, with text, near color panel
 - [x] Add ability to save screenshot
 - [x] Add screen selection
-- [ ] Async save dialog 
+- [x] Async save dialog 
 - [ ] Add load dialog 
 - [ ] Add command line load image 

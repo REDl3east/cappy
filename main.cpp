@@ -1,18 +1,12 @@
-#include <bitset>
-#include <cmath>
-#include <iomanip>
+#include <future>
 #include <iostream>
-#include <memory>
-#include <numbers>
-#include <sstream>
-#include <vector>
+#include <thread>
 
 #include "SDL3/SDL.h"
 #include "nfd.h"
+#include "stb_image_write.h"
 
 #include "machine.h"
-
-#include "stb_image_write.h"
 
 std::shared_ptr<SDL_Texture> create_capture_texture(std::shared_ptr<SDL_Renderer> renderer, Capture& capture);
 
@@ -74,6 +68,25 @@ int main() {
   std::shared_ptr<SDL_Cursor> move_cursor = std::shared_ptr<SDL_Cursor>(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEALL), SDL_DestroyCursor);
   SDL_Cursor* default_cursor              = SDL_GetDefaultCursor();
 
+  std::future<nfdchar_t*> save_dialog;
+
+  auto save_capture_from_dialog = [&machine](nfdchar_t* path) {
+    if (path == nullptr) return 0;
+    constexpr int comp = 3;
+    int stride         = machine->get_capture().stride;
+    int index          = machine->current_y * stride + machine->current_x;
+    RGB* pixels        = &machine->get_capture().pixels[index];
+
+    if (stbi_write_png(path, machine->current_w, machine->current_h, comp, pixels, comp * stride) == 0) {
+      std::cerr << "Failed to save file: '" << path << "'\n";
+      NFD_FreePath(path);
+      return 0;
+    }
+
+    NFD_FreePath(path);
+    return 1;
+  };
+
   bool quit = false;
   while (!quit) {
     SDL_Event event;
@@ -107,26 +120,11 @@ int main() {
             machine->set_state<MoveState>();
             continue;
           } else if (code == SDLK_s && mod & SDL_KMOD_CTRL) {
-            nfdchar_t* path;
-            nfdresult_t result = NFD_SaveDialog(&path, NULL, 0, NULL, "untitled.png");
-            if (result == NFD_OKAY) {
-              constexpr int comp = 3;
-              int stride         = machine->get_capture().stride;
-              RGB* pixels        = &machine->get_capture().pixels[machine->current_y * stride + machine->current_x];
-
-              int ret = stbi_write_png(path,
-                                       machine->current_w, machine->current_h,
-                                       comp,
-                                       pixels,
-                                       comp * stride);
-
-              if (ret == 0) {
-                std::cerr << "Failed to save file: '" << path << "'\n";
-              }
-
-              NFD_FreePath(path);
-            } else if (result == NFD_ERROR) {
-              std::cerr << "Failed to save file: " << NFD_GetError() << '\n';
+            if (!save_dialog.valid()) {
+              save_dialog = std::async(std::launch::async, []() {
+                nfdchar_t* path;
+                return (NFD_SaveDialog(&path, NULL, 0, NULL, "untitled.png") == NFD_OKAY) ? path : (nfdchar_t*)nullptr;
+              });
             }
           }
 
@@ -163,6 +161,10 @@ int main() {
           break;
         }
       }
+    }
+
+    if (save_dialog.valid() && save_dialog.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
+      save_capture_from_dialog(save_dialog.get());
     }
 
     machine->draw_frame(machine);
