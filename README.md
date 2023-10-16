@@ -41,5 +41,8 @@ Select a region of the capture.
 
 ## TODO
 - [x] Show color data, with text, near color panel
-- [ ] Add ability to save screenshot
-- [ ] Add screen selection
+- [x] Add ability to save screenshot
+- [x] Add screen selection
+- [ ] Async save dialog 
+- [ ] Add load dialog 
+- [ ] Add command line load image 
