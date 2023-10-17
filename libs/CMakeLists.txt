@@ -33,10 +33,10 @@ set(NFD_BUILD_TESTS OFF  CACHE BOOL "" FORCE)
 set(NFD_INSTALL     OFF  CACHE BOOL "" FORCE)
 
 FetchContent_Declare(
-  nativefiledialog_extended
-  GIT_REPOSITORY https://github.com/btzy/nativefiledialog-extended
-  GIT_TAG 800f582   # v1.1.0
-  SOURCE_DIR ${NFD_SRC_DIR}
+  portable-file-dialogs
+  GIT_REPOSITORY https://github.com/samhocevar/portable-file-dialogs
+  GIT_TAG 7f852d8 # on Nov 11, 2022
+  SOURCE_DIR ${DIALOG_SRC_DIR}
 )
 
 FetchContent_Declare(
@@ -46,4 +46,4 @@ FetchContent_Declare(
   SOURCE_DIR ${STB_SRC_DIR}
 )
 
-FetchContent_MakeAvailable(SDL3 SDL3_ttf nativefiledialog_extended stb)
+FetchContent_MakeAvailable(SDL3 SDL3_ttf portable-file-dialogs stb)

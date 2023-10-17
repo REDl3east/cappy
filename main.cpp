@@ -3,7 +3,7 @@
 #include <thread>
 
 #include "SDL3/SDL.h"
-#include "nfd.h"
+#include "portable-file-dialogs.h"
 #include "stb_image_write.h"
 
 #include "machine.h"
@@ -56,11 +56,6 @@ int main() {
     return 1;
   }
 
-  if (NFD_Init() != NFD_OKAY) {
-    std::cerr << "Failed to init NFD!\n";
-    return 1;
-  }
-
   Camera camera;
   auto machine = std::make_shared<CappyMachine>(renderer, capture, texture, camera, font);
   machine->set_state<MoveState>();
@@ -68,24 +63,29 @@ int main() {
   std::shared_ptr<SDL_Cursor> move_cursor = std::shared_ptr<SDL_Cursor>(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEALL), SDL_DestroyCursor);
   SDL_Cursor* default_cursor              = SDL_GetDefaultCursor();
 
-  std::future<nfdchar_t*> save_dialog;
+  auto save_capture_from_dialog = [&machine](std::string path) {
+    if (path.empty()) return 0;
 
-  auto save_capture_from_dialog = [&machine](nfdchar_t* path) {
-    if (path == nullptr) return 0;
-    constexpr int comp = 3;
-    int stride         = machine->get_capture().stride;
-    int index          = machine->current_y * stride + machine->current_x;
-    RGB* pixels        = &machine->get_capture().pixels[index];
+    std::thread([machine](std::string path) {
+      constexpr int comp = 3;
+      int stride         = machine->get_capture().stride;
+      int index          = machine->current_y * stride + machine->current_x;
+      RGB* pixels        = &machine->get_capture().pixels[index];
 
-    if (stbi_write_png(path, machine->current_w, machine->current_h, comp, pixels, comp * stride) == 0) {
-      std::cerr << "Failed to save file: '" << path << "'\n";
-      NFD_FreePath(path);
-      return 0;
-    }
+      std::string_view sv = path;
+      if (!sv.ends_with(".png")) {
+        path += ".png";
+      }
+      if (stbi_write_png(path.c_str(), machine->current_w, machine->current_h, comp, pixels, comp * stride) == 0) {
+        std::cerr << "Failed to save file: '" << path << "'\n";
+      }
+        std::cerr << "saved file: '" << path << "'\n";
+    }, path).detach();
 
-    NFD_FreePath(path);
     return 1;
   };
+
+  std::unique_ptr<pfd::save_file> save_dialog;
 
   bool quit = false;
   while (!quit) {
@@ -120,12 +120,7 @@ int main() {
             machine->set_state<MoveState>();
             continue;
           } else if (code == SDLK_s && mod & SDL_KMOD_CTRL) {
-            if (!save_dialog.valid()) {
-              save_dialog = std::async(std::launch::async, []() {
-                nfdchar_t* path;
-                return (NFD_SaveDialog(&path, NULL, 0, NULL, "untitled.png") == NFD_OKAY) ? path : (nfdchar_t*)nullptr;
-              });
-            }
+            if (!save_dialog) save_dialog.reset(new pfd::save_file("Select a file", ".", {"Image Files (.png)", "*.png"}, pfd::opt::none));
           }
 
           break;
@@ -163,8 +158,12 @@ int main() {
       }
     }
 
-    if (save_dialog.valid() && save_dialog.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
-      save_capture_from_dialog(save_dialog.get());
+    if (save_dialog) {
+      if (save_dialog.get()->ready()) {
+        std::cout << "path: '" << save_dialog.get()->result() << "'\n";
+        save_capture_from_dialog(save_dialog.get()->result());
+        save_dialog.reset();
+      }
     }
 
     machine->draw_frame(machine);
@@ -172,7 +171,6 @@ int main() {
 
   TTF_CloseFont(font);
 
-  NFD_Quit();
   TTF_Quit();
   SDL_Quit();
 
