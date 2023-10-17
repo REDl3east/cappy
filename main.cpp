@@ -112,7 +112,7 @@ int main() {
             machine->set_state<ColorState>();
             continue;
           } else if (code == SDLK_r) {
-            camera.reset();
+            // camera.reset();
             machine->current_x = 0;
             machine->current_y = 0;
             machine->current_w = capture.width;

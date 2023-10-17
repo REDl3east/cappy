@@ -167,20 +167,54 @@ bool DrawCropState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Even
       SDL_Keymod mod   = SDL_GetModState();
       if (!drawing) {
         if (code == SDLK_x) {
-          auto& renderer   = machine->get_renderer();
-          auto& texture    = machine->get_texture();
-          Capture& capture = machine->get_capture();
-
           machine->current_x = start.x;
           machine->current_y = start.y;
           machine->current_w = end.x - start.x;
           machine->current_h = end.y - start.y;
+          machine->set_state<MoveState>();
+          return true;
         }
       }
       break;
     }
+    case SDL_EVENT_MOUSE_BUTTON_DOWN: {
+      if (!drawing) {
+        if (event.button.button == SDL_BUTTON_RIGHT) {
+          drawing = true;
+          SDL_SetCursor(crosshair_cursor.get());
+
+          if (resize_selection == ResizeSelection::N || resize_selection == ResizeSelection::S || resize_selection == ResizeSelection::E || resize_selection == ResizeSelection::W || resize_selection == ResizeSelection::SE) {
+            start = machine->get_camera().world_to_screen(start);
+            end   = machine->get_camera().world_to_screen(end);
+          } else if (resize_selection == ResizeSelection::NW) {
+            start = machine->get_camera().world_to_screen(end);
+            end   = machine->get_camera().world_to_screen(start);
+          } else if (resize_selection == ResizeSelection::NE) {
+            start = machine->get_camera().world_to_screen(start.x, end.y);
+            end   = machine->get_camera().world_to_screen(end.x, start.y);
+          } else if (resize_selection == ResizeSelection::SW) {
+            start = machine->get_camera().world_to_screen(end.x, start.y);
+            end   = machine->get_camera().world_to_screen(start.x, end.y);
+          } else if (resize_selection == ResizeSelection::CENTER) {
+            start = machine->get_camera().world_to_screen(start);
+            end   = machine->get_camera().world_to_screen(end);
+          } else {
+            SDL_SetCursor(SDL_GetDefaultCursor());
+            drawing = false;
+            return false;
+          }
+        } else if (event.button.button == SDL_BUTTON_LEFT) {
+          return false;
+        }
+        return true;
+      }
+      break;
+    }
     case SDL_EVENT_MOUSE_BUTTON_UP: {
-      if (event.button.button == SDL_BUTTON_RIGHT) {
+      if (event.button.button == SDL_BUTTON_LEFT) {
+        SDL_SetCursor(crosshair_cursor.get());
+        return true;
+      } else if (event.button.button == SDL_BUTTON_RIGHT) {
         if (start.x == end.x && start.y == end.y) {
           machine->set_state<MoveState>();
           return true;
@@ -198,8 +232,8 @@ bool DrawCropState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Even
         start = machine->get_camera().screen_to_world(start);
         end   = machine->get_camera().screen_to_world(end);
 
-        start = {std::floor(start.x), std::floor(start.y)};
-        end   = {std::ceil(end.x), std::ceil(end.y)};
+        start = {std::round(start.x), std::round(start.y)};
+        end   = {std::round(end.x), std::round(end.y)};
 
         if (start.x < machine->current_x) start.x = machine->current_x;
         if (start.x >= machine->current_x + machine->current_w) start.x = machine->current_x + machine->current_w;
@@ -210,15 +244,116 @@ bool DrawCropState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Even
         if (end.y < machine->current_y) end.y = machine->current_y;
         if (end.y >= machine->current_y + machine->current_h) end.y = machine->current_y + machine->current_h;
 
+        if (end.x - start.x == 0 || end.y - start.y == 0) {
+          machine->set_state<MoveState>();
+          return true;
+        }
+
+        SDL_SetCursor(SDL_GetDefaultCursor());
+
         return true;
       }
       break;
     }
     case SDL_EVENT_MOUSE_MOTION: {
-      if (drawing && event.motion.state & SDL_BUTTON(SDL_BUTTON_LEFT)) {
-        start.x += event.motion.xrel;
-        start.y += event.motion.yrel;
-        return false; // we still want to move the capture.
+      if (drawing) {
+        if (resize_selection != ResizeSelection::CENTER) {
+          if (event.motion.state & SDL_BUTTON(SDL_BUTTON_LEFT)) {
+            start.x += event.motion.xrel;
+            start.y += event.motion.yrel;
+            if (resize_selection == ResizeSelection::N || resize_selection == ResizeSelection::W) {
+              end.y += event.motion.yrel;
+              end.x += event.motion.xrel;
+            } else if (resize_selection == ResizeSelection::E) {
+              end.y += event.motion.yrel;
+            } else if (resize_selection == ResizeSelection::S) {
+              end.x += event.motion.xrel;
+            }
+
+            return false; // we still want to move the capture.
+          }
+        } else {
+          if (event.motion.state & SDL_BUTTON(SDL_BUTTON_RIGHT) && resize_selection == ResizeSelection::CENTER) {
+            start.x += event.motion.xrel;
+            start.y += event.motion.yrel;
+            end.x += event.motion.xrel;
+            end.y += event.motion.yrel;
+            return false;
+          }
+        }
+
+      } else {
+        SDL_FPoint start_screen = machine->get_camera().world_to_screen(start);
+        SDL_FPoint end_screen   = machine->get_camera().world_to_screen(end);
+
+        auto getResizeDirection = [](int x, int y, SDL_FPoint start_screen, SDL_FPoint end_screen) -> ResizeSelection {
+          auto isPointInRectangle = [x, y](int rx, int ry, int rw, int rh) {
+            return (x >= rx && x <= (rx + rw) && y >= ry && y <= (ry + rh));
+          };
+
+          float screen_w      = end_screen.x - start_screen.x;
+          float screen_h      = end_screen.y - start_screen.y;
+          float corner_rect_w = screen_w / 2.0f <= resize_rect_size ? screen_w / 2.0f : resize_rect_size;
+          float corner_rect_h = screen_h / 2.0f <= resize_rect_size ? screen_h / 2.0f : resize_rect_size;
+
+          if (screen_h / 2.0f > resize_rect_size) {
+            float vertical_rect_w = corner_rect_w;
+            float vertical_rect_h = screen_h - 2.0f * corner_rect_h;
+
+            if (isPointInRectangle(start_screen.x, start_screen.y + corner_rect_h, vertical_rect_w, vertical_rect_h)) {
+              return ResizeSelection::W;
+            } else if (isPointInRectangle(end_screen.x - vertical_rect_w, start_screen.y + corner_rect_h, vertical_rect_w, vertical_rect_h)) {
+              return ResizeSelection::E;
+            }
+          }
+
+          if (screen_w / 2.0f > resize_rect_size) {
+            float horizontal_rect_w = screen_w / 2.0f <= resize_rect_size ? 0.0f : screen_w - 2.0f * corner_rect_w;
+            float horizontal_rect_h = screen_w / 2.0f <= resize_rect_size ? 0.0f : corner_rect_h;
+
+            if (isPointInRectangle(start_screen.x + corner_rect_w, start_screen.y, horizontal_rect_w, horizontal_rect_h)) {
+              return ResizeSelection::N;
+            } else if (isPointInRectangle(start_screen.x + corner_rect_w, end_screen.y - corner_rect_h, horizontal_rect_w, horizontal_rect_h)) {
+              return ResizeSelection::S;
+            }
+          }
+
+          if (isPointInRectangle(start_screen.x, start_screen.y, corner_rect_w, corner_rect_h)) {
+            return ResizeSelection::NW;
+          } else if (isPointInRectangle(start_screen.x, end_screen.y - corner_rect_h, corner_rect_w, corner_rect_h)) {
+            return ResizeSelection::SW;
+          } else if (isPointInRectangle(end_screen.x - corner_rect_w, end_screen.y - corner_rect_h, corner_rect_w, corner_rect_h)) {
+            return ResizeSelection::SE;
+          } else if (isPointInRectangle(end_screen.x - corner_rect_w, start_screen.y, corner_rect_w, corner_rect_h)) {
+            return ResizeSelection::NE;
+          }
+
+          if (screen_h / 2.0f > resize_rect_size && screen_w / 2.0f > resize_rect_size) {
+            if (isPointInRectangle(start_screen.x + corner_rect_w, start_screen.y + corner_rect_h, screen_w - 2.0f * corner_rect_w, screen_h - 2.0f * corner_rect_h)) {
+              return ResizeSelection::CENTER;
+            }
+          }
+
+          return ResizeSelection::NONE;
+        };
+
+        if (!(event.motion.state & SDL_BUTTON(SDL_BUTTON_LEFT))) {
+          resize_selection = getResizeDirection(event.motion.x, event.motion.y, start_screen, end_screen);
+
+          if (resize_selection == ResizeSelection::N || resize_selection == ResizeSelection::S) {
+            SDL_SetCursor(ns_cursor.get());
+          } else if (resize_selection == ResizeSelection::E || resize_selection == ResizeSelection::W) {
+            SDL_SetCursor(ew_cursor.get());
+          } else if (resize_selection == ResizeSelection::NE || resize_selection == ResizeSelection::SW) {
+            SDL_SetCursor(nesw_cursor.get());
+          } else if (resize_selection == ResizeSelection::NW || resize_selection == ResizeSelection::SE) {
+            SDL_SetCursor(nwse_cursor.get());
+          } else {
+            SDL_SetCursor(SDL_GetDefaultCursor());
+          }
+        }
+
+        return false;
       }
       break;
     }
@@ -231,8 +366,10 @@ bool DrawCropState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Even
         SDL_GetMouseState(&mx, &my);
 
         SDL_FPoint p1 = camera.screen_to_world(start);
+        SDL_FPoint p2 = camera.screen_to_world(end);
         machine->zoom(event.wheel.y > 0, mx, my);
         start = camera.world_to_screen(p1);
+        end   = camera.world_to_screen(p2);
 
         return true;
       }
@@ -246,14 +383,28 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
   SDL_SetRenderDrawColor(machine->get_renderer().get(), 125, 125, 125, 255);
   SDL_RenderClear(machine->get_renderer().get());
 
-  Camera& camera = machine->get_camera();
+  Camera& camera  = machine->get_camera();
+  SDL_Renderer* r = machine->get_renderer().get();
 
   machine->render_capture();
 
   if (drawing) {
-    float mx, my;
-    SDL_GetMouseState(&mx, &my);
-    end = {mx, my};
+    if (resize_selection != ResizeSelection::CENTER) {
+      float mx, my;
+      SDL_GetMouseState(&mx, &my);
+
+      if (resize_selection == ResizeSelection::N) {
+        start = {start.x, my};
+      } else if (resize_selection == ResizeSelection::E) {
+        end = {mx, end.y};
+      } else if (resize_selection == ResizeSelection::S) {
+        end = {end.x, my};
+      } else if (resize_selection == ResizeSelection::W) {
+        start = {mx, start.y};
+      } else {
+        end = {mx, my};
+      }
+    }
 
     float x1 = std::min(start.x, end.x);
     float y1 = std::min(start.y, end.y);
@@ -261,52 +412,24 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
     float y2 = std::max(start.y, end.y);
 
     draw_rect_flashlight(machine->get_renderer(), x1, y1, x2 - x1, y2 - y1, 0, 0, 0, 0, 128, 128, 128, 128);
+
+    SDL_SetRenderDrawColor(r, 255, 0, 0, 255);
+    SDL_RenderLine(r, x1, y1, x2, y1);
+    SDL_RenderLine(r, x1, y1, x1, y2);
+    SDL_RenderLine(r, x1, y2, x2, y2);
+    SDL_RenderLine(r, x2, y1, x2, y2);
+
   } else {
     SDL_FPoint start_screen = camera.world_to_screen(start);
     SDL_FPoint end_screen   = camera.world_to_screen(end);
 
     draw_rect_flashlight(machine->get_renderer(), start_screen.x, start_screen.y, end_screen.x - start_screen.x, end_screen.y - start_screen.y, 0, 0, 0, 0, 128, 128, 128, 128);
 
-    SDL_Renderer* r = machine->get_renderer().get();
-
     SDL_SetRenderDrawColor(r, 255, 0, 0, 255);
     SDL_RenderLine(r, start_screen.x, start_screen.y, end_screen.x, start_screen.y);
     SDL_RenderLine(r, start_screen.x, start_screen.y, start_screen.x, end_screen.y);
     SDL_RenderLine(r, start_screen.x, end_screen.y, end_screen.x, end_screen.y);
     SDL_RenderLine(r, end_screen.x, start_screen.y, end_screen.x, end_screen.y);
-
-    float rect_size = 10.0f;
-    float screen_w  = end_screen.x - start_screen.x;
-    float screen_h  = end_screen.y - start_screen.y;
-    float corner_rect_w    = screen_w / 2.0f <= rect_size ? screen_w / 2.0f : rect_size;
-    float corner_rect_h    = screen_h / 2.0f <= rect_size ? screen_h / 2.0f : rect_size;
-
-    float vertical_rect_w = screen_h / 2.0f <= rect_size ? 0.0f : corner_rect_w;
-    float vertical_rect_h = screen_h / 2.0f <= rect_size ? 0.0f : screen_h - 2.0f * corner_rect_h;
-    float horizontal_rect_w = screen_w / 2.0f <= rect_size ? 0.0f : screen_w - 2.0f * corner_rect_w;
-    float horizontal_rect_h = screen_w / 2.0f <= rect_size ? 0.0f : corner_rect_h;
-
-    SDL_SetRenderDrawColor(r, 255, 0, 255, 255);
-    SDL_FRect r1; 
-    r1 = {start_screen.x, start_screen.y + corner_rect_h, vertical_rect_w, vertical_rect_h};
-    SDL_RenderRect(r, &r1);
-    r1 = {end_screen.x - vertical_rect_w, start_screen.y + corner_rect_h, vertical_rect_w, vertical_rect_h};
-    SDL_RenderRect(r, &r1);
-
-    r1 = {start_screen.x + corner_rect_w, start_screen.y, horizontal_rect_w, horizontal_rect_h};
-    SDL_RenderRect(r, &r1);
-    r1 = {start_screen.x + corner_rect_w, end_screen.y - corner_rect_h, horizontal_rect_w, horizontal_rect_h};
-    SDL_RenderRect(r, &r1);
-
-    SDL_SetRenderDrawColor(r, 255, 0, 0, 255);
-    r1 = {start_screen.x, start_screen.y, corner_rect_w, corner_rect_h};
-    SDL_RenderRect(r, &r1);
-    r1 = {start_screen.x, end_screen.y - corner_rect_h, corner_rect_w, corner_rect_h};
-    SDL_RenderRect(r, &r1);
-    r1 = {end_screen.x - corner_rect_w, end_screen.y - corner_rect_h, corner_rect_w, corner_rect_h};
-    SDL_RenderRect(r, &r1);
-    r1 = {end_screen.x - corner_rect_w, start_screen.y, corner_rect_w, corner_rect_h};
-    SDL_RenderRect(r, &r1);
   }
 
   SDL_RenderPresent(machine->get_renderer().get());
