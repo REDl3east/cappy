@@ -44,8 +44,8 @@ Select a region of the capture.
 - [x] Add ability to save screenshot
 - [x] Add screen selection
 - [x] Async save dialog 
+- [x] Add ability to update selection
 - [ ] Add load dialog 
-- [ ] Add ability to update selection
 - [ ] Show text that shows the size of the selection
 - [ ] Add ruler
 - [ ] Add command line load image 
