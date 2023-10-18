@@ -212,7 +212,11 @@ bool DrawCropState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Even
     }
     case SDL_EVENT_MOUSE_BUTTON_UP: {
       if (event.button.button == SDL_BUTTON_LEFT) {
-        SDL_SetCursor(crosshair_cursor.get());
+        if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_RIGHT)) {
+          SDL_SetCursor(crosshair_cursor.get());
+        } else {
+          SDL_SetCursor(SDL_GetDefaultCursor());
+        }
         return true;
       } else if (event.button.button == SDL_BUTTON_RIGHT) {
         if (start.x == end.x && start.y == end.y) {
