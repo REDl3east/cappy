@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  Camera camera;
+  CameraSmooth camera;
   auto machine = std::make_shared<CappyMachine>(renderer, capture, texture, camera, font);
   machine->set_state<MoveState>();
 
@@ -84,7 +84,7 @@ int main(int argc, char** argv) {
   auto save_capture_from_dialog = [&machine](std::string path) {
     if (path.empty()) return 0;
 
-    std::thread([machine](std::string path) {
+    std::thread([machine, path]() mutable {
       constexpr int comp = 3;
       int stride         = machine->get_capture().stride;
       int index          = machine->current_y * stride + machine->current_x;
@@ -98,9 +98,7 @@ int main(int argc, char** argv) {
         std::cerr << "Failed to save file: '" << path << "'\n";
       }
       std::cerr << "saved file: '" << path << "'\n";
-    },
-                path)
-        .detach();
+    }).detach();
 
     return 1;
   };
@@ -185,6 +183,7 @@ int main(int argc, char** argv) {
         save_dialog.reset();
       }
     }
+    // camera.update();
 
     machine->draw_frame(machine);
   }

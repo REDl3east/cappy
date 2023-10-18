@@ -46,8 +46,10 @@ Select a region of the capture.
 - [x] Async save dialog 
 - [x] Add ability to update selection
 - [x] Add command line load image 
-- [ ] Add load dialog  box
-- [ ] Add command line argument for inputted file, window width/height/scale, borderless/fullscreen, window position
+- [x] Add smooth zoom for camera
+- [ ] Add load dialog box
+- [ ] Add command line argument for inputted file, window width/height/scale, borderless/fullscreen, window position,
+      flashlight color, zoom factor, zoom speed
 - [ ] Show text that shows the size of the selection
 - [ ] Add mouse position text
-- [ ] Add smooth zoom for camera and flashlight
+- [ ] Add smooth zoom for flashlight

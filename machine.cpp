@@ -21,6 +21,9 @@ void MoveState::draw_frame(std::shared_ptr<CappyMachine> machine) {
   SDL_SetRenderDrawColor(machine->get_renderer().get(), 125, 125, 125, 255);
   SDL_RenderClear(machine->get_renderer().get());
 
+  CameraSmooth& camera = machine->get_camera();
+  camera.update();
+
   machine->render_capture();
 
   SDL_RenderPresent(machine->get_renderer().get());
@@ -51,8 +54,9 @@ void ColorState::draw_frame(std::shared_ptr<CappyMachine> machine) {
 
   machine->render_capture();
 
-  Capture& capture = machine->get_capture();
-  Camera& camera   = machine->get_camera();
+  Capture& capture     = machine->get_capture();
+  CameraSmooth& camera = machine->get_camera();
+  camera.update();
 
   float mx, my;
   SDL_GetMouseState(&mx, &my);
@@ -147,6 +151,9 @@ bool FlashlightState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Ev
 void FlashlightState::draw_frame(std::shared_ptr<CappyMachine> machine) {
   SDL_SetRenderDrawColor(machine->get_renderer().get(), 125, 125, 125, 255);
   SDL_RenderClear(machine->get_renderer().get());
+
+  CameraSmooth& camera = machine->get_camera();
+  camera.update();
 
   machine->render_capture();
 
@@ -363,20 +370,6 @@ bool DrawCropState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Even
     }
 
     case SDL_EVENT_MOUSE_WHEEL: {
-      if (drawing) {
-        Camera& camera = machine->get_camera();
-
-        float mx, my;
-        SDL_GetMouseState(&mx, &my);
-
-        SDL_FPoint p1 = camera.screen_to_world(start);
-        SDL_FPoint p2 = camera.screen_to_world(end);
-        machine->zoom(event.wheel.y > 0, mx, my);
-        start = camera.world_to_screen(p1);
-        end   = camera.world_to_screen(p2);
-
-        return true;
-      }
       break;
     }
   }
@@ -387,12 +380,20 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
   SDL_SetRenderDrawColor(machine->get_renderer().get(), 125, 125, 125, 255);
   SDL_RenderClear(machine->get_renderer().get());
 
-  Camera& camera  = machine->get_camera();
-  SDL_Renderer* r = machine->get_renderer().get();
+  CameraSmooth& camera = machine->get_camera();
+  SDL_Renderer* r      = machine->get_renderer().get();
 
   machine->render_capture();
 
   if (drawing) {
+    if (camera.is_zooming()) {
+      SDL_FPoint p1 = camera.screen_to_world(start);
+      SDL_FPoint p2 = camera.screen_to_world(end);
+      camera.update();
+      start = camera.world_to_screen(p1);
+      end   = camera.world_to_screen(p2);
+    }
+
     if (resize_selection != ResizeSelection::CENTER) {
       float mx, my;
       SDL_GetMouseState(&mx, &my);
@@ -424,6 +425,8 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
     SDL_RenderLine(r, x2, y1, x2, y2);
 
   } else {
+    camera.update();
+
     SDL_FPoint start_screen = camera.world_to_screen(start);
     SDL_FPoint end_screen   = camera.world_to_screen(end);
 

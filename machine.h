@@ -77,7 +77,7 @@ public:
 
 class CappyMachine : public Machine<CappyMachine> {
 public:
-  CappyMachine(std::shared_ptr<SDL_Renderer> r, Capture& c, std::shared_ptr<SDL_Texture> t, Camera& cam, TTF_Font* f) : renderer(r), capture(c), texture(t), camera(cam), font(f) {
+  CappyMachine(std::shared_ptr<SDL_Renderer> r, Capture& c, std::shared_ptr<SDL_Texture> t, CameraSmooth& cam, TTF_Font* f) : renderer(r), capture(c), texture(t), camera(cam), font(f) {
     current_w = c.width;
     current_h = c.height;
   }
@@ -85,7 +85,7 @@ public:
   }
   Capture& get_capture() { return capture; }
   std::shared_ptr<SDL_Renderer>& get_renderer() { return renderer; }
-  Camera& get_camera() { return camera; }
+  CameraSmooth& get_camera() { return camera; }
   std::shared_ptr<SDL_Texture>& get_texture() { return texture; }
   TTF_Font* get_font() { return font; }
 
@@ -93,11 +93,11 @@ public:
     float scale = camera.get_scale();
     if (zoom_in) {
       if (scale <= max_scale) {
-        camera.zoom(zoom_factor, mousex, mousey);
+        camera.smooth_zoom(zoom_in_factor, mousex, mousey, zoom_in_ms);
       }
     } else {
       if (scale >= min_scale) {
-        camera.zoom(-1.0f * zoom_factor, mousex, mousey);
+        camera.smooth_zoom(-1.0f * zoom_out_factor, mousex, mousey, zoom_out_ms);
       }
     }
   }
@@ -117,13 +117,17 @@ public:
 private:
   std::shared_ptr<SDL_Renderer> renderer;
   Capture& capture;
-  Camera& camera;
+  CameraSmooth& camera;
   std::shared_ptr<SDL_Texture> texture;
   TTF_Font* font;
 
-  float max_scale   = 100.0f;
-  float min_scale   = 0.25f;
-  float zoom_factor = 0.1;
+  float zoom_in_factor  = 3.0f;
+  Uint64 zoom_in_ms     = 150;
+  float zoom_out_factor = 5.0f;
+  Uint64 zoom_out_ms    = 100;
+
+  float max_scale = 100.0f;
+  float min_scale = 0.25f;
 };
 
 DEFINE_STATE(MoveState, CappyMachine) {
@@ -192,7 +196,6 @@ private:
   std::shared_ptr<SDL_Cursor> nwse_cursor;
   std::shared_ptr<SDL_Cursor> nesw_cursor;
   std::shared_ptr<SDL_Cursor> move_cursor;
-
 };
 
 #endif
