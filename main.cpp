@@ -10,11 +10,31 @@
 
 std::shared_ptr<SDL_Texture> create_capture_texture(std::shared_ptr<SDL_Renderer> renderer, Capture& capture);
 
-int main() {
-  Capture capture;
-  if (!capture.capture()) {
-    std::cerr << "Failed to capture screen!\n";
+int main(int argc, char** argv) {
+  if (argc - 1 > 1) {
+    std::cerr << "Expected 0 or 1 arguments, got " << argc - 1 << '\n';
+    std::cerr << "Usage: " << argv[0] << " [FILE]\n";
     return 1;
+  }
+
+  Uint32 flags = 0;
+  int x        = 0;
+  int y        = 0;
+  Capture capture;
+  if (argc == 1) {
+    if (!capture.capture()) {
+      std::cerr << "Failed to capture screen!\n";
+      return 1;
+    }
+    flags |= SDL_WINDOW_BORDERLESS;
+  } else {
+    if (!capture.capture(argv[1])) {
+      std::cerr << "Failed to load capture: '" << argv[1] << "'\n";
+      return 1;
+    }
+    flags |= SDL_WINDOW_RESIZABLE;
+    x = SDL_WINDOWPOS_CENTERED;
+    y = SDL_WINDOWPOS_CENTERED;
   }
 
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -22,13 +42,11 @@ int main() {
     return 1;
   }
 
-  std::shared_ptr<SDL_Window> window = std::shared_ptr<SDL_Window>(SDL_CreateWindow("Cappy", capture.width, capture.height, SDL_WINDOW_BORDERLESS), SDL_DestroyWindow);
+  std::shared_ptr<SDL_Window> window = std::shared_ptr<SDL_Window>(SDL_CreateWindowWithPosition("Cappy", x, y, capture.width, capture.height, flags), SDL_DestroyWindow);
   if (!window) {
     std::cerr << "Failed to create window!\n";
     return 1;
   }
-
-  SDL_SetWindowPosition(window.get(), 0, 0);
 
   std::shared_ptr<SDL_Renderer> renderer = std::shared_ptr<SDL_Renderer>(SDL_CreateRenderer(window.get(), NULL, SDL_RENDERER_PRESENTVSYNC), SDL_DestroyRenderer);
   if (!renderer) {
@@ -79,8 +97,10 @@ int main() {
       if (stbi_write_png(path.c_str(), machine->current_w, machine->current_h, comp, pixels, comp * stride) == 0) {
         std::cerr << "Failed to save file: '" << path << "'\n";
       }
-        std::cerr << "saved file: '" << path << "'\n";
-    }, path).detach();
+      std::cerr << "saved file: '" << path << "'\n";
+    },
+                path)
+        .detach();
 
     return 1;
   };

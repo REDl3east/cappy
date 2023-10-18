@@ -15,6 +15,7 @@ public:
   ~Capture();
 
   bool capture();
+  bool capture(const char* filename);
 
   bool in_bound(int x, int y) {
     if (!captured) return false;
