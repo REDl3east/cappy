@@ -4,6 +4,8 @@
 #include <iomanip>
 #include <sstream>
 
+#include "stb_image.h"
+
 #if __linux__
   #include <X11/Xlib.h>
   #include <X11/Xutil.h>
@@ -125,6 +127,44 @@ bool Capture::capture() {
 #endif
 
   return false;
+}
+
+bool Capture::capture(const char* filename) {
+  int w, h, comp;
+  unsigned char* data = stbi_load(filename, &w, &h, &comp, 0);
+  if (data == nullptr) return false;
+
+  width  = w;
+  stride = w;
+  height = h;
+  pixels = new RGB[width * height];
+
+  if (!pixels) {
+    stbi_image_free(data);
+    return false;
+  }
+
+  for (int y = 0; y < height; y++) {
+    for (int x = 0; x < width; x++) {
+      int index = (y * width + x) * comp;
+      RGB rgb;
+      if (comp == 1 || comp == 2) {
+        rgb.r = data[index];
+        rgb.g = data[index];
+        rgb.b = data[index];
+      } else if (comp == 3 || comp == 4) {
+        rgb.r = data[index];
+        rgb.g = data[index + 1];
+        rgb.b = data[index + 2];
+      }
+      pixels[y * width + x] = rgb;
+    }
+  }
+
+  stbi_image_free(data);
+
+  captured = true;
+  return true;
 }
 
 std::string toDecimalString(const RGB& color) {
