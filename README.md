@@ -36,6 +36,7 @@ Select a region of the capture.
 
 **Release Right Click** - Finish drawing crop region  
 **Drag**                - Continue drawing region  
+**Shift+Drag**          - Continue drawing region as a square  
 **Right Click (Rapid)** - Exit Crop Drawing Mode  
 **X**                   - Crop capture
 
