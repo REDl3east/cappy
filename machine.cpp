@@ -2,6 +2,7 @@
 #include "renderer.h"
 
 #include <cmath>
+#include <format>
 
 bool MoveState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Event& event) {
   switch (event.type) {
@@ -187,7 +188,8 @@ bool DrawCropState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Even
     case SDL_EVENT_MOUSE_BUTTON_DOWN: {
       if (!drawing) {
         if (event.button.button == SDL_BUTTON_RIGHT) {
-          drawing = true;
+          drawing        = true;
+          recompute_text = true;
           SDL_SetCursor(crosshair_cursor.get());
 
           if (resize_selection == ResizeSelection::N || resize_selection == ResizeSelection::S || resize_selection == ResizeSelection::E || resize_selection == ResizeSelection::W || resize_selection == ResizeSelection::SE) {
@@ -207,9 +209,11 @@ bool DrawCropState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Even
             end   = machine->get_camera().world_to_screen(end);
           } else {
             SDL_SetCursor(SDL_GetDefaultCursor());
-            drawing = false;
+            drawing        = false;
+            recompute_text = false;
             return false;
           }
+
         } else if (event.button.button == SDL_BUTTON_LEFT) {
           return false;
         }
@@ -260,6 +264,8 @@ bool DrawCropState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Even
           return true;
         }
 
+        recompute_text = true;
+
         SDL_SetCursor(SDL_GetDefaultCursor());
 
         return true;
@@ -284,15 +290,17 @@ bool DrawCropState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Even
             return false; // we still want to move the capture.
           }
         } else {
-          if (event.motion.state & SDL_BUTTON(SDL_BUTTON_RIGHT) && resize_selection == ResizeSelection::CENTER) {
+          if (event.motion.state & SDL_BUTTON(SDL_BUTTON_RIGHT)) {
             start.x += event.motion.xrel;
             start.y += event.motion.yrel;
             end.x += event.motion.xrel;
             end.y += event.motion.yrel;
+            recompute_text = true;
             return false;
           }
         }
 
+        recompute_text = true;
       } else {
         SDL_FPoint start_screen = machine->get_camera().world_to_screen(start);
         SDL_FPoint end_screen   = machine->get_camera().world_to_screen(end);
@@ -385,6 +393,9 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
 
   machine->render_capture();
 
+  float mx, my;
+  SDL_GetMouseState(&mx, &my);
+
   if (drawing) {
     if (camera.is_zooming()) {
       SDL_FPoint p1 = camera.screen_to_world(start);
@@ -411,6 +422,19 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
       }
     }
 
+    SDL_Keymod mod = SDL_GetModState();
+    if (mod & SDL_KMOD_SHIFT) {
+      if (start.x < end.x && start.y < end.y) { // quad 4
+        end.y += (end.x - start.x) - (end.y - start.y);
+      } else if (start.x < end.x && start.y >= end.y) { // quad 1
+        end.y += (start.x - end.x) - (end.y - start.y);
+      }else if (start.x >= end.x && start.y < end.y) { // quad 3
+        end.y -= (end.x - start.x) - (start.y - end.y);
+      }else if (start.x >= end.x && start.y >= end.y) { // quad 2
+        end.y -= (start.x - end.x) - (start.y - end.y);
+      }
+    }
+
     float x1 = std::min(start.x, end.x);
     float y1 = std::min(start.y, end.y);
     float x2 = std::max(start.x, end.x);
@@ -423,6 +447,55 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
     SDL_RenderLine(r, x1, y1, x1, y2);
     SDL_RenderLine(r, x1, y2, x2, y2);
     SDL_RenderLine(r, x2, y1, x2, y2);
+
+    SDL_FPoint start_screen = camera.screen_to_world(start);
+    SDL_FPoint end_screen   = camera.screen_to_world(end);
+    float width             = end_screen.x - start_screen.x;
+    float height            = end_screen.y - start_screen.y;
+
+    if (recompute_text) {
+      float selection_x, selection_y;
+      if (resize_selection == ResizeSelection::CENTER) {
+        selection_x = start_screen.x;
+        selection_y = start_screen.y;
+      } else if (width > 0 && height > 0) {
+        selection_x = start_screen.x;
+        selection_y = start_screen.y;
+      } else if (width <= 0 && height > 0) {
+        selection_x = start_screen.x + width;
+        selection_y = start_screen.y;
+      } else if (width > 0 && height <= 0) {
+        selection_x = start_screen.x;
+        selection_y = start_screen.y + height;
+      } else {
+        selection_x = start_screen.x + width;
+        selection_y = start_screen.y + height;
+      }
+
+      text_surface   = std::shared_ptr<SDL_Surface>(TTF_RenderText_Solid_Wrapped(machine->get_font(), std::format("x: {:.2f} y: {:.2f}\nw: {:.2f} h: {:.2f}", selection_x, selection_y, std::abs(width), std::abs(height)).c_str(), {255, 255, 255, 255}, 0), SDL_DestroySurface);
+      text_texture   = std::shared_ptr<SDL_Texture>(SDL_CreateTextureFromSurface(machine->get_renderer().get(), text_surface.get()), SDL_DestroyTexture);
+      recompute_text = false;
+    }
+
+    float offset = 15.0f;
+
+    float text_x, text_y;
+    if (width > 0 && height > 0) {
+      text_x = mx + offset;
+      text_y = my + offset;
+    } else if (width <= 0 && height > 0) {
+      text_x = mx - text_surface->w - offset;
+      text_y = my + offset;
+    } else if (width > 0 && height <= 0) {
+      text_x = mx + offset;
+      text_y = my - text_surface->h - offset;
+    } else {
+      text_x = mx - text_surface->w - offset;
+      text_y = my - text_surface->h - offset;
+    }
+
+    SDL_FRect text_rect = {text_x, text_y, (float)text_surface->w, (float)text_surface->h};
+    SDL_RenderTexture(machine->get_renderer().get(), text_texture.get(), NULL, &text_rect);
 
   } else {
     camera.update();
@@ -437,6 +510,37 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
     SDL_RenderLine(r, start_screen.x, start_screen.y, start_screen.x, end_screen.y);
     SDL_RenderLine(r, start_screen.x, end_screen.y, end_screen.x, end_screen.y);
     SDL_RenderLine(r, end_screen.x, start_screen.y, end_screen.x, end_screen.y);
+
+    if (recompute_text) {
+      int width  = end.x - start.x;
+      int height = end.y - start.y;
+      int x      = end.x - width;
+      int y      = end.y - height;
+
+      text_surface   = std::shared_ptr<SDL_Surface>(TTF_RenderText_Solid(machine->get_font(), std::format("x: {} y: {} w: {} h: {}", x, y, width, height).c_str(), {255, 255, 255, 255}), SDL_DestroySurface);
+      text_texture   = std::shared_ptr<SDL_Texture>(SDL_CreateTextureFromSurface(machine->get_renderer().get(), text_surface.get()), SDL_DestroyTexture);
+      recompute_text = false;
+    }
+
+    int w, h;
+    SDL_GetWindowSize(SDL_GetRenderWindow(machine->get_renderer().get()), &w, &h);
+
+    float text_padding = 10.0f;
+
+    float rect_x = w - (float)text_surface->w - 2.0f * text_padding;
+    float rect_y = h - (float)text_surface->h;
+
+    SDL_FRect text_rect = {rect_x + text_padding, rect_y, (float)text_surface->w, (float)text_surface->h};
+
+    SDL_FRect r_rect;
+    r_rect.x = text_rect.x - text_padding;
+    r_rect.y = text_rect.y;
+    r_rect.w = text_rect.w + 2.0f * text_padding;
+    r_rect.h = text_rect.h;
+
+    SDL_SetRenderDrawColor(machine->get_renderer().get(), 0, 0, 0, 255);
+    SDL_RenderFillRect(machine->get_renderer().get(), &r_rect);
+    SDL_RenderTexture(machine->get_renderer().get(), text_texture.get(), NULL, &text_rect);
   }
 
   SDL_RenderPresent(machine->get_renderer().get());

@@ -123,7 +123,7 @@ private:
 
   float zoom_in_factor  = 3.0f;
   Uint64 zoom_in_ms     = 150;
-  float zoom_out_factor = 5.0f;
+  float zoom_out_factor = 3.0f;
   Uint64 zoom_out_ms    = 100;
 
   float max_scale = 100.0f;
@@ -196,6 +196,10 @@ private:
   std::shared_ptr<SDL_Cursor> nwse_cursor;
   std::shared_ptr<SDL_Cursor> nesw_cursor;
   std::shared_ptr<SDL_Cursor> move_cursor;
+
+  std::shared_ptr<SDL_Surface> text_surface;
+  std::shared_ptr<SDL_Texture> text_texture;
+  bool recompute_text = true;
 };
 
 #endif

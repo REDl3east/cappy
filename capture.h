@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <cstdint>
 
 struct RGB {
   uint8_t r;

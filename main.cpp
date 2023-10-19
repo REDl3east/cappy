@@ -183,7 +183,6 @@ int main(int argc, char** argv) {
         save_dialog.reset();
       }
     }
-    // camera.update();
 
     machine->draw_frame(machine);
   }
