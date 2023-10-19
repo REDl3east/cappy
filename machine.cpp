@@ -428,9 +428,9 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
         end.y += (end.x - start.x) - (end.y - start.y);
       } else if (start.x < end.x && start.y >= end.y) { // quad 1
         end.y += (start.x - end.x) - (end.y - start.y);
-      }else if (start.x >= end.x && start.y < end.y) { // quad 3
+      } else if (start.x >= end.x && start.y < end.y) { // quad 3
         end.y -= (end.x - start.x) - (start.y - end.y);
-      }else if (start.x >= end.x && start.y >= end.y) { // quad 2
+      } else if (start.x >= end.x && start.y >= end.y) { // quad 2
         end.y -= (start.x - end.x) - (start.y - end.y);
       }
     }
@@ -480,7 +480,7 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
     float offset = 15.0f;
 
     float text_x, text_y;
-    if (width > 0 && height > 0) {
+    if (width == 0 && height == 0 || width > 0 && height > 0) {
       text_x = mx + offset;
       text_y = my + offset;
     } else if (width <= 0 && height > 0) {
