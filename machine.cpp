@@ -449,7 +449,7 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
         end   = camera.world_to_screen(end_screen);
       }
     } else {
-      if (camera.is_zooming()) {
+      if (camera.is_zooming() && !camera.is_panning()) {
         start = camera.world_to_screen(start_screen);
         end   = camera.world_to_screen(end_screen);
       }
