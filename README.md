@@ -36,6 +36,7 @@ Select a region of the capture.
 
 **Release Right Click** - Finish drawing crop region  
 **Drag**                - Continue drawing region  
+**Shift+Drag**          - Continue drawing region as a square  
 **Right Click (Rapid)** - Exit Crop Drawing Mode  
 **X**                   - Crop capture
 
@@ -53,3 +54,4 @@ Select a region of the capture.
 - [ ] Add command line argument for inputted file, window width/height/scale, borderless/fullscreen, window position,
       flashlight color, zoom factor, zoom speed
 - [ ] Add mouse position text
+- [ ] Add smooth zoom for flashlight
