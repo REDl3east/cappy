@@ -90,6 +90,7 @@ public:
       pan_vx *= pan_damping;
       pan_vy *= pan_damping;
 
+      // TODO: PANS FOREVER, GIVE AN EPSILON
       if (pan_vx == 0.0f && pan_vy == 0.0f) {
         panning = false;
         return false;
