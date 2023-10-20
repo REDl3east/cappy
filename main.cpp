@@ -1,3 +1,4 @@
+#include <cmath>
 #include <future>
 #include <iostream>
 #include <thread>
@@ -105,10 +106,17 @@ int main(int argc, char** argv) {
 
   std::unique_ptr<pfd::save_file> save_dialog;
 
+  float last_x = 0.0f;
+  float last_y = 0.0f;
+
   bool quit = false;
   while (!quit) {
     SDL_Event event;
 
+    float mx, my;
+    SDL_GetMouseState(&mx, &my);
+    last_x = mx;
+    last_y = my;
     while (SDL_PollEvent(&event)) {
       bool handled = machine->handle_event(event);
       if (handled) continue;
@@ -145,6 +153,8 @@ int main(int argc, char** argv) {
         }
         case SDL_EVENT_MOUSE_BUTTON_DOWN: {
           if (event.button.button == SDL_BUTTON_LEFT) {
+            camera.cancel_pan();
+
             SDL_SetCursor(move_cursor.get());
           } else if (event.button.button == SDL_BUTTON_RIGHT) {
             float mx, my;
@@ -156,7 +166,18 @@ int main(int argc, char** argv) {
         }
         case SDL_EVENT_MOUSE_BUTTON_UP: {
           if (event.button.button == SDL_BUTTON_LEFT) {
-            SDL_SetCursor(default_cursor);
+            float mx, my;
+            SDL_GetMouseState(&mx, &my);
+            float magnitude = std::sqrt(mx * mx + my * my);
+            float nx        = (mx - last_x) / magnitude;
+            float ny        = (my - last_y) / magnitude;
+            float vx        = 1000.0f * nx;
+            float vy        = 1000.0f * ny;
+
+            camera.smooth_pan(vx, vy, 0.92, 10);
+            if (!(SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_RIGHT))) {
+              SDL_SetCursor(default_cursor);
+            }
           }
           break;
         }

@@ -225,10 +225,8 @@ bool DrawCropState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Even
       if (event.button.button == SDL_BUTTON_LEFT) {
         if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_RIGHT)) {
           SDL_SetCursor(crosshair_cursor.get());
-        } else {
-          SDL_SetCursor(SDL_GetDefaultCursor());
         }
-        return true;
+        return false; // process smooth zoom
       } else if (event.button.button == SDL_BUTTON_RIGHT) {
         if (start.x == end.x && start.y == end.y) {
           machine->set_state<MoveState>();
@@ -396,15 +394,11 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
   float mx, my;
   SDL_GetMouseState(&mx, &my);
 
-  if (drawing) {
-    if (camera.is_zooming()) {
-      SDL_FPoint p1 = camera.screen_to_world(start);
-      SDL_FPoint p2 = camera.screen_to_world(end);
-      camera.update();
-      start = camera.world_to_screen(p1);
-      end   = camera.world_to_screen(p2);
-    }
+  if(camera.is_panning() && SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_RIGHT)){
+    recompute_text = true;
+  }
 
+  if (drawing) {
     if (resize_selection != ResizeSelection::CENTER) {
       float mx, my;
       SDL_GetMouseState(&mx, &my);
@@ -420,20 +414,27 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
       } else {
         end = {mx, my};
       }
-    }
 
-    SDL_Keymod mod = SDL_GetModState();
-    if (mod & SDL_KMOD_SHIFT) {
-      if (start.x < end.x && start.y < end.y) { // quad 4
-        end.y += (end.x - start.x) - (end.y - start.y);
-      } else if (start.x < end.x && start.y >= end.y) { // quad 1
-        end.y += (start.x - end.x) - (end.y - start.y);
-      } else if (start.x >= end.x && start.y < end.y) { // quad 3
-        end.y -= (end.x - start.x) - (start.y - end.y);
-      } else if (start.x >= end.x && start.y >= end.y) { // quad 2
-        end.y -= (start.x - end.x) - (start.y - end.y);
+      SDL_Keymod mod = SDL_GetModState();
+      if (mod & SDL_KMOD_SHIFT) {
+        if (start.x < end.x && start.y < end.y) { // quad 4
+          end.y += (end.x - start.x) - (end.y - start.y);
+        } else if (start.x < end.x && start.y >= end.y) { // quad 1
+          end.y += (start.x - end.x) - (end.y - start.y);
+        } else if (start.x >= end.x && start.y < end.y) { // quad 3
+          end.y -= (end.x - start.x) - (start.y - end.y);
+        } else if (start.x >= end.x && start.y >= end.y) { // quad 2
+          end.y -= (start.x - end.x) - (start.y - end.y);
+        }
       }
     }
+
+    SDL_FPoint start_screen = camera.screen_to_world(start);
+    SDL_FPoint end_screen   = camera.screen_to_world(end);
+    float width             = end_screen.x - start_screen.x;
+    float height            = end_screen.y - start_screen.y;
+
+    camera.update();
 
     float x1 = std::min(start.x, end.x);
     float y1 = std::min(start.y, end.y);
@@ -442,16 +443,16 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
 
     draw_rect_flashlight(machine->get_renderer(), x1, y1, x2 - x1, y2 - y1, 0, 0, 0, 0, 128, 128, 128, 128);
 
+    if (resize_selection != ResizeSelection::CENTER && camera.is_running()) {
+      start = camera.world_to_screen(start_screen);
+      end   = camera.world_to_screen(end_screen);
+    }
+
     SDL_SetRenderDrawColor(r, 255, 0, 0, 255);
     SDL_RenderLine(r, x1, y1, x2, y1);
     SDL_RenderLine(r, x1, y1, x1, y2);
     SDL_RenderLine(r, x1, y2, x2, y2);
     SDL_RenderLine(r, x2, y1, x2, y2);
-
-    SDL_FPoint start_screen = camera.screen_to_world(start);
-    SDL_FPoint end_screen   = camera.screen_to_world(end);
-    float width             = end_screen.x - start_screen.x;
-    float height            = end_screen.y - start_screen.y;
 
     if (recompute_text) {
       float selection_x, selection_y;
@@ -498,10 +499,10 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
     SDL_RenderTexture(machine->get_renderer().get(), text_texture.get(), NULL, &text_rect);
 
   } else {
-    camera.update();
-
     SDL_FPoint start_screen = camera.world_to_screen(start);
     SDL_FPoint end_screen   = camera.world_to_screen(end);
+
+    camera.update();
 
     draw_rect_flashlight(machine->get_renderer(), start_screen.x, start_screen.y, end_screen.x - start_screen.x, end_screen.y - start_screen.y, 0, 0, 0, 0, 128, 128, 128, 128);
 
