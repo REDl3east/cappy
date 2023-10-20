@@ -168,13 +168,14 @@ int main(int argc, char** argv) {
           if (event.button.button == SDL_BUTTON_LEFT) {
             float mx, my;
             SDL_GetMouseState(&mx, &my);
+            
             float magnitude = std::sqrt(mx * mx + my * my);
             float nx        = (mx - last_x) / magnitude;
             float ny        = (my - last_y) / magnitude;
             float vx        = 1000.0f * nx;
             float vy        = 1000.0f * ny;
-
             camera.smooth_pan(vx, vy, 0.92, 10);
+
             if (!(SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_RIGHT))) {
               SDL_SetCursor(default_cursor);
             }

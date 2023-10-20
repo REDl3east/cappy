@@ -394,7 +394,7 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
   float mx, my;
   SDL_GetMouseState(&mx, &my);
 
-  if(camera.is_panning() && SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_RIGHT)){
+  if (camera.is_panning() && SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_RIGHT)) {
     recompute_text = true;
   }
 
@@ -443,9 +443,16 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
 
     draw_rect_flashlight(machine->get_renderer(), x1, y1, x2 - x1, y2 - y1, 0, 0, 0, 0, 128, 128, 128, 128);
 
-    if (resize_selection != ResizeSelection::CENTER && camera.is_running()) {
-      start = camera.world_to_screen(start_screen);
-      end   = camera.world_to_screen(end_screen);
+    if (resize_selection != ResizeSelection::CENTER) {
+      if (camera.is_running()) {
+        start = camera.world_to_screen(start_screen);
+        end   = camera.world_to_screen(end_screen);
+      }
+    } else {
+      if (camera.is_zooming()) {
+        start = camera.world_to_screen(start_screen);
+        end   = camera.world_to_screen(end_screen);
+      }
     }
 
     SDL_SetRenderDrawColor(r, 255, 0, 0, 255);
