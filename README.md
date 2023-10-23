@@ -55,3 +55,4 @@ Select a region of the capture.
 - [ ] Add command line argument for inputted file, window width/height/scale, borderless/fullscreen, window position,
       flashlight color, zoom factor, zoom speed
 - [ ] Add smooth zoom for flashlight
+- [ ] Add show grid
