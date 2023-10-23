@@ -4,6 +4,10 @@
 #include <cmath>
 #include <format>
 
+MoveState::MoveState(){
+  SDL_ShowCursor();
+}
+
 bool MoveState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Event& event) {
   switch (event.type) {
     case SDL_EVENT_KEY_DOWN: {

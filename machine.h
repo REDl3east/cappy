@@ -132,15 +132,14 @@ private:
 
 DEFINE_STATE(MoveState, CappyMachine) {
   DEFINE_STATE_INNER(MoveState, CappyMachine);
+  public:
+  MoveState();
 };
 
 DEFINE_STATE(ColorState, CappyMachine) {
   DEFINE_STATE_INNER(ColorState, CappyMachine);
 
 public:
-  ~ColorState() {
-    SDL_ShowCursor();
-  }
 
 private:
   float panel_width  = 275.0f;
