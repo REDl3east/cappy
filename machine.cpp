@@ -62,6 +62,8 @@ void ColorState::draw_frame(std::shared_ptr<CappyMachine> machine) {
   float mx, my;
   SDL_GetMouseState(&mx, &my);
   SDL_FPoint mouse = camera.screen_to_world(mx, my);
+  mouse.x          = std::round(mouse.x);
+  mouse.y          = std::round(mouse.y);
 
   RGB rgb;
   if (capture.at(mouse.x, mouse.y, rgb) && !(mouse.x < machine->current_x || mouse.x > machine->current_x + machine->current_w || mouse.y < machine->current_y || mouse.y > machine->current_y + machine->current_h)) {
@@ -86,6 +88,37 @@ void ColorState::draw_frame(std::shared_ptr<CappyMachine> machine) {
       } else {
         SDL_SetClipboardText(toBinaryString(rgb).c_str());
       }
+    }
+
+    if (camera.get_scale() > 7.5f) {
+      SDL_FPoint p = camera.world_to_screen(mouse.x, mouse.y);
+
+      float r          = rgb.r / 255.0f;
+      float g          = rgb.g / 255.0f;
+      float b          = rgb.b / 255.0f;
+      float brightness = 0.299 * r + 0.587 * g + 0.114 * b;
+
+      SDL_FRect r1{
+          p.x,
+          p.y,
+          camera.get_scale(),
+          camera.get_scale(),
+      };
+
+      if (brightness > 0.5f) {
+        SDL_SetRenderDrawColor(machine->get_renderer().get(), 0, 0, 0, 255);
+      } else {
+        SDL_SetRenderDrawColor(machine->get_renderer().get(), 255, 255, 255, 255);
+      }
+      SDL_RenderPoint(machine->get_renderer().get(), p.x, p.y);
+      SDL_RenderRect(machine->get_renderer().get(), &r1);
+
+      SDL_HideCursor();
+
+      mx = p.x;
+      my = p.y;
+    } else {
+      SDL_ShowCursor();
     }
 
     if (recompute_text) {
