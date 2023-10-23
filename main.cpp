@@ -91,8 +91,7 @@ int main(int argc, char** argv) {
       int index          = machine->current_y * stride + machine->current_x;
       RGB* pixels        = &machine->get_capture().pixels[index];
 
-      std::string_view sv = path;
-      if (!sv.ends_with(".png")) {
+      if (!path.ends_with(".png")) {
         path += ".png";
       }
       if (stbi_write_png(path.c_str(), machine->current_w, machine->current_h, comp, pixels, comp * stride) == 0) {

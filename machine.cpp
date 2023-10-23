@@ -89,27 +89,49 @@ void ColorState::draw_frame(std::shared_ptr<CappyMachine> machine) {
     }
 
     if (recompute_text) {
-      text_surface   = std::shared_ptr<SDL_Surface>(TTF_RenderText_Solid(machine->get_font(), toDecimalSepString(rgb).c_str(), {255, 255, 255, 255}), SDL_DestroySurface);
-      text_texture   = std::shared_ptr<SDL_Texture>(SDL_CreateTextureFromSurface(machine->get_renderer().get(), text_surface.get()), SDL_DestroyTexture);
-      recompute_text = false;
+      std::string text = std::format("r: {:3} g: {:3} b: {:3}\nx: {} y: {}", rgb.r, rgb.g, rgb.b, (int)mouse.x, (int)mouse.y);
+      text_surface     = std::shared_ptr<SDL_Surface>(TTF_RenderText_Solid_Wrapped(machine->get_font(), text.c_str(), {255, 255, 255, 255}, 0), SDL_DestroySurface);
+      text_texture     = std::shared_ptr<SDL_Texture>(SDL_CreateTextureFromSurface(machine->get_renderer().get(), text_surface.get()), SDL_DestroyTexture);
+      recompute_text   = false;
     }
 
-    SDL_FRect rect = {mx + panel_offset, my - panel_size - panel_offset, panel_size, panel_size};
+    SDL_FRect text_panel = {
+        mx,
+        my - text_surface->h - 1,
+        panel_width,
+        (float)text_surface->h,
+    };
+    text_panel.x += panel_offset;
+    text_panel.y -= panel_offset;
+
+    SDL_SetRenderDrawColor(machine->get_renderer().get(), 125, 125, 125, 255);
+    SDL_RenderFillRect(machine->get_renderer().get(), &text_panel);
+    SDL_SetRenderDrawColor(machine->get_renderer().get(), 0, 0, 0, 255);
+    SDL_RenderRect(machine->get_renderer().get(), &text_panel);
+
+    SDL_FRect color_panel = {
+        mx,
+        my - text_panel.w - text_surface->h,
+        panel_width,
+        panel_width,
+    };
+    color_panel.x += panel_offset;
+    color_panel.y -= panel_offset;
 
     SDL_SetRenderDrawColor(machine->get_renderer().get(), rgb.r, rgb.g, rgb.b, 255);
-    SDL_RenderFillRect(machine->get_renderer().get(), &rect);
+    SDL_RenderFillRect(machine->get_renderer().get(), &color_panel);
 
-    SDL_SetRenderDrawColor(machine->get_renderer().get(), 125, 125, 125, 255);
-    SDL_RenderRect(machine->get_renderer().get(), &rect);
+    SDL_SetRenderDrawColor(machine->get_renderer().get(), 0, 0, 0, 255);
+    SDL_RenderRect(machine->get_renderer().get(), &color_panel);
 
-    SDL_FRect text_rect = {mx + panel_offset + (0.5f * (panel_size - text_surface->w)), my - panel_size - panel_offset - text_surface->h, (float)text_surface->w, (float)text_surface->h};
-
-    SDL_FRect text_rect_back = {mx + panel_offset, my - panel_size - panel_offset - text_surface->h, panel_size, (float)text_surface->h};
-    SDL_SetRenderDrawColor(machine->get_renderer().get(), 125, 125, 125, 255);
-    SDL_RenderFillRect(machine->get_renderer().get(), &text_rect_back);
-
-    SDL_SetRenderDrawColor(machine->get_renderer().get(), 125, 125, 125, 255);
-    SDL_RenderRect(machine->get_renderer().get(), &text_rect_back);
+    SDL_FRect text_rect = {
+        mx + (0.5f * (panel_width - text_surface->w)),
+        my - text_surface->h - 1,
+        (float)text_surface->w,
+        (float)text_surface->h,
+    };
+    text_rect.x += panel_offset;
+    text_rect.y -= panel_offset;
 
     SDL_RenderTexture(machine->get_renderer().get(), text_texture.get(), NULL, &text_rect);
   }
