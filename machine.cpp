@@ -4,7 +4,7 @@
 #include <cmath>
 #include <format>
 
-MoveState::MoveState(){
+MoveState::MoveState() {
   SDL_ShowCursor();
 }
 
@@ -197,8 +197,7 @@ bool FlashlightState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Ev
     }
     case SDL_EVENT_MOUSE_WHEEL: {
       if ((SDL_GetModState() & SDL_KMOD_LSHIFT)) {
-        size += event.wheel.y > 0 ? -10.0f : 10.f;
-        if (size <= 0) size = 0.0f;
+        zoom(event.wheel.y <= 0);
         return true;
       }
 
@@ -214,6 +213,8 @@ void FlashlightState::draw_frame(std::shared_ptr<CappyMachine> machine) {
 
   CameraSmooth& camera = machine->get_camera();
   camera.update();
+
+  update();
 
   machine->render_capture();
 

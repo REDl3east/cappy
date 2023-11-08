@@ -132,7 +132,8 @@ private:
 
 DEFINE_STATE(MoveState, CappyMachine) {
   DEFINE_STATE_INNER(MoveState, CappyMachine);
-  public:
+
+public:
   MoveState();
 };
 
@@ -140,7 +141,6 @@ DEFINE_STATE(ColorState, CappyMachine) {
   DEFINE_STATE_INNER(ColorState, CappyMachine);
 
 public:
-
 private:
   float panel_width  = 275.0f;
   float panel_offset = 50.0f;
@@ -158,7 +158,48 @@ public:
   ~FlashlightState();
 
 private:
-  float size = 300.0f;
+  void zoom(float in) {
+    zooming          = true;
+    zoom_in          = in;
+    zoom_tick        = SDL_GetTicks();
+    zoom_elapsed     = 0.0f;
+    zoom_size_per_ms = zoom_amount / zoom_ms;
+  }
+
+  bool update() {
+    if (!zooming) return false;
+
+    float t = SDL_GetTicks();
+    zoom_elapsed += t - zoom_tick;
+
+    if (zoom_in) {
+      size += zoom_size_per_ms;
+    } else {
+      size -= zoom_size_per_ms;
+    }
+
+    if (size <= 0) {
+      size    = 0.0f;
+      zooming = false;
+    }
+
+    if (zoom_elapsed > zoom_ms) {
+      zooming = false;
+    }
+
+    zoom_tick = t;
+
+    return true;
+  }
+
+  float size             = 300.0f;
+  float zooming          = false;
+  float zoom_in          = false;
+  float zoom_amount      = 150.0f;
+  float zoom_ms          = 25.0f;
+  float zoom_tick        = 0.0f;
+  float zoom_elapsed     = 0.0f;
+  float zoom_size_per_ms = 0.0f;
 };
 
 enum class ResizeSelection {

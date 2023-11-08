@@ -91,8 +91,8 @@ Select a region of the capture.
 - [x] Show text that shows the size of the selection
 - [x] Add smooth zoom for flashlight
 - [x] Add mouse position text
+- [x] Add smooth zoom for flashlight
 - [ ] Add load dialog box
 - [ ] Add command line argument for inputted file, window width/height/scale, borderless/fullscreen, window position,
       flashlight color, zoom factor, zoom speed
-- [ ] Add smooth zoom for flashlight
 - [ ] Add show grid
