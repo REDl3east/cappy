@@ -26,8 +26,26 @@ target_include_directories(cappy PRIVATE
   ${DIALOG_SRC_DIR}
   ${STB_SRC_DIR}
 )
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  set_target_properties(cappy
+    PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/debug/lib"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/debug/lib"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/debug/bin"
+  )
+elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+  set_target_properties(cappy
+    PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/release/lib"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/release/lib"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/release/bin"
+  )
+endif()
+
 if (UNIX)
     target_link_libraries(cappy SDL3-static SDL3_ttf-static X11)
+    install(TARGETS cappy DESTINATION bin)
 elseif(WIN32)
     target_link_libraries(cappy SDL3-static SDL3_ttf-static)
 endif()
