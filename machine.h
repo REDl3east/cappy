@@ -185,6 +185,7 @@ public:
     nwse_cursor      = std::shared_ptr<SDL_Cursor>(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENWSE), SDL_DestroyCursor);
     nesw_cursor      = std::shared_ptr<SDL_Cursor>(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENESW), SDL_DestroyCursor);
 
+    SDL_ShowCursor();
     SDL_SetCursor(crosshair_cursor.get());
   }
 
