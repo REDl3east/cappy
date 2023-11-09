@@ -114,8 +114,15 @@ void ColorState::draw_frame(std::shared_ptr<CappyMachine> machine) {
       } else {
         SDL_SetRenderDrawColor(machine->get_renderer().get(), 255, 255, 255, 255);
       }
-      SDL_RenderPoint(machine->get_renderer().get(), p.x, p.y);
-      SDL_RenderRect(machine->get_renderer().get(), &r1);
+
+      int size = camera.get_scale() / 7.5;
+      for (int i = 0; i < size; i++) {
+        SDL_RenderRect(machine->get_renderer().get(), &r1);
+        r1.x += 1;
+        r1.y += 1;
+        r1.w -= 2;
+        r1.h -= 2;
+      }
 
       SDL_HideCursor();
 
@@ -500,6 +507,11 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
     float y1 = std::min(start.y, end.y);
     float x2 = std::max(start.x, end.x);
     float y2 = std::max(start.y, end.y);
+    int size = camera.get_scale() / 7.5;
+
+    for(int i=0;i<size;i++){
+      
+    }
 
     draw_rect_flashlight(machine->get_renderer(), x1, y1, x2 - x1, y2 - y1, 0, 0, 0, 0, 128, 128, 128, 128);
 
