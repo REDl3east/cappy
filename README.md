@@ -29,8 +29,19 @@ The way to do this depends on the OS.
 7. Set the Command to ```cappy```
 8. Set the shortcut to whatever you'd like. I like using ```ctrl+lshift+z```
 
-#### Setting shortcut for Windows
-1. TBD
+
+#### Setting shortcut for Windows 10/11 (Way 1)
+1. Right-click the blank area on the desktop and select New -> Shortcut. Type the location of the item and click Next. If you don’t know the path of the app, you can click the Browse button. Then you can select the target app’s executable file and click OK. Type a name for the shortcut and click Finish to create a shortcut for the app.
+2. Then you can right-click the app’s shortcut and select Properties.
+3. In the Properties window, you can click the Shortcut tab.
+4. Next to the Shortcut key field, you can set a keyboard shortcut that you want to use to open the app. Click OK to save the setting.
+
+#### Setting shortcut for Windows 10/11 (Way 2)
+1. You can click Start Menu on your Windows 10 computer. For Windows 11, you need to click the All apps icon to view all apps in the Start Menu.
+2. Next, you can scroll down to find the target app. Right-click the app and select Pin to taskbar or More -> Pin to taskbar to add the program to the Windows taskbar. Alternatively, you can also directly drag the app onto the taskbar to pin the program to the taskbar. You can follow the same operation to pin other apps to the taskbar.
+3. Then you can use the Windows key along with the corresponding number key to open the programs on the taskbar with a keyboard shortcut. Based on the position of the pinned apps on the taskbar, they get a number from 1 to 9 from the left to the right. For instance, you can press Windows + 1 keyboard shortcut to open the first pinned app on the taskbar.
+
+[Source](https://www.minitool.com/news/open-a-program-with-keyboard-shortcut-win-10-11.html)
 
 ### Controls
 
@@ -96,3 +107,5 @@ Select a region of the capture.
 - [ ] Add command line argument for inputted file, window width/height/scale, borderless/fullscreen, window position,
       flashlight color, zoom factor, zoom speed
 - [ ] Add show grid
+- [ ] When the image is cropped and zoomed in on color mode. A square is rendered when you are one off the width or height
+- [ ] If in color mode and zoomed in enough to render a square. If the mouse is outside the capture, the cursor should be shown.
