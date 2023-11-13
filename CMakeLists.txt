@@ -11,12 +11,12 @@ set(STB_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs/stb)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs)
 
 set(MAIN_SRC
-  ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/camera.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/capture.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/machine.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/renderer.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/stb.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/camera.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/capture.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/machine.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/stb.cpp
 )
 
 add_executable(cappy ${MAIN_SRC})
