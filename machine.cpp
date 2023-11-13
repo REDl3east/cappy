@@ -520,7 +520,6 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
     SDL_RenderLine(r, x1, y2, x2, y2);
     SDL_RenderLine(r, x2, y1, x2, y2);
 
-    recompute_text = true;
     if (recompute_text) {
       float selection_x, selection_y;
       if (resize_selection == ResizeSelection::CENTER) {
