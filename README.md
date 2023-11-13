@@ -103,10 +103,10 @@ Select a region of the capture.
 - [x] Add smooth zoom for flashlight
 - [x] Add mouse position text
 - [x] Add smooth zoom for flashlight
+- [x] When resizing and zooming in and not panning, the cropped section is changing width and height when it should stay the same.
 - [ ] Add load dialog box
 - [ ] Add command line argument for inputted file, window width/height/scale, borderless/fullscreen, window position,
       flashlight color, zoom factor, zoom speed
 - [ ] Add show grid
 - [ ] When the image is cropped and zoomed in on color mode. A square is rendered when you are one off the width or height
 - [ ] If in color mode and zoomed in enough to render a square. If the mouse is outside the capture, the cursor should be shown.
-- [ ] When resizing and zooming in and not panning, the cropped section is changing width and height when it should stay the same.
