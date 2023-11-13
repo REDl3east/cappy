@@ -499,10 +499,10 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
     SDL_FPoint start_screen = camera.screen_to_world(start);
     SDL_FPoint end_screen   = camera.screen_to_world(end);
 
-    camera.update();
-
-    start = camera.world_to_screen(start_screen);
-    end   = camera.world_to_screen(end_screen);
+    if (camera.update()) {
+      start = camera.world_to_screen(start_screen);
+      end   = camera.world_to_screen(end_screen);
+    }
 
     float width  = end_screen.x - start_screen.x;
     float height = end_screen.y - start_screen.y;
