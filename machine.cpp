@@ -498,34 +498,21 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
 
     SDL_FPoint start_screen = camera.screen_to_world(start);
     SDL_FPoint end_screen   = camera.screen_to_world(end);
-    float width             = end_screen.x - start_screen.x;
-    float height            = end_screen.y - start_screen.y;
 
     camera.update();
+
+    start = camera.world_to_screen(start_screen);
+    end   = camera.world_to_screen(end_screen);
+
+    float width  = end_screen.x - start_screen.x;
+    float height = end_screen.y - start_screen.y;
 
     float x1 = std::min(start.x, end.x);
     float y1 = std::min(start.y, end.y);
     float x2 = std::max(start.x, end.x);
     float y2 = std::max(start.y, end.y);
-    int size = camera.get_scale() / 7.5;
-
-    for(int i=0;i<size;i++){
-      
-    }
 
     draw_rect_flashlight(machine->get_renderer(), x1, y1, x2 - x1, y2 - y1, 0, 0, 0, 0, 128, 128, 128, 128);
-
-    if (resize_selection != ResizeSelection::CENTER) {
-      if (camera.is_running()) {
-        start = camera.world_to_screen(start_screen);
-        end   = camera.world_to_screen(end_screen);
-      }
-    } else {
-      if (camera.is_zooming() && !camera.is_panning()) {
-        start = camera.world_to_screen(start_screen);
-        end   = camera.world_to_screen(end_screen);
-      }
-    }
 
     SDL_SetRenderDrawColor(r, 255, 0, 0, 255);
     SDL_RenderLine(r, x1, y1, x2, y1);
@@ -533,6 +520,7 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
     SDL_RenderLine(r, x1, y2, x2, y2);
     SDL_RenderLine(r, x2, y1, x2, y2);
 
+    recompute_text = true;
     if (recompute_text) {
       float selection_x, selection_y;
       if (resize_selection == ResizeSelection::CENTER) {
