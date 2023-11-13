@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
       std::cerr << "Failed to capture screen!\n";
       return 1;
     }
-    flags |= SDL_WINDOW_BORDERLESS | SDL_WINDOW_FULLSCREEN;
+    flags |= SDL_WINDOW_BORDERLESS;
   } else {
     if (!capture.capture(argv[1])) {
       std::cerr << "Failed to load capture: '" << argv[1] << "'\n";
