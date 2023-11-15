@@ -7,7 +7,11 @@
 #include "portable-file-dialogs.h"
 #include "stb_image_write.h"
 
-#include "machine.h"
+#include "cappyMachine.h"
+#include "moveState.h"
+#include "flashlightState.h"
+#include "colorState.h"
+#include "drawCropState.h"
 
 std::shared_ptr<SDL_Texture> create_capture_texture(std::shared_ptr<SDL_Renderer> renderer, Capture& capture);
 

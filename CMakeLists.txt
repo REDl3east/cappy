@@ -14,13 +14,20 @@ set(MAIN_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/camera.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/capture.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/machine.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/stb.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/machine/cappyMachine.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/state/colorState.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/state/drawCropState.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/state/flashlightState.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/state/moveState.cpp
 )
 
 add_executable(cappy ${MAIN_SRC})
 target_include_directories(cappy PRIVATE 
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/machine
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/state
   ${SDL3_SRC_DIR}/include
   ${SDL3_TTF_SRC_DIR}/include
   ${DIALOG_SRC_DIR}
