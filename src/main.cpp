@@ -199,7 +199,6 @@ int main(int argc, char** argv) {
 
     if (save_dialog) {
       if (save_dialog.get()->ready()) {
-        std::cout << "path: '" << save_dialog.get()->result() << "'\n";
         save_capture_from_dialog(save_dialog.get()->result());
         save_dialog.reset();
       }
