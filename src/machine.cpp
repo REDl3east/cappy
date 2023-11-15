@@ -465,6 +465,8 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
     recompute_text = true;
   }
 
+  float text_padding = 10.0f;
+
   if (drawing) {
     if (resize_selection != ResizeSelection::CENTER) {
       float mx, my;
@@ -544,7 +546,7 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
       recompute_text = false;
     }
 
-    float offset = 15.0f;
+    float offset = 25.0f;
 
     float text_x, text_y;
     if (width == 0 && height == 0 || width > 0 && height > 0) {
@@ -562,6 +564,18 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
     }
 
     SDL_FRect text_rect = {text_x, text_y, (float)text_surface->w, (float)text_surface->h};
+
+    SDL_FRect text_boundry_rect = text_rect;
+    text_boundry_rect.x -= text_padding;
+    text_boundry_rect.y -= text_padding;
+    text_boundry_rect.w += 2.0f * text_padding;
+    text_boundry_rect.h += 2.0f * text_padding;
+
+    SDL_SetRenderDrawColor(machine->get_renderer().get(), 125, 125, 125, 255);
+    SDL_RenderFillRect(machine->get_renderer().get(), &text_boundry_rect);
+    SDL_SetRenderDrawColor(machine->get_renderer().get(), 0, 0, 0, 255);
+    SDL_RenderRect(machine->get_renderer().get(), &text_boundry_rect);
+
     SDL_RenderTexture(machine->get_renderer().get(), text_texture.get(), NULL, &text_rect);
 
   } else {
@@ -584,7 +598,7 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
       int x      = end.x - width;
       int y      = end.y - height;
 
-      text_surface   = std::shared_ptr<SDL_Surface>(TTF_RenderText_Solid(machine->get_font(), std::format("x: {} y: {} w: {} h: {}", x, y, width, height).c_str(), {255, 255, 255, 255}), SDL_DestroySurface);
+      text_surface   = std::shared_ptr<SDL_Surface>(TTF_RenderText_Solid_Wrapped(machine->get_font(), std::format("x: {} y: {}\nw: {} h: {}", x, y, width, height).c_str(), {255, 255, 255, 255}, 0), SDL_DestroySurface);
       text_texture   = std::shared_ptr<SDL_Texture>(SDL_CreateTextureFromSurface(machine->get_renderer().get(), text_surface.get()), SDL_DestroyTexture);
       recompute_text = false;
     }
@@ -592,21 +606,20 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
     int w, h;
     SDL_GetWindowSize(SDL_GetRenderWindow(machine->get_renderer().get()), &w, &h);
 
-    float text_padding = 10.0f;
-
     float rect_x = w - (float)text_surface->w - 2.0f * text_padding;
     float rect_y = h - (float)text_surface->h;
 
     SDL_FRect text_rect = {rect_x + text_padding, rect_y, (float)text_surface->w, (float)text_surface->h};
 
-    SDL_FRect r_rect;
-    r_rect.x = text_rect.x - text_padding;
-    r_rect.y = text_rect.y;
-    r_rect.w = text_rect.w + 2.0f * text_padding;
-    r_rect.h = text_rect.h;
+    SDL_FRect text_boundry_rect = text_rect;
+    text_boundry_rect.x -= text_padding;
+    text_boundry_rect.w += 2.0f * text_padding;
 
+    SDL_SetRenderDrawColor(machine->get_renderer().get(), 125, 125, 125, 255);
+    SDL_RenderFillRect(machine->get_renderer().get(), &text_boundry_rect);
     SDL_SetRenderDrawColor(machine->get_renderer().get(), 0, 0, 0, 255);
-    SDL_RenderFillRect(machine->get_renderer().get(), &r_rect);
+    SDL_RenderRect(machine->get_renderer().get(), &text_boundry_rect);
+
     SDL_RenderTexture(machine->get_renderer().get(), text_texture.get(), NULL, &text_rect);
   }
 
