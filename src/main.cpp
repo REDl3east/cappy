@@ -80,7 +80,7 @@ int main(int argc, char** argv) {
   }
 
   CameraSmooth camera;
-  auto machine = std::make_shared<CappyMachine>(renderer, capture, texture, camera, font);
+  auto machine = CappyMachine::make(renderer, capture, texture, camera, font);
   machine->set_state<MoveState>();
 
   std::shared_ptr<SDL_Cursor> move_cursor = std::shared_ptr<SDL_Cursor>(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEALL), SDL_DestroyCursor);

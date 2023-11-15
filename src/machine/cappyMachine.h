@@ -22,6 +22,10 @@ public:
   void zoom(bool zoom_in, float mousex, float mousey);
   void render_capture();
 
+  static std::shared_ptr<CappyMachine> make(std::shared_ptr<SDL_Renderer> r, Capture& c, std::shared_ptr<SDL_Texture> t, CameraSmooth& cam, TTF_Font* f){
+    return std::make_shared<CappyMachine>(r, c, t, cam, f);
+  }
+
   int current_x = 0;
   int current_y = 0;
   int current_w = 0;
