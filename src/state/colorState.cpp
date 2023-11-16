@@ -4,8 +4,6 @@
 #include <cmath>
 #include <format>
 
-
-
 bool ColorState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Event& event) {
   switch (event.type) {
     case SDL_EVENT_KEY_DOWN: {
@@ -42,7 +40,7 @@ void ColorState::draw_frame(std::shared_ptr<CappyMachine> machine) {
   mouse.y          = std::round(mouse.y);
 
   RGB rgb;
-  if (capture.at(mouse.x, mouse.y, rgb) && !(mouse.x < machine->current_x || mouse.x > machine->current_x + machine->current_w || mouse.y < machine->current_y || mouse.y > machine->current_y + machine->current_h)) {
+  if (capture.at(mouse.x, mouse.y, rgb) && !(mouse.x < machine->current_x || mouse.x > machine->current_x + machine->current_w - 1 || mouse.y < machine->current_y || mouse.y > machine->current_y + machine->current_h - 1)) {
     // TODO: add this key stuff to event handler, it should not check every frame.
     const Uint8* key_state = SDL_GetKeyboardState(NULL);
     SDL_Keymod mod         = SDL_GetModState();
@@ -96,10 +94,10 @@ void ColorState::draw_frame(std::shared_ptr<CappyMachine> machine) {
         r1.h -= 2;
       }
 
-      SDL_HideCursor();
-
       mx = p.x;
       my = p.y;
+
+      SDL_HideCursor();
     } else {
       SDL_ShowCursor();
     }
@@ -150,6 +148,8 @@ void ColorState::draw_frame(std::shared_ptr<CappyMachine> machine) {
     text_rect.y -= panel_offset;
 
     SDL_RenderTexture(machine->get_renderer().get(), text_texture.get(), NULL, &text_rect);
+  } else {
+    SDL_ShowCursor();
   }
 
   SDL_RenderPresent(machine->get_renderer().get());
