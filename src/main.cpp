@@ -8,10 +8,11 @@
 #include "stb_image_write.h"
 
 #include "cappyMachine.h"
-#include "moveState.h"
-#include "flashlightState.h"
 #include "colorState.h"
+#include "config.h"
 #include "drawCropState.h"
+#include "flashlightState.h"
+#include "moveState.h"
 
 std::shared_ptr<SDL_Texture> create_capture_texture(std::shared_ptr<SDL_Renderer> renderer, Capture& capture);
 
@@ -41,6 +42,9 @@ int main(int argc, char** argv) {
     x = SDL_WINDOWPOS_CENTERED;
     y = SDL_WINDOWPOS_CENTERED;
   }
+
+  cappyConfig config;
+  config_init("/home/dalton/projects/cappy/cappy.ini", config);
 
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
     std::cerr << "Failed to init SDL!\n";
@@ -80,7 +84,7 @@ int main(int argc, char** argv) {
   }
 
   CameraSmooth camera;
-  auto machine = CappyMachine::make(renderer, capture, texture, camera, font);
+  auto machine = CappyMachine::make(config, renderer, capture, texture, camera, font);
   machine->set_state<MoveState>();
 
   std::shared_ptr<SDL_Cursor> move_cursor = std::shared_ptr<SDL_Cursor>(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEALL), SDL_DestroyCursor);
@@ -171,7 +175,7 @@ int main(int argc, char** argv) {
           if (event.button.button == SDL_BUTTON_LEFT) {
             float mx, my;
             SDL_GetMouseState(&mx, &my);
-            
+
             float magnitude = std::sqrt(mx * mx + my * my);
             float nx        = (mx - last_x) / magnitude;
             float ny        = (my - last_y) / magnitude;

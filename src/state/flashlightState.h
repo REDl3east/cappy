@@ -23,6 +23,7 @@ private:
   float zoom_tick        = 0.0f;
   float zoom_elapsed     = 0.0f;
   float zoom_size_per_ms = 0.0f;
+    bool first_pass = true;
 };
 
 #endif

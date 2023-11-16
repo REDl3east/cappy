@@ -44,14 +44,30 @@ void FlashlightState::draw_frame(std::shared_ptr<CappyMachine> machine) {
 
   machine->render_capture();
 
+  const cappyConfig& config = machine->get_config();
+  if (first_pass) {
+    size = config.flashlight_size;
+  }
+
   float x, y;
   SDL_GetMouseState(&x, &y);
   draw_circle_flashlight(machine->get_renderer(), x, y, size, 100,
-                         255, 255, 255, 0,
-                         255, 255, 255, 0,
-                         0, 0, 0, 200);
+                         config.flashlight_center_inner_color[0],
+                         config.flashlight_center_inner_color[1],
+                         config.flashlight_center_inner_color[2],
+                         config.flashlight_center_inner_color[3],
+                         config.flashlight_center_outer_color[0],
+                         config.flashlight_center_outer_color[1],
+                         config.flashlight_center_outer_color[2],
+                         config.flashlight_center_outer_color[3],
+                         config.flashlight_outer_color[0],
+                         config.flashlight_outer_color[1],
+                         config.flashlight_outer_color[2],
+                         config.flashlight_outer_color[3]);
 
   SDL_RenderPresent(machine->get_renderer().get());
+
+  first_pass = false;
 }
 
 void FlashlightState::zoom(float in) {

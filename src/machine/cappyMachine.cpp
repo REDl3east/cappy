@@ -4,7 +4,7 @@
 #include <cmath>
 #include <format>
 
-CappyMachine::CappyMachine(std::shared_ptr<SDL_Renderer> r, Capture& c, std::shared_ptr<SDL_Texture> t, CameraSmooth& cam, TTF_Font* f) : renderer(r), capture(c), texture(t), camera(cam), font(f) {
+CappyMachine::CappyMachine(cappyConfig& config, std::shared_ptr<SDL_Renderer> r, Capture& c, std::shared_ptr<SDL_Texture> t, CameraSmooth& cam, TTF_Font* f) : config(config), renderer(r), capture(c), texture(t), camera(cam), font(f) {
   current_w = c.width;
   current_h = c.height;
 }
@@ -27,6 +27,10 @@ std::shared_ptr<SDL_Texture>& CappyMachine::get_texture() {
 
 TTF_Font* CappyMachine::get_font() {
   return font;
+}
+
+const cappyConfig& CappyMachine::get_config() {
+  return config;
 }
 
 void CappyMachine::zoom(bool zoom_in, float mousex, float mousey) {

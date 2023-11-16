@@ -8,6 +8,7 @@
 
 #include "camera.h"
 #include "capture.h"
+#include "config.h"
 
 #define DEFINE_STATE(StateName, Machine) class StateName : public State<Machine, Machine::EnumType>
 

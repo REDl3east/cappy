@@ -21,6 +21,7 @@ set(MAIN_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/src/state/drawCropState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/state/flashlightState.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/state/moveState.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/config.cpp
 )
 
 add_executable(cappy ${MAIN_SRC})
