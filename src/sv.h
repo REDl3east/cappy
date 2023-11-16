@@ -3,9 +3,9 @@
 
 #define SV_NPOS (sv_index_t)(-1)
 
-#define sv(cstr_literal) sv_create(cstr_literal, sizeof(cstr_literal) - 1)
+#define svl(cstr_literal) sv_create(cstr_literal, sizeof(cstr_literal) - 1)
 #define svc(cstr)        sv_create_from_cstr(cstr)
-#define sv_empty         sv("")
+#define sv_empty         svl("")
 #define sv_fmt           "%.*s"
 #define sv_arg(sv)       (int)sv.length, sv.data
 
@@ -487,7 +487,7 @@ int sv_parse_int(string_view sv, int* value) {
     if (sv_is_empty(sv)) return 0;
   }
 
-  if (sv_find_first_not_of(sv, sv("0123456789"), 0) != SV_NPOS) return 0;
+  if (sv_find_first_not_of(sv, svl("0123456789"), 0) != SV_NPOS) return 0;
 
   int tmp = 0;
 

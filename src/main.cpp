@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
   }
 
   cappyConfig config;
-  config_init("/home/dalton/projects/cappy/cappy.ini", config);
+  config_init(config);
 
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
     std::cerr << "Failed to init SDL!\n";

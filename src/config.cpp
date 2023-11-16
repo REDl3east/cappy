@@ -3,23 +3,28 @@
 #define SV_IMPLEMENTATION
 #include "sv.h"
 
+#include "cfgpath.h"
+
+#include <filesystem>
+#include <fstream>
+
 void config_parse_color(string_view value, uint8_t* color);
 
 void config_handler(cappyConfig& config, string_view key, string_view value) {
-  if (sv_compare(key, sv("flashlight_size"))) {
+  if (sv_compare(key, svl("flashlight_size"))) {
     sv_parse_int(value, &config.flashlight_size);
-  } else if (sv_compare(key, sv("flashlight_center_inner_color"))) {
+  } else if (sv_compare(key, svl("flashlight_center_inner_color"))) {
     config_parse_color(value, config.flashlight_center_inner_color);
-  } else if (sv_compare(key, sv("flashlight_center_outer_color"))) {
+  } else if (sv_compare(key, svl("flashlight_center_outer_color"))) {
     config_parse_color(value, config.flashlight_center_outer_color);
-  } else if (sv_compare(key, sv("flashlight_outer_color"))) {
+  } else if (sv_compare(key, svl("flashlight_outer_color"))) {
     config_parse_color(value, config.flashlight_outer_color);
   }
 }
 
-void config_init(const char* file, cappyConfig& config) {
+void config_init(const std::string& file, cappyConfig& config) {
   string_view file_data;
-  if (!sv_read_file(file, &file_data)) {
+  if (!sv_read_file(file.c_str(), &file_data)) {
     return;
   }
 
@@ -29,7 +34,7 @@ void config_init(const char* file, cappyConfig& config) {
   sv_index_t pos;
 
   do {
-    char c = sv_find_first_of_switch(input, sv("\n\r"), 0, &pos);
+    char c = sv_find_first_of_switch(input, svl("\n\r"), 0, &pos);
     if (c == '\n') {
       line  = sv_substr(input, 0, pos);
       input = sv_remove_prefix(input, pos + 1);
@@ -44,7 +49,7 @@ void config_init(const char* file, cappyConfig& config) {
     }
 
     // trim whitespace
-    line = sv_consume_until_first_not_of(sv_consume_until_last_not_of(line, sv(" \t\v\f\r")), sv(" \t\v\f\r"));
+    line = sv_consume_until_first_not_of(sv_consume_until_last_not_of(line, svl(" \t\v\f\r")), svl(" \t\v\f\r"));
 
     if (sv_is_empty(line) || sv_front(line) == ';' || sv_front(line) == '=') continue;
 
@@ -53,7 +58,7 @@ void config_init(const char* file, cappyConfig& config) {
     if (comment_pos != SV_NPOS) {
       line = sv_substr(line, 0, comment_pos - 1);
       if (sv_is_empty(line)) continue;
-      line = sv_consume_until_first_not_of(sv_consume_until_last_not_of(line, sv(" \t\v\f\r")), sv(" \t\v\f\r"));
+      line = sv_consume_until_first_not_of(sv_consume_until_last_not_of(line, svl(" \t\v\f\r")), svl(" \t\v\f\r"));
       if (sv_is_empty(line)) continue;
     }
 
@@ -61,10 +66,10 @@ void config_init(const char* file, cappyConfig& config) {
     if (equal_pos == SV_NPOS) continue;
 
     string_view key = sv_substr(line, 0, equal_pos);
-    key             = sv_consume_until_first_not_of(sv_consume_until_last_not_of(key, sv(" \t\v\f\r")), sv(" \t\v\f\r"));
+    key             = sv_consume_until_first_not_of(sv_consume_until_last_not_of(key, svl(" \t\v\f\r")), svl(" \t\v\f\r"));
 
     string_view value = sv_substr(line, equal_pos + 1, SV_NPOS);
-    value             = sv_consume_until_first_not_of(sv_consume_until_last_not_of(value, sv(" \t\v\f\r")), sv(" \t\v\f\r"));
+    value             = sv_consume_until_first_not_of(sv_consume_until_last_not_of(value, svl(" \t\v\f\r")), svl(" \t\v\f\r"));
 
     config_handler(config, key, value);
 
@@ -73,9 +78,27 @@ void config_init(const char* file, cappyConfig& config) {
   sv_read_file_free(file_data);
 }
 
+void config_init(cappyConfig& config) {
+  char path[MAX_PATH];
+  get_user_config_folder(path, MAX_PATH, "cappy");
+
+  const std::filesystem::path config_path = std::string(path) + "cappy.ini";
+
+  if (!std::filesystem::exists(config_path)) {
+    std::ofstream file(config_path);
+    file << "flashlight_size               = 150\n"
+            "flashlight_center_inner_color = 255 255 204 25\n"
+            "flashlight_center_outer_color = 255 255 204 25\n"
+            "flashlight_outer_color        = 51 51 0 50\n";
+    file.close();
+  }
+
+  config_init(config_path, config);
+}
+
 void config_parse_color(string_view value, uint8_t* color) {
   int index = 0;
-  SV_FOR_SPLIT(token, value, sv(" ")) {
+  SV_FOR_SPLIT(token, value, svl(" ")) {
     int value;
     if (!sv_parse_int(token, &value)) return;
 

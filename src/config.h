@@ -2,6 +2,7 @@
 #define _CONFIG_H
 
 #include <cstdint>
+#include <string>
 
 typedef struct cappyConfig {
   int flashlight_size                      = 100;
@@ -10,6 +11,7 @@ typedef struct cappyConfig {
   uint8_t flashlight_outer_color[4]        = {0, 0, 0, 255};
 } cappyConfig;
 
-void config_init(const char* file, cappyConfig& config);
+void config_init(const std::string& file, cappyConfig& config);
+void config_init(cappyConfig& config);
 
 #endif
