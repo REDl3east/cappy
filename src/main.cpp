@@ -17,34 +17,21 @@
 std::shared_ptr<SDL_Texture> create_capture_texture(std::shared_ptr<SDL_Renderer> renderer, Capture& capture);
 
 int main(int argc, char** argv) {
-  if (argc - 1 > 1) {
-    std::cerr << "Expected 0 or 1 arguments, got " << argc - 1 << '\n';
-    std::cerr << "Usage: " << argv[0] << " [FILE]\n";
-    return 1;
-  }
-
   Uint32 flags = 0;
   int x        = 0;
   int y        = 0;
   Capture capture;
-  if (argc == 1) {
-    if (!capture.capture()) {
-      std::cerr << "Failed to capture screen!\n";
-      return 1;
-    }
-    flags |= SDL_WINDOW_BORDERLESS;
-  } else {
-    if (!capture.capture(argv[1])) {
-      std::cerr << "Failed to load capture: '" << argv[1] << "'\n";
-      return 1;
-    }
-    flags |= SDL_WINDOW_RESIZABLE;
-    x = SDL_WINDOWPOS_CENTERED;
-    y = SDL_WINDOWPOS_CENTERED;
+
+  if (!capture.capture()) {
+    std::cerr << "Failed to capture screen!\n";
+    return 1;
   }
 
   cappyConfig config;
   config_init(config);
+
+  flags |= SDL_WINDOW_BORDERLESS;
+  if (config.window_fullscreen) flags |= SDL_WINDOW_FULLSCREEN;
 
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
     std::cerr << "Failed to init SDL!\n";
@@ -86,6 +73,25 @@ int main(int argc, char** argv) {
   CameraSmooth camera;
   auto machine = CappyMachine::make(config, renderer, capture, texture, camera, font);
   machine->set_state<MoveState>();
+
+  // setting bounds in capture, if width or height is <= 0 
+  // then it sets the crop to the capture width or height.
+  if (config.window_pre_crop[0] < 0) config.window_pre_crop[0] = 0;
+  if (config.window_pre_crop[1] < 0) config.window_pre_crop[1] = 0;
+  if (config.window_pre_crop[2] <= 0) config.window_pre_crop[2] = capture.width;
+  if (config.window_pre_crop[3] <= 0) config.window_pre_crop[3] = capture.height;
+
+  if (config.window_pre_crop[0] > capture.width) config.window_pre_crop[0] = capture.width;
+  if (config.window_pre_crop[1] > capture.height) config.window_pre_crop[1] = capture.height;
+  if (config.window_pre_crop[2] > capture.width) config.window_pre_crop[2] = capture.width;
+  if (config.window_pre_crop[3] > capture.height) config.window_pre_crop[3] = capture.height;
+
+  // set x and y to top left most point
+  // and calculate width and height
+  machine->current_x = std::min(config.window_pre_crop[0], config.window_pre_crop[2]);
+  machine->current_y = std::min(config.window_pre_crop[1], config.window_pre_crop[3]);
+  machine->current_w = std::abs(config.window_pre_crop[2] - config.window_pre_crop[0]);
+  machine->current_h = std::abs(config.window_pre_crop[3] - config.window_pre_crop[1]);
 
   std::shared_ptr<SDL_Cursor> move_cursor = std::shared_ptr<SDL_Cursor>(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEALL), SDL_DestroyCursor);
   SDL_Cursor* default_cursor              = SDL_GetDefaultCursor();

@@ -9,6 +9,7 @@
 #include <fstream>
 
 void config_parse_color(string_view value, uint8_t* color);
+void config_parse_bound(string_view value, int* bound);
 
 void config_handler(cappyConfig& config, string_view key, string_view value) {
   if (sv_compare(key, svl("flashlight_size"))) {
@@ -19,6 +20,14 @@ void config_handler(cappyConfig& config, string_view key, string_view value) {
     config_parse_color(value, config.flashlight_center_outer_color);
   } else if (sv_compare(key, svl("flashlight_outer_color"))) {
     config_parse_color(value, config.flashlight_outer_color);
+  } else if (sv_compare(key, svl("window_fullscreen"))) {
+    if (sv_compare_insensitive(value, svl("true")) || sv_compare(value, svl("1"))) {
+      config.window_fullscreen = true;
+    } else if (sv_compare_insensitive(value, svl("false")) || sv_compare(value, svl("0"))) {
+      config.window_fullscreen = false;
+    }
+  } else if (sv_compare(key, svl("window_pre_crop"))) {
+    config_parse_bound(value, config.window_pre_crop);
   }
 }
 
@@ -86,7 +95,9 @@ void config_init(cappyConfig& config) {
 
   if (!std::filesystem::exists(config_path)) {
     std::ofstream file(config_path);
-    file << "flashlight_size               = 150\n"
+    file << "window_fullscreen             = false\n"
+            "window_pre_crop               = 0 0 0 0\n"
+            "flashlight_size               = 150\n"
             "flashlight_center_inner_color = 255 255 204 25\n"
             "flashlight_center_outer_color = 255 255 204 25\n"
             "flashlight_outer_color        = 51 51 0 50\n";
@@ -114,5 +125,23 @@ void config_parse_color(string_view value, uint8_t* color) {
   // set rest of color values to 255
   for (int i = index; i < 4; i++) {
     color[i] = 255;
+  }
+}
+
+void config_parse_bound(string_view value, int* bounds) {
+  int index = 0;
+  SV_FOR_SPLIT(token, value, svl(" ")) {
+    int value;
+    if (!sv_parse_int(token, &value)) return;
+
+    bounds[index] = value;
+
+    index++;
+    if (index == 4) break;
+  }
+
+  // set rest of bound values to -1
+  for (int i = index; i < 4; i++) {
+    bounds[i] = -1;
   }
 }

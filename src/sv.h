@@ -4,10 +4,10 @@
 #define SV_NPOS (sv_index_t)(-1)
 
 #define svl(cstr_literal) sv_create(cstr_literal, sizeof(cstr_literal) - 1)
-#define svc(cstr)        sv_create_from_cstr(cstr)
-#define sv_empty         svl("")
-#define sv_fmt           "%.*s"
-#define sv_arg(sv)       (int)sv.length, sv.data
+#define svc(cstr)         sv_create_from_cstr(cstr)
+#define sv_empty          svl("")
+#define sv_fmt            "%.*s"
+#define sv_arg(sv)        (int)sv.length, sv.data
 
 typedef unsigned long int sv_index_t;
 
@@ -35,6 +35,7 @@ string_view sv_remove_suffix(string_view sv, sv_index_t n);
 void sv_swap(string_view sv1, string_view sv2);
 string_view sv_substr(string_view sv, sv_index_t pos, sv_index_t count);
 int sv_compare(string_view sv1, string_view sv2);
+int sv_compare_insensitive(string_view sv1, string_view sv2);
 int sv_starts_with(string_view sv1, string_view sv2);
 int sv_starts_with_insensitive(string_view sv1, string_view sv2);
 
@@ -48,7 +49,6 @@ int sv_count_char(string_view sv, char c);
 
 sv_index_t sv_find_char(string_view sv1, char c, sv_index_t pos);
 sv_index_t sv_find(string_view sv1, string_view sv2, sv_index_t pos);
-
 
 sv_index_t sv_find_insensitive(string_view sv1, string_view sv2, sv_index_t pos);
 
@@ -67,7 +67,6 @@ int sv_is_numeric(char c);
 int sv_is_alphanum(char c);
 char sv_tolower(char c);
 char sv_toupper(char c);
-
 
 sv_index_t sv_find_last_of_char(string_view sv, char c, sv_index_t pos);
 sv_index_t sv_find_last_of(string_view sv1, string_view sv2, sv_index_t pos);
@@ -162,6 +161,16 @@ int sv_compare(string_view sv1, string_view sv2) {
 
   for (int i = 0; i < (int)sv1.length; i++) {
     if (sv1.data[i] != sv2.data[i]) return 0;
+  }
+
+  return 1;
+}
+
+int sv_compare_insensitive(string_view sv1, string_view sv2) {
+  if (sv1.length != sv2.length) return 0;
+
+  for (int i = 0; i < (int)sv1.length; i++) {
+    if (sv_tolower(sv1.data[i]) != sv_tolower(sv2.data[i])) return 0;
   }
 
   return 1;
@@ -351,7 +360,6 @@ char sv_toupper(char c) {
   }
   return c;
 }
-
 
 sv_index_t sv_find_last_of_char(string_view sv, char c, sv_index_t pos) {
   return sv_rfind_char(sv, c, pos);

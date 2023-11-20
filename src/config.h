@@ -5,6 +5,8 @@
 #include <string>
 
 typedef struct cappyConfig {
+  bool window_fullscreen                   = false;
+  int window_pre_crop[4]                   = {0, 0, 0, 0};
   int flashlight_size                      = 100;
   uint8_t flashlight_center_inner_color[4] = {255, 255, 255, 0};
   uint8_t flashlight_center_outer_color[4] = {255, 255, 255, 0};
