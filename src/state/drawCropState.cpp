@@ -231,9 +231,6 @@ bool DrawCropState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Even
 }
 
 void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
-  SDL_SetRenderDrawColor(machine->get_renderer().get(), 125, 125, 125, 255);
-  SDL_RenderClear(machine->get_renderer().get());
-
   CameraSmooth& camera = machine->get_camera();
   SDL_Renderer* r      = machine->get_renderer().get();
 

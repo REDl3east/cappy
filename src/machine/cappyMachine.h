@@ -22,6 +22,7 @@ public:
   const cappyConfig& get_config();
   void zoom(bool zoom_in, float mousex, float mousey);
   void render_capture();
+  void render_clear(uint8_t r, uint8_t g, uint8_t b);
 
   static std::shared_ptr<CappyMachine> make(cappyConfig& config, std::shared_ptr<SDL_Renderer> r, Capture& c, std::shared_ptr<SDL_Texture> t, CameraSmooth& cam, TTF_Font* f){
     return std::make_shared<CappyMachine>(config, r, c, t, cam, f);

@@ -52,3 +52,8 @@ void CappyMachine::render_capture() {
   SDL_FRect r2   = {pos.x, pos.y, (float)current_w * camera.get_scale(), (float)current_h * camera.get_scale()};
   SDL_RenderTexture(renderer.get(), texture.get(), &r1, &r2);
 }
+
+void CappyMachine::render_clear(uint8_t r, uint8_t g, uint8_t b){
+  SDL_SetRenderDrawColor(get_renderer().get(), r, g, b, 255);
+  SDL_RenderClear(get_renderer().get());
+}

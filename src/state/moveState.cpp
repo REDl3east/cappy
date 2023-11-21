@@ -17,9 +17,6 @@ bool MoveState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Event& e
 }
 
 void MoveState::draw_frame(std::shared_ptr<CappyMachine> machine) {
-  SDL_SetRenderDrawColor(machine->get_renderer().get(), 125, 125, 125, 255);
-  SDL_RenderClear(machine->get_renderer().get());
-
   CameraSmooth& camera = machine->get_camera();
   camera.update();
 

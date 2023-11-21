@@ -9,6 +9,7 @@
 #include <fstream>
 
 void config_parse_color(string_view value, uint8_t* color);
+void config_parse_color3(string_view value, uint8_t* color);
 void config_parse_bound(string_view value, int* bound);
 
 void config_handler(cappyConfig& config, string_view key, string_view value) {
@@ -28,6 +29,8 @@ void config_handler(cappyConfig& config, string_view key, string_view value) {
     }
   } else if (sv_compare(key, svl("window_pre_crop"))) {
     config_parse_bound(value, config.window_pre_crop);
+  } else if (sv_compare(key, svl("background_color"))) {
+    config_parse_color3(value, config.background_color);
   }
 }
 
@@ -101,6 +104,7 @@ void config_init(cappyConfig& config) {
             "flashlight_center_inner_color = 255 255 204 25\n"
             "flashlight_center_outer_color = 255 255 204 25\n"
             "flashlight_outer_color        = 51 51 0 50\n";
+            "background_color              = 50 50 50\n";
     file.close();
   }
 
@@ -127,6 +131,28 @@ void config_parse_color(string_view value, uint8_t* color) {
     color[i] = 255;
   }
 }
+
+void config_parse_color3(string_view value, uint8_t* color) {
+  int index = 0;
+  SV_FOR_SPLIT(token, value, svl(" ")) {
+    int value;
+    if (!sv_parse_int(token, &value)) return;
+
+    if (value > 255) value = 255;
+    if (value < 0) value = 0;
+
+    color[index] = value;
+
+    index++;
+    if (index == 3) break;
+  }
+
+  // set rest of color values to 255
+  for (int i = index; i < 3; i++) {
+    color[i] = 255;
+  }
+}
+
 
 void config_parse_bound(string_view value, int* bounds) {
   int index = 0;

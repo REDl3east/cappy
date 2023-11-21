@@ -24,9 +24,6 @@ bool ColorState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Event& 
 }
 
 void ColorState::draw_frame(std::shared_ptr<CappyMachine> machine) {
-  SDL_SetRenderDrawColor(machine->get_renderer().get(), 125, 125, 125, 255);
-  SDL_RenderClear(machine->get_renderer().get());
-
   machine->render_capture();
 
   Capture& capture     = machine->get_capture();
