@@ -110,6 +110,7 @@ int main(int argc, char** argv) {
       }
       if (stbi_write_png(path.c_str(), machine->current_w, machine->current_h, comp, pixels, comp * stride) == 0) {
         std::cerr << "Failed to save file: '" << path << "'\n";
+        return;
       }
       std::cerr << "saved file: '" << path << "'\n";
     }).detach();
