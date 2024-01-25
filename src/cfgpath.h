@@ -48,7 +48,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <sys/stat.h>
-#define MAX_PATH 512  /* arbitrary value */
+#define MAX_PATH PATH_MAX  /* arbitrary value */
 #define PATH_SEPARATOR_CHAR '/'
 #define PATH_SEPARATOR_STRING "/"
 #elif defined(WIN32)

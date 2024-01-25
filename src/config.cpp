@@ -7,6 +7,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 
 void config_parse_color(string_view value, uint8_t* color);
 void config_parse_color3(string_view value, uint8_t* color);
@@ -35,8 +36,11 @@ void config_handler(cappyConfig& config, string_view key, string_view value) {
 }
 
 void config_init(const std::string& file, cappyConfig& config) {
+  std::cout << "Reading config file: '" << file << "'\n";
+
   string_view file_data;
   if (!sv_read_file(file.c_str(), &file_data)) {
+    std::cerr << "Failed to read config file: '" << file << "'\n";
     return;
   }
 
@@ -104,7 +108,7 @@ void config_init(cappyConfig& config) {
             "flashlight_center_inner_color = 255 255 204 25\n"
             "flashlight_center_outer_color = 255 255 204 25\n"
             "flashlight_outer_color        = 51 51 0 50\n";
-            "background_color              = 50 50 50\n";
+    "background_color              = 50 50 50\n";
     file.close();
   }
 
@@ -152,7 +156,6 @@ void config_parse_color3(string_view value, uint8_t* color) {
     color[i] = 255;
   }
 }
-
 
 void config_parse_bound(string_view value, int* bounds) {
   int index = 0;
