@@ -54,7 +54,7 @@ A configuration file is automattically generated when the program is ran for the
 | flashlight_center_inner_color | The center color of the flashlight. Requires 4 integers between 0-255 in the format: REG GREEN BLUE ALPHA | `255 255 204 25` |
 | flashlight_center_outer_color | The center color of the flashlight. Requires 4 integers between 0-255 in the format: REG GREEN BLUE ALPHA | `255 255 204 25` |
 | flashlight_outer_color        | The center color of the flashlight. Requires 4 integers between 0-255 in the format: REG GREEN BLUE ALPHA | `51 51 0 50`     |
-| background_color              | The center color of the flashlight. Requires 3 integers between 0-255 in the format: REG GREEN BLUE       | `255 0 0`        |
+| background_color              | The center color of the flashlight. Requires 3 integers between 0-255 in the format: REG GREEN BLUE       | `50 50 50`        |
 
 
 ### Controls
