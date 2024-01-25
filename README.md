@@ -48,13 +48,13 @@ A configuration file is automattically generated when the program is ran for the
 
 | Option                        | Description                                                                | Default        |
 | ----------------------------- | -------------------------------------------------------------------------- |--------------- |
-| window_fullscreen             | Sets the window to fullscreen, otherwise sets it as fullscreen borderless. | false          |
-| window_pre_crop               | Pre-crop the image at initial startup. Requires 4 integers in the format: X Y WIDTH HEIGHT. If WIDTH is 0, then it is replaced with the capture width. If HEIGHT is 0, then it is replaced with the capture height.                                                                                   | 0 0 0 0        |
-| flashlight_size               | The inital flashlight radius.                                                                             | 150            |
-| flashlight_center_inner_color | The center color of the flashlight. Requires 4 integers between 0-255 in the format: REG GREEN BLUE ALPHA | 255 255 204 25 |
-| flashlight_center_outer_color | The center color of the flashlight. Requires 4 integers between 0-255 in the format: REG GREEN BLUE ALPHA | 255 255 204 25 |
-| flashlight_outer_color        | The center color of the flashlight. Requires 4 integers between 0-255 in the format: REG GREEN BLUE ALPHA | 51 51 0 50     |
-| background_color              | The center color of the flashlight. Requires 3 integers between 0-255 in the format: REG GREEN BLUE       | 255 0 0        |
+| window_fullscreen             | Sets the window to fullscreen, otherwise sets it as fullscreen borderless. | `false`          |
+| window_pre_crop               | Pre-crop the image at initial startup. Requires 4 integers in the format: X Y WIDTH HEIGHT. If WIDTH is 0, then it is replaced with the capture width. If HEIGHT is 0, then it is replaced with the capture height.                                                                                   | `0 0 0 0`        |
+| flashlight_size               | The inital flashlight radius.                                                                             | `150`            |
+| flashlight_center_inner_color | The center color of the flashlight. Requires 4 integers between 0-255 in the format: REG GREEN BLUE ALPHA | `255 255 204 25` |
+| flashlight_center_outer_color | The center color of the flashlight. Requires 4 integers between 0-255 in the format: REG GREEN BLUE ALPHA | `255 255 204 25` |
+| flashlight_outer_color        | The center color of the flashlight. Requires 4 integers between 0-255 in the format: REG GREEN BLUE ALPHA | `51 51 0 50`     |
+| background_color              | The center color of the flashlight. Requires 3 integers between 0-255 in the format: REG GREEN BLUE       | `255 0 0`        |
 
 
 ### Controls
