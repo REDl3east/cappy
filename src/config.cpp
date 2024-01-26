@@ -3,6 +3,7 @@
 #define SV_IMPLEMENTATION
 #include "sv.h"
 
+#include "SDL3/SDL_log.h"
 #include "cfgpath.h"
 
 #include <filesystem>
@@ -36,11 +37,11 @@ void config_handler(cappyConfig& config, string_view key, string_view value) {
 }
 
 void config_init(const std::string& file, cappyConfig& config) {
-  std::cout << "Reading config file: '" << file << "'\n";
+  SDL_Log("Reading config file: '%s'", file.c_str());
 
   string_view file_data;
   if (!sv_read_file(file.c_str(), &file_data)) {
-    std::cerr << "Failed to read config file: '" << file << "'\n";
+    SDL_Log("Failed to read config file: '%s'", file.c_str());
     return;
   }
 

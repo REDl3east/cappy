@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
   Capture capture;
 
   if (!capture.capture()) {
-    std::cerr << "Failed to capture screen!\n";
+    SDL_Log("Failed to capture screen!");
     return 1;
   }
 
@@ -34,19 +34,19 @@ int main(int argc, char** argv) {
   if (config.window_fullscreen) flags |= SDL_WINDOW_FULLSCREEN;
 
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-    std::cerr << "Failed to init SDL!\n";
+    SDL_Log("Failed to init SDL!");
     return 1;
   }
 
   std::shared_ptr<SDL_Window> window = std::shared_ptr<SDL_Window>(SDL_CreateWindowWithPosition("Cappy", x, y, capture.width, capture.height, flags), SDL_DestroyWindow);
   if (!window) {
-    std::cerr << "Failed to create window!\n";
+    SDL_Log("Failed to create window!");
     return 1;
   }
 
   std::shared_ptr<SDL_Renderer> renderer = std::shared_ptr<SDL_Renderer>(SDL_CreateRenderer(window.get(), NULL, SDL_RENDERER_PRESENTVSYNC), SDL_DestroyRenderer);
   if (!renderer) {
-    std::cerr << "Failed to create renderer!\n";
+    SDL_Log("Failed to create renderer!");
     return 1;
   }
 
@@ -55,18 +55,18 @@ int main(int argc, char** argv) {
   std::shared_ptr<SDL_Texture> texture = create_capture_texture(renderer, capture);
 
   if (!texture) {
-    std::cerr << "Failed to create capture texture!\n";
+    SDL_Log("Failed to create capture texture!");
     return 1;
   }
 
   if (TTF_Init() < 0) {
-    std::cerr << "Failed to init TTF!\n";
+    SDL_Log("Failed to init TTF!");
     return 1;
   }
 
   TTF_Font* font = TTF_OpenFontRW(SDL_RWFromConstMem(advanced_pixel_7, sizeof(advanced_pixel_7)), SDL_TRUE, 36);
   if (!font) {
-    std::cerr << "Failed to load font: " << TTF_GetError() << '\n';
+    SDL_Log("Failed to load font: %s", TTF_GetError());
     return 1;
   }
 
@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
   auto machine = CappyMachine::make(config, renderer, capture, texture, camera, font);
   machine->set_state<MoveState>();
 
-  // setting bounds in capture, if width or height is <= 0 
+  // setting bounds in capture, if width or height is <= 0
   // then it sets the crop to the capture width or height.
   if (config.window_pre_crop[0] < 0) config.window_pre_crop[0] = 0;
   if (config.window_pre_crop[1] < 0) config.window_pre_crop[1] = 0;
@@ -109,10 +109,10 @@ int main(int argc, char** argv) {
         path += ".png";
       }
       if (stbi_write_png(path.c_str(), machine->current_w, machine->current_h, comp, pixels, comp * stride) == 0) {
-        std::cerr << "Failed to save file: '" << path << "'\n";
+        SDL_Log("Failed to save file: '%s'", path.c_str());
         return;
       }
-      std::cerr << "saved file: '" << path << "'\n";
+      SDL_Log("saved file: '%s'", path.c_str());
     }).detach();
 
     return 1;
