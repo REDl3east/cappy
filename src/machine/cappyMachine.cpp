@@ -51,10 +51,6 @@ void CappyMachine::render_capture() {
   SDL_FRect r1   = {(float)current_x, (float)current_y, (float)current_w, (float)current_h};
   SDL_FRect r2   = {pos.x, pos.y, (float)current_w * camera.get_scale(), (float)current_h * camera.get_scale()};
   SDL_RenderTexture(renderer.get(), texture.get(), &r1, &r2);
-
-  if (is_grid_enabled()) {
-    render_grid();
-  }
 }
 
 void CappyMachine::render_clear(uint8_t r, uint8_t g, uint8_t b) {
@@ -62,7 +58,15 @@ void CappyMachine::render_clear(uint8_t r, uint8_t g, uint8_t b) {
   SDL_RenderClear(get_renderer().get());
 }
 
+void CappyMachine::render_present() {
+  SDL_RenderPresent(get_renderer().get());
+}
+
 void CappyMachine::render_grid() {
+  if (!is_grid_enabled()) {
+    return;
+  }
+
   int grid_solid_every = 10;
 
   int x1 = current_x;

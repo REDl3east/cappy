@@ -1,8 +1,8 @@
 #include "renderer.h"
 
 #include <cmath>
-#include <vector>
 #include <numbers>
+#include <vector>
 
 void drawTriangle(std::shared_ptr<SDL_Renderer> renderer, float x1, float y1, float x2, float y2, float x3, float y3, Uint8 r, Uint8 g, Uint8 b, Uint8 a) {
   SDL_Vertex v[3] = {0};

@@ -149,5 +149,4 @@ void ColorState::draw_frame(std::shared_ptr<CappyMachine> machine) {
     SDL_ShowCursor();
   }
 
-  SDL_RenderPresent(machine->get_renderer().get());
 }

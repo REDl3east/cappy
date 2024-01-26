@@ -1,9 +1,9 @@
 #ifndef _CAPTURE_H_
 #define _CAPTURE_H_
 
+#include <cstdint>
 #include <fstream>
 #include <iostream>
-#include <cstdint>
 
 struct RGB {
   uint8_t r;

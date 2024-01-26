@@ -62,8 +62,6 @@ void FlashlightState::draw_frame(std::shared_ptr<CappyMachine> machine) {
                          config.flashlight_outer_color[2],
                          config.flashlight_outer_color[3]);
 
-  SDL_RenderPresent(machine->get_renderer().get());
-
   first_pass = false;
 }
 

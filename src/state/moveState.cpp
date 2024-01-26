@@ -21,6 +21,4 @@ void MoveState::draw_frame(std::shared_ptr<CappyMachine> machine) {
   camera.update();
 
   machine->render_capture();
-
-  SDL_RenderPresent(machine->get_renderer().get());
 }

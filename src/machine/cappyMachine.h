@@ -22,6 +22,7 @@ public:
   void zoom(bool zoom_in, float mousex, float mousey);
   void render_capture();
   void render_clear(uint8_t r, uint8_t g, uint8_t b);
+  void render_present();
   void render_grid();
 
   bool is_grid_enabled() {

@@ -401,5 +401,5 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
     SDL_RenderTexture(machine->get_renderer().get(), text_texture.get(), NULL, &text_rect);
   }
 
-  SDL_RenderPresent(machine->get_renderer().get());
+
 }

@@ -221,6 +221,9 @@ int main(int argc, char** argv) {
 
     machine->render_clear(config.background_color[0], config.background_color[1], config.background_color[2]);
     machine->draw_frame(machine);
+    machine->render_grid();
+
+    machine->render_present();
   }
 
   TTF_CloseFont(font);
