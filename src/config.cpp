@@ -33,6 +33,10 @@ void config_handler(cappyConfig& config, string_view key, string_view value) {
     config_parse_bound(value, config.window_pre_crop);
   } else if (sv_compare(key, svl("background_color"))) {
     config_parse_color3(value, config.background_color);
+  } else if (sv_compare(key, svl("grid_size"))) {
+    sv_parse_int(value, &config.grid_size);
+  } else if (sv_compare(key, svl("grid_color"))) {
+    config_parse_color3(value, config.grid_color);
   }
 }
 
@@ -109,7 +113,9 @@ void config_init(cappyConfig& config) {
             "flashlight_center_inner_color = 255 255 204 25\n"
             "flashlight_center_outer_color = 255 255 204 25\n"
             "flashlight_outer_color        = 51 51 0 50\n"
-            "background_color              = 50 50 50\n";
+            "background_color              = 50 50 50\n"
+            "grid_size                     = 100\n"
+            "grid_color                    = 200 200 200\n";
     file.close();
   }
 

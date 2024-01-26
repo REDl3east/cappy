@@ -23,7 +23,7 @@ public:
   void render_capture();
   void render_clear(uint8_t r, uint8_t g, uint8_t b);
   void render_present();
-  void render_grid();
+  void render_grid(int grid_size, uint8_t r, uint8_t g, uint8_t b);
 
   bool is_grid_enabled() {
     return grid_enabled;
