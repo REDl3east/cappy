@@ -33,7 +33,7 @@
 #ifndef CFGPATH_H_
 #define CFGPATH_H_
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(__MINGW32__)
 #define inline __inline
 #include <direct.h>
 #define mkdir _mkdir
@@ -48,7 +48,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <sys/stat.h>
-#define MAX_PATH PATH_MAX  /* arbitrary value */
+#define MAX_PATH 512  /* arbitrary value */
 #define PATH_SEPARATOR_CHAR '/'
 #define PATH_SEPARATOR_STRING "/"
 #elif defined(WIN32)
@@ -127,13 +127,14 @@ static inline void get_user_config_file(char *out, unsigned int maxlen, const ch
 		memcpy(out, ".config/", config_len);
 		out += config_len;
 		/* Make the .config folder if it doesn't already exist */
+		*out = '\0';
 		mkdir(out_orig, 0755);
 	}
 	memcpy(out, appname, appname_len);
 	out += appname_len;
 	memcpy(out, ".conf", ext_len);
 	out += ext_len;
-	*out = 0;
+	*out = '\0';
 #elif defined(CFGPATH_WINDOWS)
 	if (maxlen < MAX_PATH) {
 		out[0] = 0;
@@ -242,7 +243,7 @@ static inline void get_user_config_folder(char *out, unsigned int maxlen, const 
 	mkdir(out_orig, 0755);
 	*out = '/';
 	out++;
-	*out = 0;
+	*out = '\0';
 #elif defined(CFGPATH_WINDOWS)
 	if (maxlen < MAX_PATH) {
 		out[0] = 0;
@@ -359,7 +360,7 @@ static inline void get_user_data_folder(char *out, unsigned int maxlen, const ch
 	mkdir(out_orig, 0755);
 	*out = '/';
 	out++;
-	*out = 0;
+	*out = '\0';
 #elif defined(CFGPATH_WINDOWS) || defined(CFGPATH_MAC)
 	/* No distinction under Windows or OS X */
 	get_user_config_folder(out, maxlen, appname);
@@ -444,7 +445,7 @@ static inline void get_user_cache_folder(char *out, unsigned int maxlen, const c
 	mkdir(out_orig, 0755);
 	*out = '/';
 	out++;
-	*out = 0;
+	*out = '\0';
 #elif defined(CFGPATH_WINDOWS)
 	if (maxlen < MAX_PATH) {
 		out[0] = 0;
