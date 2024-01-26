@@ -70,7 +70,7 @@ void CappyMachine::render_grid() {
   int x2 = current_x + current_w;
   int y2 = current_y + current_h;
 
-  SDL_SetRenderDrawColor(renderer.get(), 128, 128, 128, 75);
+  SDL_SetRenderDrawColor(renderer.get(), 200, 200, 200, 75);
 
   // Draw vertical grid lines
   for (int x = x1; x <= x2; ++x) {
@@ -88,7 +88,7 @@ void CappyMachine::render_grid() {
     SDL_RenderLine(renderer.get(), start.x, start.y, end.x, end.y);
   }
 
-  SDL_SetRenderDrawColor(renderer.get(), 128, 128, 128, 150); // Set color to semi-transparent gray
+  SDL_SetRenderDrawColor(renderer.get(), 200, 200, 200, 150); // Set color to semi-transparent gray
 
   // Draw solid vertical grid lines
   for (int x = x1; x <= x2; ++x) {
