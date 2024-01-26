@@ -51,9 +51,58 @@ void CappyMachine::render_capture() {
   SDL_FRect r1   = {(float)current_x, (float)current_y, (float)current_w, (float)current_h};
   SDL_FRect r2   = {pos.x, pos.y, (float)current_w * camera.get_scale(), (float)current_h * camera.get_scale()};
   SDL_RenderTexture(renderer.get(), texture.get(), &r1, &r2);
+
+  if (is_grid_enabled()) {
+    render_grid();
+  }
 }
 
-void CappyMachine::render_clear(uint8_t r, uint8_t g, uint8_t b){
+void CappyMachine::render_clear(uint8_t r, uint8_t g, uint8_t b) {
   SDL_SetRenderDrawColor(get_renderer().get(), r, g, b, 255);
   SDL_RenderClear(get_renderer().get());
+}
+
+void CappyMachine::render_grid() {
+  int grid_solid_every = 10;
+
+  int x1 = current_x;
+  int y1 = current_y;
+  int x2 = current_x + current_w;
+  int y2 = current_y + current_h;
+
+  SDL_SetRenderDrawColor(renderer.get(), 128, 128, 128, 75);
+
+  // Draw vertical grid lines
+  for (int x = x1; x <= x2; ++x) {
+    if (x % grid_solid_every == 0) continue;
+    SDL_FPoint start = camera.world_to_screen(x, y1);
+    SDL_FPoint end   = camera.world_to_screen(x, y2);
+    SDL_RenderLine(renderer.get(), start.x, start.y, end.x, end.y);
+  }
+
+  // Draw horizontal grid lines
+  for (int y = y1; y <= y2; ++y) {
+    if (y % grid_solid_every == 0) continue;
+    SDL_FPoint start = camera.world_to_screen(x1, y);
+    SDL_FPoint end   = camera.world_to_screen(x2, y);
+    SDL_RenderLine(renderer.get(), start.x, start.y, end.x, end.y);
+  }
+
+  SDL_SetRenderDrawColor(renderer.get(), 128, 128, 128, 150); // Set color to semi-transparent gray
+
+  // Draw solid vertical grid lines
+  for (int x = x1; x <= x2; ++x) {
+    if (x % grid_solid_every != 0) continue;
+    SDL_FPoint start = camera.world_to_screen(x, y1);
+    SDL_FPoint end   = camera.world_to_screen(x, y2);
+    SDL_RenderLine(renderer.get(), start.x, start.y, end.x, end.y);
+  }
+
+  // Draw solid horizontal grid lines
+  for (int y = y1; y <= y2; ++y) {
+    if (y % grid_solid_every != 0) continue;
+    SDL_FPoint start = camera.world_to_screen(x1, y);
+    SDL_FPoint end   = camera.world_to_screen(x2, y);
+    SDL_RenderLine(renderer.get(), start.x, start.y, end.x, end.y);
+  }
 }

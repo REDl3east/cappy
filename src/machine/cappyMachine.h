@@ -3,7 +3,6 @@
 
 #include "machine.h"
 
-
 enum class StateType {
   MoveState,
   ColorState,
@@ -23,8 +22,25 @@ public:
   void zoom(bool zoom_in, float mousex, float mousey);
   void render_capture();
   void render_clear(uint8_t r, uint8_t g, uint8_t b);
+  void render_grid();
 
-  static std::shared_ptr<CappyMachine> make(cappyConfig& config, std::shared_ptr<SDL_Renderer> r, Capture& c, std::shared_ptr<SDL_Texture> t, CameraSmooth& cam, TTF_Font* f){
+  bool is_grid_enabled() {
+    return grid_enabled;
+  }
+
+  void enable_grid() {
+    grid_enabled = true;
+  }
+
+  void disable_grid() {
+    grid_enabled = false;
+  }
+
+  void toggle_grid() {
+    grid_enabled = !grid_enabled;
+  }
+
+  static std::shared_ptr<CappyMachine> make(cappyConfig& config, std::shared_ptr<SDL_Renderer> r, Capture& c, std::shared_ptr<SDL_Texture> t, CameraSmooth& cam, TTF_Font* f) {
     return std::make_shared<CappyMachine>(config, r, c, t, cam, f);
   }
 
@@ -49,8 +65,7 @@ private:
   float max_scale = 100.0f;
   float min_scale = 0.25f;
 
-
+  bool grid_enabled = false;
 };
 
-
-#endif 
+#endif

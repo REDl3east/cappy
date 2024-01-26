@@ -66,6 +66,7 @@ A configuration file is automattically generated when the program is ran for the
 | C            | Enter/Exit color mode      |
 | F            | Enter/Exit flashlight mode |
 | R            | Reset capture              |
+| G            | Toggle grid                |
 | Right Click  | Enter crop drawing mode    |
 | Left Drag    | Pan                        |
 | Scroll Wheel | Zoom                       |
@@ -120,4 +121,4 @@ Select a region of the capture.
 - [x] When resizing and zooming in and not panning, the cropped section is changing width and height when it should stay the same.
 - [x] When the image is cropped and zoomed in on color mode. A square is rendered when you are one off the width or height
 - [x] If in color mode and zoomed in enough to render a square. If the mouse is outside the capture, the cursor should be shown.
-- [ ] Add show grid
+- [x] Add show grid

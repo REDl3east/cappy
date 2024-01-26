@@ -18,8 +18,6 @@ std::shared_ptr<SDL_Texture> create_capture_texture(std::shared_ptr<SDL_Renderer
 
 int main(int argc, char** argv) {
   Uint32 flags = 0;
-  int x        = 0;
-  int y        = 0;
   Capture capture;
 
   if (!capture.capture()) {
@@ -38,7 +36,7 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  std::shared_ptr<SDL_Window> window = std::shared_ptr<SDL_Window>(SDL_CreateWindowWithPosition("Cappy", x, y, capture.width, capture.height, flags), SDL_DestroyWindow);
+  std::shared_ptr<SDL_Window> window = std::shared_ptr<SDL_Window>(SDL_CreateWindowWithPosition("Cappy", 0, 0, capture.width, capture.height, flags), SDL_DestroyWindow);
   if (!window) {
     SDL_Log("Failed to create window!");
     return 1;
@@ -151,6 +149,8 @@ int main(int argc, char** argv) {
           } else if (code == SDLK_c) {
             machine->set_state<ColorState>();
             continue;
+          } else if (code == SDLK_g) {
+            machine->toggle_grid();
           } else if (code == SDLK_r) {
             // camera.reset();
             machine->current_x = 0;
