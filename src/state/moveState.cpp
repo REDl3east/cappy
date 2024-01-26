@@ -19,6 +19,4 @@ bool MoveState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Event& e
 void MoveState::draw_frame(std::shared_ptr<CappyMachine> machine) {
   CameraSmooth& camera = machine->get_camera();
   camera.update();
-
-  machine->render_capture();
 }

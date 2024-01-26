@@ -39,7 +39,6 @@ void FlashlightState::draw_frame(std::shared_ptr<CappyMachine> machine) {
 
   update();
 
-  machine->render_capture();
 
   const cappyConfig& config = machine->get_config();
   if (first_pass) {

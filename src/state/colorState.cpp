@@ -24,7 +24,6 @@ bool ColorState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Event& 
 }
 
 void ColorState::draw_frame(std::shared_ptr<CappyMachine> machine) {
-  machine->render_capture();
 
   Capture& capture     = machine->get_capture();
   CameraSmooth& camera = machine->get_camera();

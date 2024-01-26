@@ -234,7 +234,6 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
   CameraSmooth& camera = machine->get_camera();
   SDL_Renderer* r      = machine->get_renderer().get();
 
-  machine->render_capture();
 
   float mx, my;
   SDL_GetMouseState(&mx, &my);

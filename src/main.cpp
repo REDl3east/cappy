@@ -220,8 +220,9 @@ int main(int argc, char** argv) {
     }
 
     machine->render_clear(config.background_color[0], config.background_color[1], config.background_color[2]);
-    machine->draw_frame(machine);
+    machine->render_capture();
     machine->render_grid(config.grid_size, config.grid_color[0], config.grid_color[1], config.grid_color[2]);
+    machine->draw_frame(machine);
 
     machine->render_present();
   }

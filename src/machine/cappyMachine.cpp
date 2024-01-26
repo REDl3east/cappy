@@ -72,39 +72,48 @@ void CappyMachine::render_grid(int grid_size, uint8_t r, uint8_t g, uint8_t b) {
   int x2 = current_x + current_w;
   int y2 = current_y + current_h;
 
-  SDL_SetRenderDrawColor(renderer.get(), r, g, b, 75);
+  int lines_rendered = 0;
 
-  // Draw vertical grid lines
-  for (int x = x1; x <= x2; ++x) {
-    if (x % grid_size == 0) continue;
-    SDL_FPoint start = camera.world_to_screen(x, y1);
-    SDL_FPoint end   = camera.world_to_screen(x, y2);
-    SDL_RenderLine(renderer.get(), start.x, start.y, end.x, end.y);
+  if (camera.get_scale() > 7.5f) {
+    SDL_SetRenderDrawColor(renderer.get(), r, g, b, 75);
+    // Draw vertical grid lines
+    for (int x = x1; x <= x2; ++x) {
+      if (grid_size > 0 && x % grid_size == 0) continue;
+      SDL_FPoint start = camera.world_to_screen(x, y1);
+      SDL_FPoint end   = camera.world_to_screen(x, y2);
+      SDL_RenderLine(renderer.get(), start.x, start.y, end.x, end.y);
+      lines_rendered++;
+    }
+
+    // Draw horizontal grid lines
+    for (int y = y1; y <= y2; ++y) {
+      if (grid_size > 0 && y % grid_size == 0) continue;
+      SDL_FPoint start = camera.world_to_screen(x1, y);
+      SDL_FPoint end   = camera.world_to_screen(x2, y);
+      SDL_RenderLine(renderer.get(), start.x, start.y, end.x, end.y);
+      lines_rendered++;
+    }
   }
 
-  // Draw horizontal grid lines
-  for (int y = y1; y <= y2; ++y) {
-    if (y % grid_size == 0) continue;
-    SDL_FPoint start = camera.world_to_screen(x1, y);
-    SDL_FPoint end   = camera.world_to_screen(x2, y);
-    SDL_RenderLine(renderer.get(), start.x, start.y, end.x, end.y);
-  }
+  if (grid_size > 0) {
+    SDL_SetRenderDrawColor(renderer.get(), r, g, b, 150); // Set color to semi-transparent gray
 
-  SDL_SetRenderDrawColor(renderer.get(), r, g, b, 150); // Set color to semi-transparent gray
+    // Draw solid vertical grid lines
+    for (int x = x1; x <= x2; ++x) {
+      if (x % grid_size != 0) continue;
+      SDL_FPoint start = camera.world_to_screen(x, y1);
+      SDL_FPoint end   = camera.world_to_screen(x, y2);
+      SDL_RenderLine(renderer.get(), start.x, start.y, end.x, end.y);
+      lines_rendered++;
+    }
 
-  // Draw solid vertical grid lines
-  for (int x = x1; x <= x2; ++x) {
-    if (x % grid_size != 0) continue;
-    SDL_FPoint start = camera.world_to_screen(x, y1);
-    SDL_FPoint end   = camera.world_to_screen(x, y2);
-    SDL_RenderLine(renderer.get(), start.x, start.y, end.x, end.y);
-  }
-
-  // Draw solid horizontal grid lines
-  for (int y = y1; y <= y2; ++y) {
-    if (y % grid_size != 0) continue;
-    SDL_FPoint start = camera.world_to_screen(x1, y);
-    SDL_FPoint end   = camera.world_to_screen(x2, y);
-    SDL_RenderLine(renderer.get(), start.x, start.y, end.x, end.y);
+    // Draw solid horizontal grid lines
+    for (int y = y1; y <= y2; ++y) {
+      if (y % grid_size != 0) continue;
+      SDL_FPoint start = camera.world_to_screen(x1, y);
+      SDL_FPoint end   = camera.world_to_screen(x2, y);
+      SDL_RenderLine(renderer.get(), start.x, start.y, end.x, end.y);
+      lines_rendered++;
+    }
   }
 }
