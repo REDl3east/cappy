@@ -107,12 +107,12 @@ void config_init(cappyConfig& config) {
             "flashlight_size               = 150\n"
             "flashlight_center_inner_color = 255 255 204 25\n"
             "flashlight_center_outer_color = 255 255 204 25\n"
-            "flashlight_outer_color        = 51 51 0 50\n";
-    "background_color              = 50 50 50\n";
+            "flashlight_outer_color        = 51 51 0 50\n"
+            "background_color              = 50 50 50\n";
     file.close();
   }
 
-  config_init(config_path, config);
+  config_init(config_path.string(), config);
 }
 
 void config_parse_color(string_view value, uint8_t* color) {
