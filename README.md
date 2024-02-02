@@ -25,7 +25,7 @@ The way to do this depends on the OS.
 3. Click Keyboard in the sidebar to open the panel.
 4. In the Keyboard Shortcuts section, select View and Customize Shortcuts.
 5. Add a keyboard shortcut by clicking the + button towards the bottom of the list
-6. Set the Name tp ```Cappy```
+6. Set the Name to ```Cappy```
 7. Set the Command to ```cappy```
 8. Set the shortcut to whatever you'd like. I like using ```ctrl+lshift+z```
 
