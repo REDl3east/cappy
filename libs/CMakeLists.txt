@@ -5,8 +5,8 @@ set(SDL2_DISABLE_INSTALL   ON  CACHE BOOL "" FORCE)
 set(SDL2_DISABLE_UNINSTALL ON  CACHE BOOL "" FORCE)
 set(SDL_SHARED             OFF CACHE BOOL "" FORCE)
 set(SDL_STATIC             ON  CACHE BOOL "" FORCE)
-set(SDL_TEST               OFF CACHE BOOL "" FORCE)
-set(SDL_TESTS              OFF CACHE BOOL "" FORCE)
+set(SDL_TEST               ON CACHE BOOL "" FORCE)
+set(SDL_TESTS              ON CACHE BOOL "" FORCE)
 set(SDL_INSTALL_TESTS      OFF CACHE BOOL "" FORCE)
 
 FetchContent_Declare(

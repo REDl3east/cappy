@@ -5,6 +5,20 @@
 #include <format>
 
 bool ColorState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Event& event) {
+  auto handle_clipboard = [this, machine](auto func) {
+    Capture& capture     = machine->get_capture();
+    CameraSmooth& camera = machine->get_camera();
+    float mx, my;
+    SDL_GetMouseState(&mx, &my);
+    SDL_FPoint mouse = camera.screen_to_world(mx, my);
+    mouse.x          = std::round(mouse.x);
+    mouse.y          = std::round(mouse.y);
+    RGB rgb;
+    if (capture.at(mouse.x, mouse.y, rgb) && !(mouse.x < machine->current_x || mouse.x > machine->current_x + machine->current_w - 1 || mouse.y < machine->current_y || mouse.y > machine->current_y + machine->current_h - 1)) {
+      SDL_SetClipboardText(func(rgb).c_str());
+    }
+  };
+
   switch (event.type) {
     case SDL_EVENT_KEY_DOWN: {
       SDL_Keycode code = event.key.keysym.sym;
@@ -12,6 +26,18 @@ bool ColorState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Event& 
       if (code == SDLK_c) {
         machine->set_state<MoveState>();
         return true;
+      } else if (code == SDLK_d && (mod & SDL_KMOD_CTRL) && (mod & SDL_KMOD_LSHIFT)) {
+        handle_clipboard(toDecimalSepString);
+      } else if (code == SDLK_d && (mod & SDL_KMOD_CTRL)) {
+        handle_clipboard(toDecimalString);
+      } else if (code == SDLK_h && (mod & SDL_KMOD_CTRL) && (mod & SDL_KMOD_LSHIFT)) {
+        handle_clipboard(toHexSepString);
+      } else if (code == SDLK_h && (mod & SDL_KMOD_CTRL)) {
+        handle_clipboard(toHexString);
+      } else if (code == SDLK_b && (mod & SDL_KMOD_CTRL) && (mod & SDL_KMOD_LSHIFT)) {
+        handle_clipboard(toBinarySepString);
+      } else if (code == SDLK_b && (mod & SDL_KMOD_CTRL)) {
+        handle_clipboard(toBinaryString);
       }
       break;
     }
@@ -19,12 +45,14 @@ bool ColorState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Event& 
       recompute_text = true;
       break;
     }
+    case SDL_EVENT_CLIPBOARD_UPDATE: {
+      SDL_Log("Updated clipboard\n");
+    }
   }
   return false;
 }
 
 void ColorState::draw_frame(std::shared_ptr<CappyMachine> machine) {
-
   Capture& capture     = machine->get_capture();
   CameraSmooth& camera = machine->get_camera();
   camera.update();
@@ -37,29 +65,6 @@ void ColorState::draw_frame(std::shared_ptr<CappyMachine> machine) {
 
   RGB rgb;
   if (capture.at(mouse.x, mouse.y, rgb) && !(mouse.x < machine->current_x || mouse.x > machine->current_x + machine->current_w - 1 || mouse.y < machine->current_y || mouse.y > machine->current_y + machine->current_h - 1)) {
-    // TODO: add this key stuff to event handler, it should not check every frame.
-    const Uint8* key_state = SDL_GetKeyboardState(NULL);
-    SDL_Keymod mod         = SDL_GetModState();
-    if (key_state[SDL_SCANCODE_D] && mod & SDL_KMOD_CTRL) {
-      if (mod & SDL_KMOD_SHIFT) {
-        SDL_SetClipboardText(toDecimalSepString(rgb).c_str());
-      } else {
-        SDL_SetClipboardText(toDecimalString(rgb).c_str());
-      }
-    } else if (key_state[SDL_SCANCODE_H] && mod & SDL_KMOD_CTRL) {
-      if (mod & SDL_KMOD_SHIFT) {
-        SDL_SetClipboardText(toHexSepString(rgb).c_str());
-      } else {
-        SDL_SetClipboardText(toHexString(rgb).c_str());
-      }
-    } else if (key_state[SDL_SCANCODE_B] && mod & SDL_KMOD_CTRL) {
-      if (mod & SDL_KMOD_SHIFT) {
-        SDL_SetClipboardText(toBinarySepString(rgb).c_str());
-      } else {
-        SDL_SetClipboardText(toBinaryString(rgb).c_str());
-      }
-    }
-
     if (camera.get_scale() > 7.5f) {
       SDL_FPoint p = camera.world_to_screen(mouse.x, mouse.y);
 
@@ -147,5 +152,4 @@ void ColorState::draw_frame(std::shared_ptr<CappyMachine> machine) {
   } else {
     SDL_ShowCursor();
   }
-
 }
