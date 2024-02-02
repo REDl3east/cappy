@@ -1,6 +1,6 @@
 # cappy
 
-A screen capping tool that lets you immediately explore the pixels of the your monitor screen(s). Useful for debugging GUI applications or if you see a color you like and what to save for later :)
+A screen capping tool that lets you immediately explore the pixels of the your monitor screen(s).
 
 ## Features
 * Smooth panning/zooming of the captured screen(s).
