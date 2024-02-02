@@ -292,7 +292,7 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
 
     draw_rect_flashlight(machine->get_renderer(), x1, y1, x2 - x1, y2 - y1, 0, 0, 0, 0, 128, 128, 128, 128);
 
-    SDL_SetRenderDrawColor(r, 255, 0, 0, 255);
+    SDL_SetRenderDrawColor(r, 200, 200, 200, 200);
     SDL_RenderLine(r, x1, y1, x2, y1);
     SDL_RenderLine(r, x1, y1, x1, y2);
     SDL_RenderLine(r, x1, y2, x2, y2);
@@ -362,7 +362,7 @@ void DrawCropState::draw_frame(std::shared_ptr<CappyMachine> machine) {
 
     draw_rect_flashlight(machine->get_renderer(), start_screen.x, start_screen.y, end_screen.x - start_screen.x, end_screen.y - start_screen.y, 0, 0, 0, 0, 128, 128, 128, 128);
 
-    SDL_SetRenderDrawColor(r, 255, 0, 0, 255);
+    SDL_SetRenderDrawColor(r, 200, 200, 200, 200);
     SDL_RenderLine(r, start_screen.x, start_screen.y, end_screen.x, start_screen.y);
     SDL_RenderLine(r, start_screen.x, start_screen.y, start_screen.x, end_screen.y);
     SDL_RenderLine(r, start_screen.x, end_screen.y, end_screen.x, end_screen.y);
