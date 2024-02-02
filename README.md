@@ -3,8 +3,11 @@
 A screen capping tool that lets you immediately explore the pixels of the your monitor screen(s).
 
 ## Features
-* Pan/Zoom the captured monitor screen(s).
-* Inspect the color of the pixel hovered over.
+* Smooth panning/zooming of the captured screen(s).
+* Inspect pixel data of the currently hovered pixel, then copy that data to the clipboard.
+* Crop out sections and/or save the capture to a PNG.
+* A grid mode to better see the nice pixels.
+* A flashlight mode!
 
 ### Build
 Cappy is built using CMake. CMake will take care of downloading all necessary dependencies. It may take a while to build because everything is built from scratch and statically linked.
@@ -79,8 +82,7 @@ A configuration file is automatically generated when the program is ran for the 
 | Right Click  | Enter crop drawing mode    |
 | Left Drag    | Pan                        |
 | Scroll Wheel | Zoom                       |
-
-
+| Ctrl+S       | Save capture               |
 
 #### Color Mode
 
