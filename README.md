@@ -1,13 +1,10 @@
 
 # cappy
 
-<p>
-<img align="left" width="150" height="150" src="assets/icon.png">
-A screen capping tool that lets you immediately explore the pixels of the your monitor screen(s).
-</img>
-</p>
-
-<br />
+<div align="center">
+<img src="./assets/icon.png" width=60%>
+<br>
+<br>
 
 ## Features
 * Smooth panning/zooming of the captured screen(s).
