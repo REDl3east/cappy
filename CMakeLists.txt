@@ -53,8 +53,9 @@ endif()
 
 if (UNIX)
     target_link_libraries(cappy SDL3-static SDL3_ttf-static X11)
-    install(TARGETS cappy DESTINATION bin)
-elseif(WIN32)
+    elseif(WIN32)
     set_property(TARGET cappy PROPERTY WIN32_EXECUTABLE true)
     target_link_libraries(cappy SDL3-static SDL3_ttf-static)
 endif()
+    
+install(TARGETS cappy DESTINATION bin)
