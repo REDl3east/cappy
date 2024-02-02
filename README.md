@@ -1,4 +1,5 @@
 <img align="left" width="100" height="100" src="assets/icon.png">
+
 # cappy
 
 A screen capping tool that lets you immediately explore the pixels of the your monitor screen(s).
