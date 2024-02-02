@@ -75,6 +75,7 @@ A configuration file is automatically generated when the program is ran for the 
 | F            | Enter/Exit flashlight mode |
 | R            | Reset capture              |
 | G            | Toggle grid                |
+| M            | Minimize window            |
 | Right Click  | Enter crop drawing mode    |
 | Left Drag    | Pan                        |
 | Scroll Wheel | Zoom                       |

@@ -45,9 +45,6 @@ bool ColorState::handle_event(std::shared_ptr<CappyMachine> machine, SDL_Event& 
       recompute_text = true;
       break;
     }
-    case SDL_EVENT_CLIPBOARD_UPDATE: {
-      SDL_Log("Updated clipboard\n");
-    }
   }
   return false;
 }

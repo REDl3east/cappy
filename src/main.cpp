@@ -159,7 +159,11 @@ int main(int argc, char** argv) {
             machine->current_h = capture.height;
             machine->set_state<MoveState>();
             continue;
-          } else if (code == SDLK_s && mod & SDL_KMOD_CTRL) {
+          } else if (code == SDLK_m) {
+            SDL_MinimizeWindow(window.get());
+          }
+
+          else if (code == SDLK_s && mod & SDL_KMOD_CTRL) {
             if (!save_dialog) save_dialog.reset(new pfd::save_file("Select a file", ".", {"Image Files (.png)", "*.png"}, pfd::opt::none));
           }
 
