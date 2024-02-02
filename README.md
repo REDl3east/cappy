@@ -107,20 +107,3 @@ Select a region of the capture.
 | Shift+Drag          | Continue drawing region as a square |
 | Right Click (Rapid) | Exit Crop Drawing Mode              |
 | X                   | Crop capture                        |
-
-## TODO
-- [x] Show color data, with text, near color panel
-- [x] Add ability to save screenshot
-- [x] Add screen selection
-- [x] Async save dialog 
-- [x] Add ability to update selection
-- [x] Add command line load image 
-- [x] Add smooth zoom for camera
-- [x] Show text that shows the size of the selection
-- [x] Add smooth zoom for flashlight
-- [x] Add mouse position text
-- [x] Add smooth zoom for flashlight
-- [x] When resizing and zooming in and not panning, the cropped section is changing width and height when it should stay the same.
-- [x] When the image is cropped and zoomed in on color mode. A square is rendered when you are one off the width or height
-- [x] If in color mode and zoomed in enough to render a square. If the mouse is outside the capture, the cursor should be shown.
-- [x] Add show grid
