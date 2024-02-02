@@ -12,6 +12,7 @@
 #include "config.h"
 #include "drawCropState.h"
 #include "flashlightState.h"
+#include "icon.h"
 #include "moveState.h"
 
 std::shared_ptr<SDL_Texture> create_capture_texture(std::shared_ptr<SDL_Renderer> renderer, Capture& capture);
@@ -67,6 +68,9 @@ int main(int argc, char** argv) {
     SDL_Log("Failed to load font: %s", TTF_GetError());
     return 1;
   }
+
+  std::shared_ptr<SDL_Surface> icon = std::shared_ptr<SDL_Surface>(SDL_CreateSurfaceFrom(icon_data, ICON_WIDTH, ICON_HEIGHT, ICON_WIDTH * 4, SDL_PIXELFORMAT_RGBA32), SDL_DestroySurface);
+  SDL_SetWindowIcon(window.get(), icon.get());
 
   CameraSmooth camera;
   auto machine = CappyMachine::make(config, renderer, capture, texture, camera, font);
