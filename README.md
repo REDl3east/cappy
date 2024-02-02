@@ -5,7 +5,6 @@
 
 A screen capping tool that lets you immediately explore the pixels of the your monitor screen(s).
 
----
 </img>
 
 ## Features
