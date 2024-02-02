@@ -2,7 +2,7 @@
 # cappy
 
 <p>
-<img align="left" width="100" height="100" src="assets/icon.png">
+<img align="left" width="150" height="150" src="assets/icon.png">
 A screen capping tool that lets you immediately explore the pixels of the your monitor screen(s).
 </img>
 </p>
