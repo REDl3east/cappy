@@ -1,9 +1,10 @@
 <h1>
 Cappy
 <img align="left" width="150" height="150" src="assets/icon.png">
-A screen capping tool that lets you immediately explore the pixels of the your monitor screen(s).
-</img>
 </h1>
+</img>
+
+A screen capping tool that lets you immediately explore the pixels of the your monitor screen(s).
 
 <br />
 
