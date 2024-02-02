@@ -3,8 +3,7 @@
 
 <div align="center">
 <img src="./assets/icon.png" width=60%>
-<br>
-<br>
+</div>
 
 ## Features
 * Smooth panning/zooming of the captured screen(s).
