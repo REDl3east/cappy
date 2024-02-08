@@ -15,6 +15,11 @@ A screen capping tool that lets you immediately explore the pixels of the your m
 * A grid mode to better see the nice pixels.
 * A flashlight mode!
 
+### Demo
+The demo is heavily compressed to save space. When you run the application it will run smoother and be at your native resolution. :)
+
+<img width="960" height="540" src="assets/demo.gif">
+
 ### Build
 Cappy is built using CMake. CMake will take care of downloading all necessary dependencies. It may take a while to build because everything is built from scratch and statically linked.
 ``` bash
