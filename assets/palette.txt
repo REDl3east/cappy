@@ -1,5 +1,5 @@
 GIMP Palette
-Name: bugslife_final.png-10
+Name: Icon
 Columns: 16
 #
 224 175 89
