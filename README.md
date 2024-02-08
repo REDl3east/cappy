@@ -9,7 +9,7 @@ A screen capping tool that lets you immediately explore the pixels of the your m
 <br />
 
 ## Features
-* Smooth panning/zooming of the captured screen(s).
+* Smooth panning and precise zooming of the captured screen(s).
 * Inspect pixel data of the currently hovered pixel, then copy that data to the clipboard.
 * Crop out sections and/or save the capture to a PNG.
 * A grid mode to better see the nice pixels.
