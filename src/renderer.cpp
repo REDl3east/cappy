@@ -71,8 +71,6 @@ void draw_circle_flashlight(std::shared_ptr<SDL_Renderer> renderer, float x, flo
       SDL_PointMid(bounds[3], bounds[0]),
   };
 
-  std::vector<SDL_Vertex> v;
-
   // LIGHT
 
   for (int i = 0; i < 4; i++) {
