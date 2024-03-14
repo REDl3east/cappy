@@ -16,7 +16,7 @@ A screen capping tool that lets you immediately explore the pixels on your monit
 * A flashlight mode!
 
 ### Demo
-The demo is heavily compressed to save space. When you run the application it will run smoother and be at your native resolution. :)
+This demo is heavily compressed to save space. When you run the application it will run smoother and be at your native resolution. :)
 
 <img src="assets/demo.gif">
 
