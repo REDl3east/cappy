@@ -4,7 +4,7 @@ Cappy
 </h1>
 </img>
 
-A screen capping tool that lets you immediately explore the pixels of the your monitor screen(s).
+A screen capping tool that lets you immediately explore the pixels on your monitor screen(s).
 
 <br />
 
