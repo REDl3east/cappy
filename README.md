@@ -25,7 +25,7 @@ The demo is heavily compressed to save space. When you run the application it wi
 * Windows
 
 ### Build
-Cappy is built using CMake. CMake will take care of downloading all necessary dependencies. It may take a while to build because everything is built from scratch and statically linked.
+Cappy is built using CMake. CMake will take care of downloading all necessary dependencies. It may take a while to build because everything is built from scratch and statically linked. In some cases you may need to install libx11-dev on Linux with `sudo apt-get install libx11-dev`.
 ``` bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release  # or Debug for debug build
 cmake --build build
