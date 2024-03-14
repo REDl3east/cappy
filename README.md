@@ -23,7 +23,6 @@ The demo is heavily compressed to save space. When you run the application it wi
 ### Supported Platforms
 * Linux
 * Windows
-* macOS  (Untested, but theoretically should work?)
 
 ### Build
 Cappy is built using CMake. CMake will take care of downloading all necessary dependencies. It may take a while to build because everything is built from scratch and statically linked.
