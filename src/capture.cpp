@@ -63,17 +63,9 @@ bool Capture::capture() {
   return true;
 #elif _WIN32
   SetProcessDPIAware();
-  HDC hScreenDC = GetDC(nullptr); // CreateDC("DISPLAY",nullptr,nullptr,nullptr);
+  HDC hScreenDC = GetDC(nullptr);
   HDC hMemoryDC = CreateCompatibleDC(hScreenDC);
-
-  // width              = GetDeviceCaps(hScreenDC, HORZRES);
-  // height             = GetDeviceCaps(hScreenDC, VERTRES);
-  // stride             = width;
-  // HBITMAP hBitmap    = CreateCompatibleBitmap(hScreenDC, width, height);
-  // HBITMAP hOldBitmap = static_cast<HBITMAP>(SelectObject(hMemoryDC, hBitmap));
-  // BitBlt(hMemoryDC, 0, 0, width, height, hScreenDC, 0, 0, SRCCOPY);
-  // hBitmap = static_cast<HBITMAP>(SelectObject(hMemoryDC, hOldBitmap));
-
+  
   width              = GetSystemMetrics(SM_CXVIRTUALSCREEN);
   height             = GetSystemMetrics(SM_CYVIRTUALSCREEN);
   stride             = width;
@@ -85,7 +77,7 @@ bool Capture::capture() {
   BITMAPINFO MyBMInfo       = {0};
   MyBMInfo.bmiHeader.biSize = sizeof(MyBMInfo.bmiHeader);
 
-  if (!GetDIBits(hMemoryDC, hBitmap, 0, 0, NULL, &MyBMInfo, DIB_RGB_COLORS)) {
+  if (!GetDIBits(hMemoryDC, hBitmap, 0, 0, nullptr, &MyBMInfo, DIB_RGB_COLORS)) {
     DeleteDC(hMemoryDC);
     DeleteDC(hScreenDC);
     return false;
