@@ -101,7 +101,7 @@ A configuration file is automatically generated when the program is ran for the 
 
 #### Color Mode
 
-You can hover your mouse over a pixel and a pop-up of the color will appear near the mouse.  
+You can hover your mouse over a pixel and a pop-up of the color information will appear near the mouse.  
 
 | Key          | Description                                                                       |
 | ------------ | --------------------------------------------------------------------------------- |
