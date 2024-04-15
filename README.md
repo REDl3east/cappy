@@ -124,10 +124,10 @@ You can focus in on a specific point in flashlight mode.
 
 Select a region of the capture.
 
-| Key                 | Description                         |
-| ------------------- | ----------------------------------- |
-| Release Right Click | Finish drawing crop region          |
-| Drag                | Continue drawing region             |
-| Shift+Drag          | Continue drawing region as a square |
-| Right Click (Rapid) | Exit Crop Drawing Mode              |
-| X                   | Crop capture                        |
+| Key                                | Description                         |
+| ---------------------------------- | ----------------------------------- |
+| Release Right Click                | Finish drawing crop region          |
+| Drag                               | Continue drawing region             |
+| Shift+Drag                         | Continue drawing region as a square |
+| Right Click (Outside cropped area) | Exit Crop Drawing Mode              |
+| X                                  | Crop capture                        |
