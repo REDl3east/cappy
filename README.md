@@ -68,7 +68,7 @@ The way to do this depends on the OS. Find the path to the executable.
 [Source](https://www.minitool.com/news/open-a-program-with-keyboard-shortcut-win-10-11.html)
 
 ### Configuration
-A configuration file is automatically generated when the program is ran for the first time. The location depends on the platform. On Linux: `$HOME/.config/cappy/cappy.ini`, on Windows: `$HOME\AppData\Roaming\cappy\cappy.ini`, and on Mac: `$HOME/Library/Application Support/cappy/cappy.ini`. All possible configuration is as follows:
+A configuration file is automatically generated when the program is ran for the first time. The location depends on the platform. On Linux: `$HOME/.local/share/cappy/cappy.ini`, on Windows: `$HOME\AppData\Roaming\cappy\cappy.ini`, and on Mac: `$HOME/Library/Application Support/cappy/cappy.ini`. All possible configuration is as follows:
 
 | Option                        | Description                                                                | Default        |
 | ----------------------------- | -------------------------------------------------------------------------- |--------------- |
