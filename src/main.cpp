@@ -37,11 +37,19 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  std::shared_ptr<SDL_Window> window = std::shared_ptr<SDL_Window>(SDL_CreateWindowWithPosition("Cappy", 0, 0, capture.width, capture.height, flags), SDL_DestroyWindow);
+  SDL_PropertiesID props = SDL_CreateProperties();
+  SDL_SetStringProperty(props, SDL_PROP_WINDOW_CREATE_TITLE_STRING, "Cappy");
+  SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, capture.width);
+  SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, capture.height);
+  SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_X_NUMBER, 0);
+  SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_Y_NUMBER, 0);
+
+  std::shared_ptr<SDL_Window> window = std::shared_ptr<SDL_Window>(SDL_CreateWindowWithProperties(props), SDL_DestroyWindow);
   if (!window) {
     SDL_Log("Failed to create window!");
     return 1;
   }
+  SDL_DestroyProperties(props);
 
   std::shared_ptr<SDL_Renderer> renderer = std::shared_ptr<SDL_Renderer>(SDL_CreateRenderer(window.get(), NULL, SDL_RENDERER_PRESENTVSYNC), SDL_DestroyRenderer);
   if (!renderer) {
@@ -63,7 +71,7 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  TTF_Font* font = TTF_OpenFontRW(SDL_RWFromConstMem(advanced_pixel_7, sizeof(advanced_pixel_7)), SDL_TRUE, 36);
+  TTF_Font* font = TTF_OpenFontIO(SDL_IOFromConstMem(advanced_pixel_7, sizeof(advanced_pixel_7)), SDL_TRUE, 36);
   if (!font) {
     SDL_Log("Failed to load font: %s", TTF_GetError());
     return 1;

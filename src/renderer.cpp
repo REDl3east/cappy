@@ -4,7 +4,7 @@
 #include <numbers>
 #include <vector>
 
-void drawTriangle(std::shared_ptr<SDL_Renderer> renderer, float x1, float y1, float x2, float y2, float x3, float y3, Uint8 r, Uint8 g, Uint8 b, Uint8 a) {
+void drawTriangle(std::shared_ptr<SDL_Renderer> renderer, float x1, float y1, float x2, float y2, float x3, float y3, float r, float g, float b, float a) {
   SDL_Vertex v[3] = {0};
   v[0].position   = {x1, y1};
   v[1].position   = {x2, y2};
@@ -17,9 +17,9 @@ void drawTriangle(std::shared_ptr<SDL_Renderer> renderer, float x1, float y1, fl
 
 void drawTriangle(std::shared_ptr<SDL_Renderer> renderer,
                   float x1, float y1, float x2, float y2, float x3, float y3,
-                  Uint8 r1, Uint8 g1, Uint8 b1, Uint8 a1,
-                  Uint8 r2, Uint8 g2, Uint8 b2, Uint8 a2,
-                  Uint8 r3, Uint8 g3, Uint8 b3, Uint8 a3) {
+                  float r1, float g1, float b1, float a1,
+                  float r2, float g2, float b2, float a2,
+                  float r3, float g3, float b3, float a3) {
   SDL_Vertex v[3] = {0};
   v[0].position   = {x1, y1};
   v[1].position   = {x2, y2};
@@ -31,9 +31,9 @@ void drawTriangle(std::shared_ptr<SDL_Renderer> renderer,
 }
 
 void draw_circle_flashlight(std::shared_ptr<SDL_Renderer> renderer, float x, float y, float radius, int edges,
-                            uint8_t cr, uint8_t cg, uint8_t cb, uint8_t ca,
-                            uint8_t cor, uint8_t cog, uint8_t cob, uint8_t coa,
-                            uint8_t otr, uint8_t otg, uint8_t otb, uint8_t ota) {
+                            float cr, float cg, float cb, float ca,
+                            float cor, float cog, float cob, float coa,
+                            float otr, float otg, float otb, float ota) {
   if (edges < 5) { // wont work with edges less than 5
     return;
   }
@@ -150,7 +150,7 @@ void draw_circle_flashlight(std::shared_ptr<SDL_Renderer> renderer, float x, flo
   }
 }
 
-void draw_rect_flashlight(std::shared_ptr<SDL_Renderer> renderer, float x, float y, float w, float h, uint8_t inr, uint8_t ing, uint8_t inb, uint8_t ina, uint8_t outr, uint8_t outg, uint8_t outb, uint8_t outa) {
+void draw_rect_flashlight(std::shared_ptr<SDL_Renderer> renderer, float x, float y, float w, float h, float inr, float ing, float inb, float ina, float outr, float outg, float outb, float outa) {
   SDL_FPoint rect_bounds[4] = {
       {x, y},
       {x + w, y},
