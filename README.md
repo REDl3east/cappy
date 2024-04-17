@@ -131,3 +131,8 @@ Select a region of the capture.
 | Shift+Drag                         | Continue drawing region as a square |
 | Right Click (Outside cropped area) | Exit Crop Drawing Mode              |
 | X                                  | Crop capture                        |
+
+
+
+### TODO
+- [ ] Flush all event that happen in between starting a save and ending a save.

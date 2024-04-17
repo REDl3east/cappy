@@ -4,7 +4,6 @@
 #include <thread>
 
 #include "SDL3/SDL.h"
-#include "portable-file-dialogs.h"
 #include "stb_image_write.h"
 
 #include "cappyMachine.h"
@@ -14,6 +13,8 @@
 #include "flashlightState.h"
 #include "icon.h"
 #include "moveState.h"
+
+#define SAVE_FILE_EVENT (SDL_EVENT_USER + 1)
 
 std::shared_ptr<SDL_Texture> create_capture_texture(std::shared_ptr<SDL_Renderer> renderer, Capture& capture);
 
@@ -106,30 +107,6 @@ int main(int argc, char** argv) {
   std::shared_ptr<SDL_Cursor> move_cursor = std::shared_ptr<SDL_Cursor>(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEALL), SDL_DestroyCursor);
   SDL_Cursor* default_cursor              = SDL_GetDefaultCursor();
 
-  auto save_capture_from_dialog = [&machine](std::string path) {
-    if (path.empty()) return 0;
-
-    std::thread([machine, path]() mutable {
-      constexpr int comp = 3;
-      int stride         = machine->get_capture().stride;
-      int index          = machine->current_y * stride + machine->current_x;
-      RGB* pixels        = &machine->get_capture().pixels[index];
-
-      if (!path.ends_with(".png")) {
-        path += ".png";
-      }
-      if (stbi_write_png(path.c_str(), machine->current_w, machine->current_h, comp, pixels, comp * stride) == 0) {
-        SDL_Log("Failed to save file: '%s'", path.c_str());
-        return;
-      }
-      SDL_Log("saved file: '%s'", path.c_str());
-    }).detach();
-
-    return 1;
-  };
-
-  std::unique_ptr<pfd::save_file> save_dialog;
-
   float last_x = 0.0f;
   float last_y = 0.0f;
 
@@ -173,10 +150,30 @@ int main(int argc, char** argv) {
             continue;
           } else if (code == SDLK_m) {
             SDL_MinimizeWindow(window.get());
-          }
+          } else if (code == SDLK_s && mod & SDL_KMOD_CTRL) {
+            static const SDL_DialogFileFilter filters[] = {
+                {"PNG images", "png"},
+                {NULL, NULL},
+            };
 
-          else if (code == SDLK_s && mod & SDL_KMOD_CTRL) {
-            if (!save_dialog) save_dialog.reset(new pfd::save_file("Select a file", ".", {"Image Files (.png)", "*.png"}, pfd::opt::none));
+            SDL_ShowSaveFileDialog([](void* userdata, const char* const* filelist, int filter) {
+              if (filelist) {
+                if (!*filelist) {
+                  SDL_Log("Save dialog canceled.");
+                  return;
+                }
+
+                SDL_Event event;
+                SDL_memset(&event, 0, sizeof(event));
+                event.type       = SAVE_FILE_EVENT;
+                event.user.data1 = strdup(*filelist);
+                SDL_PushEvent(&event);
+
+              } else {
+                SDL_Log("Error: %s\n", SDL_GetError());
+              }
+            },
+                                   machine.get(), window.get(), filters, NULL);
           }
 
           break;
@@ -225,13 +222,32 @@ int main(int argc, char** argv) {
           machine->zoom(event.wheel.y > 0, mx, my);
           break;
         }
-      }
-    }
 
-    if (save_dialog) {
-      if (save_dialog.get()->ready()) {
-        save_capture_from_dialog(save_dialog.get()->result());
-        save_dialog.reset();
+        case SAVE_FILE_EVENT: {
+          std::shared_ptr<SDL_Cursor> wait_cursor = std::shared_ptr<SDL_Cursor>(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_WAIT), SDL_DestroyCursor);
+          SDL_SetCursor(wait_cursor.get());
+
+          std::string path = std::string((char*)(event.user.data1));
+          free(event.user.data1);
+
+          constexpr int comp = 3;
+          int stride         = machine->get_capture().stride;
+          int index          = machine->current_y * stride + machine->current_x;
+          RGB* pixels        = &machine->get_capture().pixels[index];
+
+          if (!path.ends_with(".png")) {
+            path += ".png";
+          }
+          if (stbi_write_png(path.c_str(), machine->current_w, machine->current_h, comp, pixels, comp * stride) == 0) {
+            SDL_Log("Failed to save file: '%s'", path.c_str());
+          } else {
+            SDL_Log("Saved file: '%s'", path.c_str());
+          }
+
+          SDL_SetCursor(SDL_GetDefaultCursor());
+
+          break;
+        }
       }
     }
 

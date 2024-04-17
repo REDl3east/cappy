@@ -26,16 +26,6 @@ FetchContent_Declare(
   SOURCE_DIR ${SDL3_TTF_SRC_DIR}
 )
 
-set(NFD_BUILD_TESTS OFF  CACHE BOOL "" FORCE)
-set(NFD_INSTALL     OFF  CACHE BOOL "" FORCE)
-
-FetchContent_Declare(
-  portable-file-dialogs
-  GIT_REPOSITORY https://github.com/samhocevar/portable-file-dialogs
-  GIT_TAG 7f852d8 # on Nov 11, 2022
-  SOURCE_DIR ${DIALOG_SRC_DIR}
-)
-
 FetchContent_Declare(
   stb
   GIT_REPOSITORY https://github.com/nothings/stb
@@ -43,4 +33,4 @@ FetchContent_Declare(
   SOURCE_DIR ${STB_SRC_DIR}
 )
 
-FetchContent_MakeAvailable(SDL3 SDL3_ttf portable-file-dialogs stb)
+FetchContent_MakeAvailable(SDL3 SDL3_ttf stb)

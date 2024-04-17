@@ -5,7 +5,6 @@ set(CMAKE_CXX_STANDARD 20)
 
 set(SDL3_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs/sdl3)
 set(SDL3_TTF_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs/sdl3_ttf)
-set(DIALOG_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs/portable-file-dialogs)
 set(STB_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs/stb)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs)
@@ -31,7 +30,6 @@ target_include_directories(cappy PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/src/state
   ${SDL3_SRC_DIR}/include
   ${SDL3_TTF_SRC_DIR}/include
-  ${DIALOG_SRC_DIR}
   ${STB_SRC_DIR}
 )
 
