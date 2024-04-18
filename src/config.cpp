@@ -3,8 +3,8 @@
 #define SV_IMPLEMENTATION
 #include "sv.h"
 
+#include "SDL3/SDL_filesystem.h"
 #include "SDL3/SDL_log.h"
-#include "cfgpath.h"
 
 #include <filesystem>
 #include <fstream>
@@ -100,10 +100,10 @@ void config_init(const std::string& file, cappyConfig& config) {
 }
 
 void config_init(cappyConfig& config) {
-  char path[MAX_PATH];
-  get_user_config_folder(path, MAX_PATH, "cappy");
+  char* path = SDL_GetPrefPath("", "cappy");
 
   const std::filesystem::path config_path = std::string(path) + "cappy.ini";
+  SDL_free(path);
 
   if (!std::filesystem::exists(config_path)) {
     std::ofstream file(config_path);

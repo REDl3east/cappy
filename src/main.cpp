@@ -30,9 +30,6 @@ int main(int argc, char** argv) {
   cappyConfig config;
   config_init(config);
 
-  flags |= SDL_WINDOW_BORDERLESS;
-  if (config.window_fullscreen) flags |= SDL_WINDOW_FULLSCREEN;
-
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
     SDL_Log("Failed to init SDL!");
     return 1;
@@ -45,9 +42,16 @@ int main(int argc, char** argv) {
   SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_X_NUMBER, 0);
   SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_Y_NUMBER, 0);
 
+  if (config.window_fullscreen) {
+    SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_FULLSCREEN_BOOLEAN, 1);
+  } else {
+    SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_BORDERLESS_BOOLEAN, 1);
+  }
+
   std::shared_ptr<SDL_Window> window = std::shared_ptr<SDL_Window>(SDL_CreateWindowWithProperties(props), SDL_DestroyWindow);
   if (!window) {
     SDL_Log("Failed to create window!");
+    SDL_DestroyProperties(props);
     return 1;
   }
   SDL_DestroyProperties(props);
