@@ -71,6 +71,8 @@ int main(int argc, char** argv) {
     return 1;
   }
 
+  SDL_SetTextureScaleMode(texture.get(), SDL_SCALEMODE_NEAREST);
+
   if (TTF_Init() < 0) {
     SDL_Log("Failed to init TTF!");
     return 1;
