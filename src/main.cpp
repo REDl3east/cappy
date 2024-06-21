@@ -241,11 +241,18 @@ int main(int argc, char** argv) {
           int index          = machine->current_y * stride + machine->current_x;
           RGB* pixels        = &machine->get_capture().pixels[index];
 
+          if (path.starts_with("file://")) {
+            path.erase(0, 7);
+          } else if (path.starts_with("file:/")) {
+            path.erase(0, 6);
+          }
+
           if (!path.ends_with(".png")) {
             path += ".png";
           }
+
           if (stbi_write_png(path.c_str(), machine->current_w, machine->current_h, comp, pixels, comp * stride) == 0) {
-            SDL_Log("Failed to save file: '%s'", path.c_str());
+            SDL_Log("Failed to save file: '%s': %s", path.c_str(), strerror(errno));
           } else {
             SDL_Log("Saved file: '%s'", path.c_str());
           }
