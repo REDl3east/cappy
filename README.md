@@ -5,7 +5,7 @@ Cappy
 </img>
 
 A cross plateform screen capping tool that lets you immediately explore the pixels on your monitor screen(s).
-
+Inspiration from [boomer](https://github.com/tsoding/boomer).
 <br />
 
 ## Features
