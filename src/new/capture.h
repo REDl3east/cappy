@@ -24,40 +24,6 @@ void capture_free(capture_t* capture);
 bool capture_in_bound(capture_t* capture, int x, int y);
 capture_rgb_t* capture_at(capture_t* capture, int x, int y);
 
-// struct Capture {
-// public:
-//   ~Capture();
-
-//   bool capture();
-//   bool capture(const char* filename);
-
-//   bool in_bound(int x, int y) {
-//     if (!captured) return false;
-//     if (x >= width || x < 0) return false;
-//     if (y >= height || y < 0) return false;
-//     return true;
-//   }
-
-//   bool at(int x, int y, RGB& rgb) {
-//     if (!captured) return false;
-//     if (x >= width || x < 0) return false;
-//     if (y >= height || y < 0) return false;
-
-//     int index = y * width + x;
-//     rgb       = pixels[index];
-
-//     return true;
-//   }
-
-//   bool captured = false;
-//   int width;
-//   int height;
-//   int stride;
-//   RGB* pixels;
-
-// private:
-// };
-
 // std::string toDecimalString(const RGB& color);
 // std::string toDecimalSepString(const RGB& color);
 // std::string toHexString(const RGB& color);

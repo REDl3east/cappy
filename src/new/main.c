@@ -12,10 +12,12 @@ SDL_AppResult app_init(app_t* app, int argc, char** argv) {
     return SDL_APP_FAILURE;
   }
 
-  if(!config_init(&app->config)){
+  if (!config_init(&app->config)) {
     SDL_Log("Failed to initialize config!");
     return SDL_APP_FAILURE;
   }
+
+  config_print(&app->config);
 
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
     SDL_Log("Failed to init SDL!");

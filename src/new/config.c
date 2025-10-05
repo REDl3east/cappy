@@ -16,25 +16,27 @@ bool config_init(config_t* config) {
   SDL_snprintf(tmp_buffer, 256, "%s%s", path, "cappy.ini");
 
   if (!SDL_GetPathInfo(tmp_buffer, NULL)) { // file not exists
-    FILE* fh = fopen(tmp_buffer, "w");
+    SDL_IOStream* io = SDL_IOFromFile(tmp_buffer, "w");
 
-    if (fh == NULL) {
+    if (io == NULL) {
       SDL_free(path);
       return false;
     }
 
-    fprintf(fh,
-            "window_fullscreen             = false\n"
-            "window_pre_crop               = 0 0 0 0\n"
-            "flashlight_size               = 150\n"
-            "flashlight_center_inner_color = 255 255 204 25\n"
-            "flashlight_center_outer_color = 255 255 204 25\n"
-            "flashlight_outer_color        = 51 51 0 50\n"
-            "background_color              = 50 50 50\n"
-            "grid_size                     = 100\n"
-            "grid_color                    = 200 200 200\n");
+    const char* config_str =
+        "window_fullscreen             = false\n"
+        "window_pre_crop               = 0 0 0 0\n"
+        "flashlight_size               = 150\n"
+        "flashlight_center_inner_color = 255 255 204 25\n"
+        "flashlight_center_outer_color = 255 255 204 25\n"
+        "flashlight_outer_color        = 51 51 0 50\n"
+        "background_color              = 50 50 50\n"
+        "grid_size                     = 100\n"
+        "grid_color                    = 200 200 200\n";
 
-    fclose(fh);
+    SDL_WriteIO(io, config_str, SDL_strlen(config_str));
+
+    SDL_CloseIO(io);
   }
 
   bool ret = config_init_file(tmp_buffer, config);
@@ -100,8 +102,6 @@ bool config_init_file(const char* file, config_t* config) {
     config_handler(config, key, value);
 
   } while (pos != SV_NPOS && !sv_is_empty(input));
-
-  config_print(config);
 
   SDL_free(file_data);
   return true;
@@ -235,27 +235,13 @@ static void config_parse_bound(cstring_view value, int* bounds) {
 
 void config_print(const config_t* config) {
   if (config == NULL) return;
-
-  SDL_Log("Config:\n  window_fullscreen = %s\n  flashlight_size = %d\n  grid_size = %d",
-          config->window_fullscreen ? "true" : "false",
-          config->flashlight_size,
-          config->grid_size);
-
-  SDL_Log("  window_pre_crop = %d %d %d %d",
-          config->window_pre_crop[0], config->window_pre_crop[1], config->window_pre_crop[2], config->window_pre_crop[3]);
-
-  SDL_Log("  flashlight_center_inner_color = %d %d %d %d",
-          config->flashlight_center_inner_color[0], config->flashlight_center_inner_color[1], config->flashlight_center_inner_color[2], config->flashlight_center_inner_color[3]);
-
-  SDL_Log("  flashlight_center_outer_color = %d %d %d %d",
-          config->flashlight_center_outer_color[0], config->flashlight_center_outer_color[1], config->flashlight_center_outer_color[2], config->flashlight_center_outer_color[3]);
-
-  SDL_Log("  flashlight_outer_color = %d %d %d %d",
-          config->flashlight_outer_color[0], config->flashlight_outer_color[1], config->flashlight_outer_color[2], config->flashlight_outer_color[3]);
-
-  SDL_Log("  background_color = %d %d %d",
-          config->background_color[0], config->background_color[1], config->background_color[2]);
-
-  SDL_Log("  grid_color = %d %d %d",
-          config->grid_color[0], config->grid_color[1], config->grid_color[2]);
+  SDL_Log("window_fullscreen             = %s", config->window_fullscreen ? "true" : "false");
+  SDL_Log("flashlight_size               = %d", config->flashlight_size);
+  SDL_Log("grid_size                     = %d", config->grid_size);
+  SDL_Log("window_pre_crop               = %d %d %d %d", config->window_pre_crop[0], config->window_pre_crop[1], config->window_pre_crop[2], config->window_pre_crop[3]);
+  SDL_Log("flashlight_center_inner_color = %d %d %d %d", config->flashlight_center_inner_color[0], config->flashlight_center_inner_color[1], config->flashlight_center_inner_color[2], config->flashlight_center_inner_color[3]);
+  SDL_Log("flashlight_center_outer_color = %d %d %d %d", config->flashlight_center_outer_color[0], config->flashlight_center_outer_color[1], config->flashlight_center_outer_color[2], config->flashlight_center_outer_color[3]);
+  SDL_Log("flashlight_outer_color        = %d %d %d %d", config->flashlight_outer_color[0], config->flashlight_outer_color[1], config->flashlight_outer_color[2], config->flashlight_outer_color[3]);
+  SDL_Log("background_color              = %d %d %d", config->background_color[0], config->background_color[1], config->background_color[2]);
+  SDL_Log("grid_color                    = %d %d %d", config->grid_color[0], config->grid_color[1], config->grid_color[2]);
 }
