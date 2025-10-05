@@ -75,13 +75,13 @@ void camera_smooth_zoom(camera_t* camera, float amount, float mouse_x, float mou
 }
 
 void camera_smooth_pan(camera_t* camera, float v_x, float v_y, float damping, Uint64 milliseconds) {
-    camera->panning     = true;
-    camera->pan_vx      = v_x;
-    camera->pan_vy      = v_y;
-    camera->pan_damping = damping;
-    camera->pan_ms      = milliseconds;
-    camera->pan_tick    = SDL_GetTicks();
-    camera->pan_elapsed = 0.0f;
+  camera->panning     = true;
+  camera->pan_vx      = v_x;
+  camera->pan_vy      = v_y;
+  camera->pan_damping = damping;
+  camera->pan_ms      = (float)milliseconds;
+  camera->pan_tick    = (float)SDL_GetTicks();
+  camera->pan_elapsed = 0.0f;
 }
 
 bool camera_update(camera_t* camera) {

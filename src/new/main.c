@@ -127,11 +127,6 @@ SDL_AppResult app_init(app_t* app, int argc, char** argv) {
 }
 
 SDL_AppResult app_event(app_t* app, SDL_Event* event) {
-  float mx, my;
-  SDL_GetMouseState(&mx, &my);
-  app->last_x = mx;
-  app->last_y = my;
-
   // bool handled = machine->handle_event(event);
   // if (handled) continue;
 
@@ -160,9 +155,10 @@ SDL_AppResult app_event(app_t* app, SDL_Event* event) {
       //   machine->current_h = capture.height;
       //   machine->set_state<MoveState>();
       //   continue;
-      // } else if (code == SDLK_m) {
-      //   SDL_MinimizeWindow(window.get());
-      // } else if (code == SDLK_s && mod & SDL_KMOD_CTRL) {
+      // }
+      else if (code == SDLK_M) {
+        SDL_MinimizeWindow(app->window);
+      } // else if (code == SDLK_s && mod & SDL_KMOD_CTRL) {
       //   static const SDL_DialogFileFilter filters[] = {
       //       {"PNG images", "png"},
       //       {NULL, NULL},
@@ -204,21 +200,21 @@ SDL_AppResult app_event(app_t* app, SDL_Event* event) {
       break;
     }
     case SDL_EVENT_MOUSE_BUTTON_UP: {
-      // if (event.button.button == SDL_BUTTON_LEFT) {
-      //   float mx, my;
-      //   SDL_GetMouseState(&mx, &my);
+      if (event->button.button == SDL_BUTTON_LEFT) {
+        float mx, my;
+        SDL_GetMouseState(&mx, &my);
 
-      //   float magnitude = std::sqrt(mx * mx + my * my);
-      //   float nx        = (mx - last_x) / magnitude;
-      //   float ny        = (my - last_y) / magnitude;
-      //   float vx        = 1000.0f * nx;
-      //   float vy        = 1000.0f * ny;
-      //   camera.smooth_pan(vx, vy, 0.92, 10);
+        float magnitude = sqrtf(mx * mx + my * my);
+        float nx        = (mx - app->last_x) / magnitude;
+        float ny        = (my - app->last_y) / magnitude;
+        float vx        = 1000.0f * nx;
+        float vy        = 1000.0f * ny;
+        camera_smooth_pan(&app->camera, vx, vy, 0.92f, 10);
 
-      //   if (!(SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_RIGHT))) {
-      //     SDL_SetCursor(default_cursor);
-      //   }
-      // }
+        // if (!(SDL_GetMouseState(NULL, NULL) & SDL_BUTTON_MASK(SDL_BUTTON_RIGHT))) {
+        //   SDL_SetCursor(app->default_cursor);
+        // }
+      }
       break;
     }
     case SDL_EVENT_MOUSE_MOTION: {
@@ -291,6 +287,11 @@ SDL_AppResult app_event(app_t* app, SDL_Event* event) {
 }
 
 SDL_AppResult app_iterate(app_t* app) {
+  float mx, my;
+  SDL_GetMouseState(&mx, &my);
+  app->last_x = mx;
+  app->last_y = my;
+
   SDL_SetRenderDrawColor(app->renderer, app->config.background_color[0], app->config.background_color[1], app->config.background_color[2], 255);
   SDL_RenderClear(app->renderer);
 
@@ -307,6 +308,9 @@ SDL_AppResult app_iterate(app_t* app) {
   // machine->render_present();
 
   camera_update(&app->camera);
+  // SDL_Log("%f %f", app->camera.pan_vx,app->camera.pan_vy);
+  // if(app->camera.panning)
+  // SDL_Log("%s", app->camera.panning ? "true" : "false");
 
   return SDL_APP_CONTINUE;
 }

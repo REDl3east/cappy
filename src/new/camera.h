@@ -36,6 +36,6 @@ SDL_FPoint camera_screen_to_world(camera_t* camera, float screen_x, float screen
 
 void camera_smooth_zoom(camera_t* camera, float amount, float mouse_x, float mouse_y, Uint64 milliseconds);
 void camera_smooth_pan(camera_t* camera, float v_x, float v_y, float damping, Uint64 milliseconds);
-bool camera_update();
+bool camera_update(camera_t* camera);
 
 #endif
