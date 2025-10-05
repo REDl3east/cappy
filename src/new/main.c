@@ -1,7 +1,7 @@
-#include "advanced_pixel_7.h"
 #include "app.h"
-#include "icon.h"
 
+#include "assets/advanced_pixel_7.h"
+#include "assets/icon.h"
 
 #define SDL_MAIN_USE_CALLBACKS
 #include "SDL3/SDL_main.h"
@@ -108,8 +108,17 @@ SDL_AppResult app_init(app_t* app, int argc, char** argv) {
   // machine->current_w = std::abs(config.window_pre_crop[2] - config.window_pre_crop[0]);
   // machine->current_h = std::abs(config.window_pre_crop[3] - config.window_pre_crop[1]);
 
-  // std::shared_ptr<SDL_Cursor> move_cursor = std::shared_ptr<SDL_Cursor>(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEALL), SDL_DestroyCursor);
-  // SDL_Cursor* default_cursor              = SDL_GetDefaultCursor();
+  app->move_cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_MOVE);
+  if (app->move_cursor == NULL) {
+    SDL_Log("Failed to create move cursor: %s", SDL_GetError());
+    return SDL_APP_FAILURE;
+  }
+
+  app->default_cursor = SDL_GetDefaultCursor();
+  if (app->default_cursor == NULL) {
+    SDL_Log("Failed to create default cursor: %s", SDL_GetError());
+    return SDL_APP_FAILURE;
+  }
 
   return SDL_APP_CONTINUE;
 }
@@ -139,6 +148,8 @@ void app_quit(app_t* app, SDL_AppResult result) {
     if (app->capture_texture != NULL) SDL_DestroyTexture(app->capture_texture);
     if (app->font != NULL) TTF_CloseFont(app->font);
     if (app->icon != NULL) SDL_DestroySurface(app->icon);
+    if (app->move_cursor != NULL) SDL_DestroyCursor(app->move_cursor);
+    if (app->default_cursor != NULL) SDL_DestroyCursor(app->default_cursor);
 
     TTF_Quit();
     SDL_Quit();

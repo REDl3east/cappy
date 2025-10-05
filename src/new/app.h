@@ -13,6 +13,8 @@ typedef struct app_t {
   camera_t camera;
   TTF_Font* font;
   SDL_Surface* icon;
+  SDL_Cursor* move_cursor;
+  SDL_Cursor* default_cursor;
 } app_t;
 
 SDL_AppResult app_init(app_t* app, int argc, char** argv);
