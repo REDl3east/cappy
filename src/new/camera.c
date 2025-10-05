@@ -71,26 +71,26 @@ void camera_smooth_zoom(camera_t* camera, float amount, float mouse_x, float mou
   camera->zoom_ms           = (float)milliseconds;
   camera->zoom_tick         = (float)SDL_GetTicks();
   camera->zoom_elapsed      = 0.0f;
-  camera->zoom_scale_per_ms = amount / camera->zoom_x;
+  camera->zoom_scale_per_ms = amount / camera->zoom_ms;
 }
 
 void camera_smooth_pan(camera_t* camera, float v_x, float v_y, float damping, Uint64 milliseconds) {
-  camera->panning     = true;
-  camera->pan_vx      = v_x;
-  camera->pan_vy      = v_y;
-  camera->pan_damping = damping;
-  camera->pan_ms      = (float)milliseconds;
-  camera->pan_tick    = (float)SDL_GetTicks();
-  camera->pan_elapsed = 0.0f;
+    camera->panning     = true;
+    camera->pan_vx      = v_x;
+    camera->pan_vy      = v_y;
+    camera->pan_damping = damping;
+    camera->pan_ms      = milliseconds;
+    camera->pan_tick    = SDL_GetTicks();
+    camera->pan_elapsed = 0.0f;
 }
 
 bool camera_update(camera_t* camera) {
   if (!camera->zooming && !camera->panning) return false;
 
-  float t = (float)SDL_GetTicks();
+  float tick = (float)SDL_GetTicks();
 
   if (camera->zooming) {
-    camera->zoom_elapsed += t - camera->zoom_tick;
+    camera->zoom_elapsed += tick - camera->zoom_tick;
 
     camera_zoom(camera, camera->zoom_scale_per_ms, camera->zoom_x, camera->zoom_y);
 
@@ -98,11 +98,11 @@ bool camera_update(camera_t* camera) {
       camera->zooming = false;
     }
 
-    camera->zoom_tick = t;
+    camera->zoom_tick = tick;
   }
 
   if (camera->panning) {
-    camera->pan_elapsed += t - camera->pan_tick;
+    camera->pan_elapsed += tick - camera->pan_tick;
 
     camera->pan_vx *= camera->pan_damping;
     camera->pan_vy *= camera->pan_damping;
@@ -118,7 +118,7 @@ bool camera_update(camera_t* camera) {
       }
     }
 
-    camera->pan_tick = t;
+    camera->pan_tick = tick;
   }
 
   return true;
