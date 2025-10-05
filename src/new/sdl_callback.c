@@ -1,4 +1,4 @@
-#include "main.h"
+#include "app.h"
 
 SDL_AppResult SDL_AppInit(void** app_ptr, int argc, char** argv) {
   *app_ptr = (app_t*)SDL_calloc(sizeof(app_t), 1);
