@@ -13,6 +13,7 @@ set(MAIN_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/src/new/sdl_callback.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/new/capture.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/new/config.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/new/camera.c
   # ${CMAKE_CURRENT_SOURCE_DIR}/src/camera.cpp
   # ${CMAKE_CURRENT_SOURCE_DIR}/src/capture.cpp
   # ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer.cpp

@@ -3,12 +3,14 @@
 
 #include "capture.h"
 #include "config.h"
+#include "camera.h"
 
 typedef struct app_t {
   SDL_Window* window;
   SDL_Renderer* renderer;
   SDL_Texture* capture_texture;
   config_t config;
+  camera_t camera;
   TTF_Font* font;
   SDL_Surface* icon;
 } app_t;

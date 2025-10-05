@@ -84,7 +84,8 @@ SDL_AppResult app_init(app_t* app, int argc, char** argv) {
 
   SDL_SetWindowIcon(app->window, app->icon);
 
-  // CameraSmooth camera;
+  camera_reset(&app->camera);
+
   // auto machine = CappyMachine::make(config, renderer, capture, texture, camera, font);
   // machine->set_state<MoveState>();
 
