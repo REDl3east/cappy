@@ -9,6 +9,8 @@ typedef struct app_t {
   SDL_Renderer* renderer;
   SDL_Texture* capture_texture;
   config_t config;
+  TTF_Font* font;
+  SDL_Surface* icon;
 } app_t;
 
 SDL_AppResult app_init(app_t* app, int argc, char** argv);

@@ -26,8 +26,15 @@ void SDL_AppQuit(void* app_ptr, SDL_AppResult result) {
   app_t* app = (app_t*)app_ptr;
 
   if (app != NULL) {
-    SDL_DestroyRenderer(app->renderer);
-    SDL_DestroyWindow(app->window);
+    if (app->renderer != NULL) {
+      SDL_DestroyRenderer(app->renderer);
+      app->renderer = NULL;
+    }
+
+    if (app->window != NULL) {
+      SDL_DestroyWindow(app->window);
+      app->window = NULL;
+    }
   }
 
   app_quit((app_t*)app_ptr, result);

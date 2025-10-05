@@ -1,4 +1,7 @@
+#include "advanced_pixel_7.h"
 #include "app.h"
+#include "icon.h"
+
 
 #define SDL_MAIN_USE_CALLBACKS
 #include "SDL3/SDL_main.h"
@@ -16,10 +19,9 @@ SDL_AppResult app_init(app_t* app, int argc, char** argv) {
     SDL_Log("Failed to initialize config!");
     return SDL_APP_FAILURE;
   }
-
   config_print(&app->config);
 
-  if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+  if (!SDL_Init(SDL_INIT_VIDEO)) {
     SDL_Log("Failed to init SDL!");
     return SDL_APP_FAILURE;
   }
@@ -38,12 +40,12 @@ SDL_AppResult app_init(app_t* app, int argc, char** argv) {
   }
 
   app->window = SDL_CreateWindowWithProperties(props);
+  SDL_DestroyProperties(props);
+
   if (app->window == NULL) {
-    SDL_Log("Failed to create window!");
-    SDL_DestroyProperties(props);
+    SDL_Log("Failed to create window: %s", SDL_GetError());
     return SDL_APP_FAILURE;
   }
-  SDL_DestroyProperties(props);
 
   app->renderer = SDL_CreateRenderer(app->window, NULL);
   if (app->renderer == NULL) {
@@ -56,26 +58,31 @@ SDL_AppResult app_init(app_t* app, int argc, char** argv) {
 
   app->capture_texture = create_capture_texture(app->renderer, &capture);
   if (app->capture_texture == NULL) {
-    SDL_Log("Failed to create capture texture %s", SDL_GetError());
+    SDL_Log("Failed to create capture texture: %s", SDL_GetError());
     return SDL_APP_FAILURE;
   }
   capture_free(&capture);
 
   SDL_SetTextureScaleMode(app->capture_texture, SDL_SCALEMODE_NEAREST);
 
-  // if (TTF_Init() < 0) {
-  //   SDL_Log("Failed to init TTF!");
-  //   return 1;
-  // }
+  if (!TTF_Init()) {
+    SDL_Log("Failed to init TTF!: %s", SDL_GetError());
+    return SDL_APP_FAILURE;
+  }
 
-  // TTF_Font* font = TTF_OpenFontIO(SDL_IOFromConstMem(advanced_pixel_7, sizeof(advanced_pixel_7)), SDL_TRUE, 36);
-  // if (!font) {
-  //   SDL_Log("Failed to load font: %s", TTF_GetError());
-  //   return 1;
-  // }
+  app->font = TTF_OpenFontIO(SDL_IOFromConstMem(advanced_pixel_7, sizeof(advanced_pixel_7)), true, 36);
+  if (app->font == NULL) {
+    SDL_Log("Failed to load font: %s", SDL_GetError());
+    return SDL_APP_FAILURE;
+  }
 
-  // std::shared_ptr<SDL_Surface> icon = std::shared_ptr<SDL_Surface>(SDL_CreateSurfaceFrom(icon_data, ICON_WIDTH, ICON_HEIGHT, ICON_WIDTH * 4, SDL_PIXELFORMAT_RGBA32), SDL_DestroySurface);
-  // SDL_SetWindowIcon(window.get(), icon.get());
+  app->icon = SDL_CreateSurfaceFrom(ICON_WIDTH, ICON_HEIGHT, SDL_PIXELFORMAT_RGBA32, icon_data, ICON_WIDTH * 4);
+  if (app->icon == NULL) {
+    SDL_Log("Failed to create icon: %s", SDL_GetError());
+    return SDL_APP_FAILURE;
+  }
+
+  SDL_SetWindowIcon(app->window, app->icon);
 
   // CameraSmooth camera;
   // auto machine = CappyMachine::make(config, renderer, capture, texture, camera, font);
@@ -128,7 +135,12 @@ SDL_AppResult app_iterate(app_t* app) {
 void app_quit(app_t* app, SDL_AppResult result) {
   // free anything allocated within app variable.
   if (app != NULL) {
-    SDL_DestroyTexture(app->capture_texture);
+    if (app->capture_texture != NULL) SDL_DestroyTexture(app->capture_texture);
+    if (app->font != NULL) TTF_CloseFont(app->font);
+    if (app->icon != NULL) SDL_DestroySurface(app->icon);
+
+    TTF_Quit();
+    SDL_Quit();
   }
 }
 
