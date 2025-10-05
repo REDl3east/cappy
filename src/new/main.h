@@ -1,11 +1,13 @@
 #include "SDL3/SDL.h"
 
+#include "capture.h"
+#include "config.h"
 
 typedef struct app_t {
   SDL_Window* window;
   SDL_Renderer* renderer;
-  int width;
-  int height;
+  SDL_Texture* capture_texture;
+  config_t config;
 } app_t;
 
 SDL_AppResult app_init(app_t* app, int argc, char** argv);

@@ -4,22 +4,6 @@ SDL_AppResult SDL_AppInit(void** app_ptr, int argc, char** argv) {
   *app_ptr = (app_t*)SDL_calloc(sizeof(app_t), 1);
   if (*app_ptr == NULL) return SDL_APP_FAILURE;
   app_t* app = (app_t*)*app_ptr;
-
-  app->width  = 1440;
-  app->height = 810;
-
-  if (!SDL_Init(SDL_INIT_VIDEO)) {
-    SDL_Log("Couldn't initialize SDL: %s", SDL_GetError());
-    return SDL_APP_FAILURE;
-  }
-
-  if (!SDL_CreateWindowAndRenderer("c-color-convert - playground", app->width, app->height, SDL_WINDOW_HIDDEN, &app->window, &app->renderer)) {
-    SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
-    return SDL_APP_FAILURE;
-  }
-
-  SDL_ShowWindow(app->window);
-
   return app_init(app, argc, argv);
 }
 
