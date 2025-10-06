@@ -2,6 +2,7 @@
 
 #include "assets/advanced_pixel_7.h"
 #include "assets/icon.h"
+#include "renderer.h"
 
 #define SDL_MAIN_USE_CALLBACKS
 #include "SDL3/SDL_main.h"
@@ -31,8 +32,10 @@ SDL_AppResult app_init(app_t* app, int argc, char** argv) {
 
   SDL_PropertiesID props = SDL_CreateProperties();
   SDL_SetStringProperty(props, SDL_PROP_WINDOW_CREATE_TITLE_STRING, "Cappy");
-  SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, app->capture.width);
-  SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, app->capture.height);
+  SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, 1920);
+  SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, 1080);
+  // SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, app->capture.width);
+  // SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, app->capture.height);
   SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_X_NUMBER, 0);
   SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_Y_NUMBER, 0);
 
@@ -91,6 +94,15 @@ SDL_AppResult app_init(app_t* app, int argc, char** argv) {
   app->state          = APP_MOVE_STATE;
   app->recompute_text = true;
 
+  app->flashlight_zoom.size             = 150.0f;
+  app->flashlight_zoom.zooming          = false;
+  app->flashlight_zoom.zoom_in          = false;
+  app->flashlight_zoom.zoom_amount      = 150.0f;
+  app->flashlight_zoom.zoom_ms          = 25.0f;
+  app->flashlight_zoom.zoom_tick        = 0.0f;
+  app->flashlight_zoom.zoom_elapsed     = 0.0f;
+  app->flashlight_zoom.zoom_size_per_ms = 0.0f;
+
   // setting bounds in capture, if width or height is <= 0
   // then it sets the crop to the capture width or height.
   if (app->config.window_pre_crop[0] < 0) app->config.window_pre_crop[0] = 0;
@@ -131,6 +143,8 @@ SDL_AppResult app_event(app_t* app, SDL_Event* event) {
     handled = app_event_move(app, event);
   } else if (app->state == APP_COLOR_STATE) {
     handled = app_event_color(app, event);
+  } else if (app->state == APP_FLASHLIGHT_STATE) {
+    handled = app_event_flashlight(app, event);
   } else {
     return SDL_APP_FAILURE;
   }
@@ -146,17 +160,22 @@ SDL_AppResult app_event(app_t* app, SDL_Event* event) {
       SDL_Keymod mod   = SDL_GetModState();
       if (code == SDLK_Q) {
         return SDL_APP_SUCCESS;
-      }
-      // TODO:
-      // else if (code == SDLK_f) {
-      //   machine->set_state<FlashlightState>();
-      //   continue;
-      else if (code == SDLK_C) {
-        if (app->state == APP_COLOR_STATE) {
+      } else if (code == SDLK_F) {
+        if (app->state == APP_MOVE_STATE || app->state == APP_COLOR_STATE) {
+          app->state                      = APP_FLASHLIGHT_STATE;
+        } else if (app->state == APP_FLASHLIGHT_STATE) {
           app->state = APP_MOVE_STATE;
         } else {
+          return SDL_APP_FAILURE;
+        }
+      } else if (code == SDLK_C) {
+        if (app->state == APP_MOVE_STATE || app->state == APP_FLASHLIGHT_STATE) {
           app->state          = APP_COLOR_STATE;
           app->recompute_text = true;
+        } else if (app->state == APP_COLOR_STATE) {
+          app->state = APP_MOVE_STATE;
+        } else {
+          return SDL_APP_FAILURE;
         }
 
       } else if (code == SDLK_G) {
@@ -210,6 +229,7 @@ SDL_AppResult app_event(app_t* app, SDL_Event* event) {
 
         SDL_SetCursor(app->move_cursor);
       } else if (event->button.button == SDL_BUTTON_RIGHT) {
+        // TODO:
         // float mx, my;
         // SDL_GetMouseState(&mx, &my);
         // machine->set_state<DrawCropState>(mx, my);
@@ -328,6 +348,8 @@ SDL_AppResult app_iterate(app_t* app) {
     app_iterate_move(app);
   } else if (app->state == APP_COLOR_STATE) {
     app_iterate_color(app);
+  } else if (app->state == APP_FLASHLIGHT_STATE) {
+    app_iterate_flashlight(app);
   } else {
     return SDL_APP_FAILURE;
   }
@@ -488,8 +510,8 @@ void app_iterate_color(app_t* app) {
 
     check_recompute_text(app, (int)mouse.x, (int)mouse.y, rgb);
 
-    float panel_width  = 275.0f;
-    float panel_offset = 50.0f;
+    const float panel_width  = 275.0f;
+    const float panel_offset = 50.0f;
 
     SDL_FRect text_panel = {
         mx,
@@ -533,6 +555,76 @@ void app_iterate_color(app_t* app) {
   } else {
     SDL_ShowCursor();
   }
+}
+
+void flashlight_zoom(flashlight_zoom_t* zoom, bool in) {
+  zoom->zooming          = true;
+  zoom->zoom_in          = in;
+  zoom->zoom_tick        = (float)SDL_GetTicks();
+  zoom->zoom_elapsed     = 0.0f;
+  zoom->zoom_size_per_ms = zoom->zoom_amount / zoom->zoom_ms;
+}
+
+bool flashlight_update(flashlight_zoom_t* zoom) {
+  if (!zoom->zooming) return false;
+
+  float tick = (float)SDL_GetTicks();
+  zoom->zoom_elapsed += tick - zoom->zoom_tick;
+
+  if (zoom->zoom_in) {
+    zoom->size += zoom->zoom_size_per_ms;
+  } else {
+    zoom->size -= zoom->zoom_size_per_ms;
+  }
+
+  if (zoom->size <= 0) {
+    zoom->size    = 0.0f;
+    zoom->zooming = false;
+  }
+
+  if (zoom->zoom_elapsed > zoom->zoom_ms) {
+    zoom->zooming = false;
+  }
+
+  zoom->zoom_tick = tick;
+
+  return true;
+}
+
+bool app_event_flashlight(app_t* app, SDL_Event* event) {
+  switch (event->type) {
+    case SDL_EVENT_MOUSE_WHEEL: {
+      if ((SDL_GetModState() & SDL_KMOD_LSHIFT)) {
+        flashlight_zoom(&app->flashlight_zoom, event->wheel.y <= 0);
+        return true;
+      }
+
+      break;
+    }
+  }
+  return false;
+}
+
+void app_iterate_flashlight(app_t* app) {
+  camera_update(&app->camera);
+
+  flashlight_update(&app->flashlight_zoom);
+
+  float x, y;
+  SDL_GetMouseState(&x, &y);
+  draw_circle_flashlight(app->renderer, x, y, app->flashlight_zoom.size, 100,
+                         (float)app->config.flashlight_center_inner_color[0] / 255.0f,
+                         (float)app->config.flashlight_center_inner_color[1] / 255.0f,
+                         (float)app->config.flashlight_center_inner_color[2] / 255.0f,
+                         (float)app->config.flashlight_center_inner_color[3] / 255.0f,
+                         (float)app->config.flashlight_center_outer_color[0] / 255.0f,
+                         (float)app->config.flashlight_center_outer_color[1] / 255.0f,
+                         (float)app->config.flashlight_center_outer_color[2] / 255.0f,
+                         (float)app->config.flashlight_center_outer_color[3] / 255.0f,
+                         (float)app->config.flashlight_outer_color[0] / 255.0f,
+                         (float)app->config.flashlight_outer_color[1] / 255.0f,
+                         (float)app->config.flashlight_outer_color[2] / 255.0f,
+                         (float)app->config.flashlight_outer_color[3] / 255.0f);
 }
 
 SDL_Texture* create_capture_texture(SDL_Renderer* renderer, capture_t* capture) {

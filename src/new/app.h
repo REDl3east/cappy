@@ -5,6 +5,17 @@
 #include "capture.h"
 #include "config.h"
 
+typedef struct flashlight_zoom_t {
+  float size;
+  float zooming;
+  bool zoom_in;
+  float zoom_amount;
+  float zoom_ms;
+  float zoom_tick;
+  float zoom_elapsed;
+  float zoom_size_per_ms;
+} flashlight_zoom_t;
+
 typedef enum app_state_t {
   APP_MOVE_STATE,
   APP_COLOR_STATE,
@@ -35,6 +46,8 @@ typedef struct app_t {
   bool recompute_text;
   SDL_Texture* text_texture;
 
+  flashlight_zoom_t flashlight_zoom;
+
   app_state_t state;
 } app_t;
 
@@ -47,6 +60,11 @@ bool app_event_move(app_t* app, SDL_Event* event);
 void app_iterate_move(app_t* app);
 bool app_event_color(app_t* app, SDL_Event* event);
 void app_iterate_color(app_t* app);
+bool app_event_flashlight(app_t* app, SDL_Event* event);
+void app_iterate_flashlight(app_t* app);
+
+void flashlight_zoom(flashlight_zoom_t* zoom, bool in);
+bool flashlight_update(flashlight_zoom_t* zoom);
 
 #ifndef MIN
   #define MIN(a, b) ((a) < (b) ? (a) : (b))
