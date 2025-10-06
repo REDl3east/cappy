@@ -160,9 +160,11 @@ SDL_AppResult app_event(app_t* app, SDL_Event* event) {
         return SDL_APP_SUCCESS;
       } else if (code == SDLK_F) {
         if (app->state == APP_MOVE_STATE || app->state == APP_COLOR_STATE) {
-          app->state                      = APP_FLASHLIGHT_STATE;
+          app->state = APP_FLASHLIGHT_STATE;
+          SDL_HideCursor();
         } else if (app->state == APP_FLASHLIGHT_STATE) {
           app->state = APP_MOVE_STATE;
+          SDL_ShowCursor();
         } else {
           return SDL_APP_FAILURE;
         }
