@@ -22,7 +22,7 @@ bool capture_screen(capture_t* capture);
 void capture_free(capture_t* capture);
 
 bool capture_in_bound(capture_t* capture, int x, int y);
-capture_rgb_t* capture_at(capture_t* capture, int x, int y);
+bool capture_at(capture_t* capture, int x, int y, capture_rgb_t* rgb);
 
 // std::string toDecimalString(const RGB& color);
 // std::string toDecimalSepString(const RGB& color);

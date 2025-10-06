@@ -119,8 +119,12 @@ bool capture_in_bound(capture_t* capture, int x, int y) {
   return true;
 }
 
-capture_rgb_t* capture_at(capture_t* capture, int x, int y) {
-  if (x >= capture->width || x < 0) return NULL;
-  if (y >= capture->height || y < 0) return NULL;
-  return capture->pixels + (y * capture->width + x);
+bool capture_at(capture_t* capture, int x, int y, capture_rgb_t* rgb) {
+  if (x >= capture->width || x < 0) return false;
+  if (y >= capture->height || y < 0) return false;
+  capture_rgb_t* tmp_rgb =  capture->pixels + (y * capture->width + x);
+  (*rgb).r = tmp_rgb->r;
+  (*rgb).g = tmp_rgb->g;
+  (*rgb).b = tmp_rgb->b;
+  return true;
 }
