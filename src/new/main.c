@@ -144,7 +144,7 @@ SDL_AppResult app_event(app_t* app, SDL_Event* event) {
   } else if (app->state == APP_FLASHLIGHT_STATE) {
     handled = app_event_flashlight(app, event);
   } else if (app->state == APP_DRAW_STATE) {
-    handled = app_event_crop(app, event);
+    handled = app_event_draw(app, event);
   } else {
     return SDL_APP_FAILURE;
   }
@@ -364,7 +364,7 @@ SDL_AppResult app_iterate(app_t* app) {
   } else if (app->state == APP_FLASHLIGHT_STATE) {
     app_iterate_flashlight(app);
   } else if (app->state == APP_DRAW_STATE) {
-    app_iterate_crop(app);
+    app_iterate_draw(app);
   } else {
     return SDL_APP_FAILURE;
   }
@@ -387,11 +387,11 @@ void app_quit(app_t* app, SDL_AppResult result) {
   }
 }
 
-bool app_event_crop(app_t* app, SDL_Event* event) {
+bool app_event_draw(app_t* app, SDL_Event* event) {
   return false;
 }
 
-void app_iterate_crop(app_t* app) {
+void app_iterate_draw(app_t* app) {
   SDL_FRect r = {0, 0, 250, 250};
   SDL_SetRenderDrawColor(app->renderer, 255, 128, 0, 255);
   SDL_RenderRect(app->renderer, &r);
