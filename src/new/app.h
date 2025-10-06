@@ -63,6 +63,8 @@ bool app_event_color(app_t* app, SDL_Event* event);
 void app_iterate_color(app_t* app);
 bool app_event_flashlight(app_t* app, SDL_Event* event);
 void app_iterate_flashlight(app_t* app);
+bool app_event_crop(app_t* app, SDL_Event* event);
+void app_iterate_crop(app_t* app);
 
 void flashlight_zoom(flashlight_zoom_t* zoom, bool in);
 bool flashlight_update(flashlight_zoom_t* zoom);

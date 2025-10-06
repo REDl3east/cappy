@@ -143,6 +143,8 @@ SDL_AppResult app_event(app_t* app, SDL_Event* event) {
     handled = app_event_color(app, event);
   } else if (app->state == APP_FLASHLIGHT_STATE) {
     handled = app_event_flashlight(app, event);
+  } else if (app->state == APP_DRAW_STATE) {
+    handled = app_event_crop(app, event);
   } else {
     return SDL_APP_FAILURE;
   }
@@ -159,7 +161,7 @@ SDL_AppResult app_event(app_t* app, SDL_Event* event) {
       if (code == SDLK_Q) {
         return SDL_APP_SUCCESS;
       } else if (code == SDLK_F) {
-        if (app->state == APP_MOVE_STATE || app->state == APP_COLOR_STATE) {
+        if (app->state == APP_MOVE_STATE || app->state == APP_COLOR_STATE || app->state == APP_DRAW_STATE) {
           app->state = APP_FLASHLIGHT_STATE;
           SDL_HideCursor();
         } else if (app->state == APP_FLASHLIGHT_STATE) {
@@ -169,17 +171,28 @@ SDL_AppResult app_event(app_t* app, SDL_Event* event) {
           return SDL_APP_FAILURE;
         }
       } else if (code == SDLK_C) {
-        if (app->state == APP_MOVE_STATE || app->state == APP_FLASHLIGHT_STATE) {
+        if (app->state == APP_MOVE_STATE || app->state == APP_FLASHLIGHT_STATE || app->state == APP_DRAW_STATE) {
           app->state          = APP_COLOR_STATE;
           app->recompute_text = true;
         } else if (app->state == APP_COLOR_STATE) {
           app->state = APP_MOVE_STATE;
+          SDL_ShowCursor();
         } else {
           return SDL_APP_FAILURE;
         }
 
       } else if (code == SDLK_G) {
         app->grid_enabled = !app->grid_enabled;
+      } else if (code == SDLK_D) {
+        if (app->state == APP_MOVE_STATE || app->state == APP_FLASHLIGHT_STATE || app->state == APP_COLOR_STATE) {
+          app->state = APP_DRAW_STATE;
+          SDL_ShowCursor();
+        } else if (app->state == APP_DRAW_STATE) {
+          app->state = APP_MOVE_STATE;
+          SDL_ShowCursor();
+        } else {
+          return SDL_APP_FAILURE;
+        }
       } // else if (code == SDLK_r) {
       // TODO:
 
@@ -350,6 +363,8 @@ SDL_AppResult app_iterate(app_t* app) {
     app_iterate_color(app);
   } else if (app->state == APP_FLASHLIGHT_STATE) {
     app_iterate_flashlight(app);
+  } else if (app->state == APP_DRAW_STATE) {
+    app_iterate_crop(app);
   } else {
     return SDL_APP_FAILURE;
   }
@@ -370,6 +385,16 @@ void app_quit(app_t* app, SDL_AppResult result) {
     TTF_Quit();
     SDL_Quit();
   }
+}
+
+bool app_event_crop(app_t* app, SDL_Event* event) {
+  return false;
+}
+
+void app_iterate_crop(app_t* app) {
+  SDL_FRect r = {0, 0, 250, 250};
+  SDL_SetRenderDrawColor(app->renderer, 255, 128, 0, 255);
+  SDL_RenderRect(app->renderer, &r);
 }
 
 bool app_event_move(app_t* app, SDL_Event* event) {
