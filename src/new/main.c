@@ -375,12 +375,12 @@ SDL_AppResult app_iterate(app_t* app) {
 void app_quit(app_t* app, SDL_AppResult result) {
   // free anything allocated within app variable.
   if (app != NULL) {
+    capture_free(&app->capture);
     if (app->capture_texture != NULL) SDL_DestroyTexture(app->capture_texture);
     if (app->font != NULL) TTF_CloseFont(app->font);
     if (app->icon != NULL) SDL_DestroySurface(app->icon);
     if (app->move_cursor != NULL) SDL_DestroyCursor(app->move_cursor);
     if (app->default_cursor != NULL) SDL_DestroyCursor(app->default_cursor);
-    capture_free(&app->capture);
 
     TTF_Quit();
     SDL_Quit();
