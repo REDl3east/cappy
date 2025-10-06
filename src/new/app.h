@@ -21,6 +21,7 @@ typedef enum app_state_t {
   APP_COLOR_STATE,
   APP_DRAW_STATE,
   APP_FLASHLIGHT_STATE,
+  APP_STATE_COUNT
 } app_state_t;
 
 typedef struct app_t {
