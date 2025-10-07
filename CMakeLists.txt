@@ -15,6 +15,11 @@ set(MAIN_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/src/new/config.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/new/camera.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/new/renderer.c
+  
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/new/state/state_move.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/new/state/state_color.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/new/state/state_flashlight.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/new/state/state_draw.c
   # ${CMAKE_CURRENT_SOURCE_DIR}/src/camera.cpp
   # ${CMAKE_CURRENT_SOURCE_DIR}/src/capture.cpp
   # ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer.cpp
@@ -29,7 +34,8 @@ set(MAIN_SRC
 
 add_executable(cappy ${MAIN_SRC})
 target_include_directories(cappy PRIVATE 
-#   ${CMAKE_CURRENT_SOURCE_DIR}/src
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/new
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/new/state
 #   ${CMAKE_CURRENT_SOURCE_DIR}/src/machine
 #   ${CMAKE_CURRENT_SOURCE_DIR}/src/state
 #   ${SDL3_SRC_DIR}/include
