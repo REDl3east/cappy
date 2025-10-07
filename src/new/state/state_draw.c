@@ -11,13 +11,13 @@ bool app_event_draw(app_t* app, SDL_Event* event) {
       SDL_Keycode code = event->key.key;
       if (!app->drawing) {
         if (code == SDLK_X) {
-          app->current_x = (int)app->start_crop.x;
-          app->current_y = (int)app->start_crop.y;
+          app->current_x = (int)(app->start_crop.x);
+          app->current_y = (int)(app->start_crop.y);
           app->current_w = (int)(app->end_crop.x - app->start_crop.x);
           app->current_h = (int)(app->end_crop.y - app->start_crop.y);
           app->state     = APP_MOVE_STATE;
           SDL_SetCursor(app->default_cursor);
-          return true;
+          SDL_ShowCursor();
         }
       }
       break;
@@ -25,7 +25,8 @@ bool app_event_draw(app_t* app, SDL_Event* event) {
     case SDL_EVENT_MOUSE_BUTTON_DOWN: {
       if (!app->drawing) {
         if (event->button.button == SDL_BUTTON_RIGHT) {
-          app->drawing = true;
+          app->drawing        = true;
+          app->recompute_text = true;
           SDL_SetCursor(app->crosshair_cursor);
 
           if (app->resize_selection == RESIZE_SELECTION_N || app->resize_selection == RESIZE_SELECTION_S || app->resize_selection == RESIZE_SELECTION_E || app->resize_selection == RESIZE_SELECTION_W || app->resize_selection == RESIZE_SELECTION_SE) {
@@ -44,8 +45,9 @@ bool app_event_draw(app_t* app, SDL_Event* event) {
             app->start_crop = camera_world_to_screen(&app->camera, app->start_crop.x, app->start_crop.y);
             app->end_crop   = camera_world_to_screen(&app->camera, app->end_crop.x, app->end_crop.y);
           } else {
-            SDL_SetCursor(app->default_cursor);
-            app->drawing = false;
+            SDL_SetCursor(SDL_GetDefaultCursor());
+            app->drawing        = false;
+            app->recompute_text = false;
             return false;
           }
 
@@ -54,7 +56,6 @@ bool app_event_draw(app_t* app, SDL_Event* event) {
         }
         return true;
       }
-
       break;
     }
     case SDL_EVENT_MOUSE_BUTTON_UP: {
@@ -67,6 +68,7 @@ bool app_event_draw(app_t* app, SDL_Event* event) {
         if (app->start_crop.x == app->end_crop.x && app->start_crop.y == app->end_crop.y) {
           app->state = APP_MOVE_STATE;
           SDL_SetCursor(app->default_cursor);
+          SDL_ShowCursor();
           return true;
         }
 
@@ -82,23 +84,26 @@ bool app_event_draw(app_t* app, SDL_Event* event) {
         app->start_crop = camera_screen_to_world(&app->camera, app->start_crop.x, app->start_crop.y);
         app->end_crop   = camera_screen_to_world(&app->camera, app->end_crop.x, app->end_crop.y);
 
-        app->start_crop = (SDL_FPoint){SDL_roundf(app->start_crop.x), SDL_roundf(app->start_crop.y)};
-        app->end_crop   = (SDL_FPoint){SDL_roundf(app->end_crop.x), SDL_roundf(app->end_crop.y)};
+        app->start_crop = (SDL_FPoint){roundf(app->start_crop.x), roundf(app->start_crop.y)};
+        app->end_crop   = (SDL_FPoint){roundf(app->end_crop.x), roundf(app->end_crop.y)};
 
         if (app->start_crop.x < app->current_x) app->start_crop.x = (float)app->current_x;
-        if (app->start_crop.x >= app->current_x + app->current_w) app->start_crop.x = app->current_x + (float)app->current_w;
+        if (app->start_crop.x >= app->current_x + app->current_w) app->start_crop.x = (float)(app->current_x + app->current_w);
         if (app->start_crop.y < app->current_y) app->start_crop.y = (float)app->current_y;
-        if (app->start_crop.y >= app->current_y + app->current_h) app->start_crop.y = app->current_y + (float)app->current_h;
+        if (app->start_crop.y >= app->current_y + app->current_h) app->start_crop.y = (float)(app->current_y + app->current_h);
         if (app->end_crop.x < app->current_x) app->end_crop.x = (float)app->current_x;
-        if (app->end_crop.x >= app->current_x + app->current_w) app->end_crop.x = app->current_x + (float)app->current_w;
+        if (app->end_crop.x >= app->current_x + app->current_w) app->end_crop.x = (float)(app->current_x + app->current_w);
         if (app->end_crop.y < app->current_y) app->end_crop.y = (float)app->current_y;
-        if (app->end_crop.y >= app->current_y + app->current_h) app->end_crop.y = app->current_y + (float)app->current_h;
+        if (app->end_crop.y >= app->current_y + app->current_h) app->end_crop.y = (float)(app->current_y + app->current_h);
 
         if (app->end_crop.x - app->start_crop.x == 0 || app->end_crop.y - app->start_crop.y == 0) {
           app->state = APP_MOVE_STATE;
           SDL_SetCursor(app->default_cursor);
+          SDL_ShowCursor();
           return true;
         }
+
+        app->recompute_text = true;
 
         SDL_SetCursor(app->default_cursor);
 
@@ -129,10 +134,12 @@ bool app_event_draw(app_t* app, SDL_Event* event) {
             app->start_crop.y += event->motion.yrel;
             app->end_crop.x += event->motion.xrel;
             app->end_crop.y += event->motion.yrel;
+            app->recompute_text = true;
             return false;
           }
         }
 
+        app->recompute_text = true;
       } else {
         SDL_FPoint start_screen = camera_world_to_screen(&app->camera, app->start_crop.x, app->start_crop.y);
         SDL_FPoint end_screen   = camera_world_to_screen(&app->camera, app->end_crop.x, app->end_crop.y);
@@ -149,7 +156,7 @@ bool app_event_draw(app_t* app, SDL_Event* event) {
           } else if (app->resize_selection == RESIZE_SELECTION_NW || app->resize_selection == RESIZE_SELECTION_SE) {
             SDL_SetCursor(app->nwse_cursor);
           } else {
-            SDL_SetCursor(SDL_GetDefaultCursor());
+            SDL_SetCursor(app->default_cursor);
           }
         }
 
@@ -165,16 +172,77 @@ bool app_event_draw(app_t* app, SDL_Event* event) {
   return false;
 }
 
-void app_iterate_draw(app_t* app) {
-  SDL_FRect crop_rect;
+static void recompute_mouse_text(app_t* app, float selection_x, float selection_y, float width, float height) {
+  char text_buf[128];
+  SDL_snprintf(text_buf, sizeof(text_buf), "x: %.2f y: %.2f\nw: %.2f h: %.2f", selection_x, selection_y, width, height);
 
+  SDL_Color white = {255, 255, 255, 255};
+
+  SDL_Surface* text_surface = TTF_RenderText_Solid_Wrapped(app->font, text_buf, 0, white, 0);
+  if (text_surface == NULL) {
+    SDL_Log("Failed to render text surface: %s", SDL_GetError());
+  } else {
+    if (app->text_texture != NULL) {
+      SDL_DestroyTexture(app->text_texture);
+      app->text_texture = NULL;
+    }
+
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(app->renderer, text_surface);
+    if (texture == NULL) {
+      SDL_Log("Failed to create text texture: %s", SDL_GetError());
+    } else {
+      app->text_texture = texture;
+    }
+
+    SDL_DestroySurface(text_surface);
+  }
+
+  app->recompute_text = false;
+}
+
+static void recompute_header_text(app_t* app, int x, int y, int width, int height) {
+  char text_buf[128];
+  SDL_snprintf(text_buf, sizeof(text_buf), "x: %d y: %d\nw: %d h: %d", x, y, width, height);
+
+  SDL_Color white = {255, 255, 255, 255};
+
+  SDL_Surface* text_surface = TTF_RenderText_Solid_Wrapped(app->font, text_buf, 0, white, 0);
+  if (text_surface == NULL) {
+    SDL_Log("Failed to render text surface: %s", SDL_GetError());
+  } else {
+    if (app->text_texture != NULL) {
+      SDL_DestroyTexture(app->text_texture);
+      app->text_texture = NULL;
+    }
+
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(app->renderer, text_surface);
+    if (texture == NULL) {
+      SDL_Log("Failed to create text texture: %s", SDL_GetError());
+    } else {
+      app->text_texture = texture;
+    }
+
+    SDL_DestroySurface(text_surface);
+  }
+
+  app->recompute_text = false;
+}
+
+void app_iterate_draw(app_t* app) {
   float mx, my;
   SDL_GetMouseState(&mx, &my);
+
+  if (app->camera.panning && SDL_GetMouseState(NULL, NULL) & SDL_BUTTON_MASK(SDL_BUTTON_RIGHT)) {
+    app->recompute_text = true;
+  }
 
   float text_padding = 10.0f;
 
   if (app->drawing) {
     if (app->resize_selection != RESIZE_SELECTION_CENTER) {
+      float mx, my;
+      SDL_GetMouseState(&mx, &my);
+
       if (app->resize_selection == RESIZE_SELECTION_N) {
         app->start_crop = (SDL_FPoint){app->start_crop.x, my};
       } else if (app->resize_selection == RESIZE_SELECTION_E) {
@@ -209,15 +277,75 @@ void app_iterate_draw(app_t* app) {
       app->end_crop   = camera_world_to_screen(&app->camera, end_screen.x, end_screen.y);
     }
 
+    float width  = end_screen.x - start_screen.x;
+    float height = end_screen.y - start_screen.y;
+
     float x1 = MIN(app->start_crop.x, app->end_crop.x);
     float y1 = MIN(app->start_crop.y, app->end_crop.y);
     float x2 = MAX(app->start_crop.x, app->end_crop.x);
     float y2 = MAX(app->start_crop.y, app->end_crop.y);
 
-    crop_rect.x = x1;
-    crop_rect.y = y1;
-    crop_rect.w = x2 - x1;
-    crop_rect.h = y2 - y1;
+    draw_rect_flashlight(app->renderer, x1, y1, x2 - x1, y2 - y1, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.5f, 0.5f, 0.5f);
+
+    SDL_SetRenderDrawColor(app->renderer, 200, 200, 200, 200);
+    SDL_RenderLine(app->renderer, x1, y1, x2, y1);
+    SDL_RenderLine(app->renderer, x1, y1, x1, y2);
+    SDL_RenderLine(app->renderer, x1, y2, x2, y2);
+    SDL_RenderLine(app->renderer, x2, y1, x2, y2);
+
+    if (app->recompute_text) {
+      float selection_x, selection_y;
+      if (app->resize_selection == RESIZE_SELECTION_CENTER) {
+        selection_x = start_screen.x;
+        selection_y = start_screen.y;
+      } else if (width > 0 && height > 0) {
+        selection_x = start_screen.x;
+        selection_y = start_screen.y;
+      } else if (width <= 0 && height > 0) {
+        selection_x = start_screen.x + width;
+        selection_y = start_screen.y;
+      } else if (width > 0 && height <= 0) {
+        selection_x = start_screen.x;
+        selection_y = start_screen.y + height;
+      } else {
+        selection_x = start_screen.x + width;
+        selection_y = start_screen.y + height;
+      }
+
+      recompute_mouse_text(app, selection_x, selection_y, fabsf(width), fabsf(height));
+    }
+
+    float offset = 25.0f;
+
+    float text_x, text_y;
+    if (width == 0 && height == 0 || width > 0 && height > 0) {
+      text_x = mx + offset;
+      text_y = my + offset;
+    } else if (width <= 0 && height > 0) {
+      text_x = mx - app->text_texture->w - offset;
+      text_y = my + offset;
+    } else if (width > 0 && height <= 0) {
+      text_x = mx + offset;
+      text_y = my - app->text_texture->h - offset;
+    } else {
+      text_x = mx - app->text_texture->w - offset;
+      text_y = my - app->text_texture->h - offset;
+    }
+
+    SDL_FRect text_rect = {text_x, text_y, (float)app->text_texture->w, (float)app->text_texture->h};
+
+    SDL_FRect text_boundry_rect = text_rect;
+    text_boundry_rect.x -= text_padding;
+    text_boundry_rect.y -= text_padding;
+    text_boundry_rect.w += 2.0f * text_padding;
+    text_boundry_rect.h += 2.0f * text_padding;
+
+    SDL_SetRenderDrawColor(app->renderer, 125, 125, 125, 255);
+    SDL_RenderFillRect(app->renderer, &text_boundry_rect);
+    SDL_SetRenderDrawColor(app->renderer, 0, 0, 0, 255);
+    SDL_RenderRect(app->renderer, &text_boundry_rect);
+
+    SDL_RenderTexture(app->renderer, app->text_texture, NULL, &text_rect);
 
   } else {
     SDL_FPoint start_screen = camera_world_to_screen(&app->camera, app->start_crop.x, app->start_crop.y);
@@ -225,19 +353,42 @@ void app_iterate_draw(app_t* app) {
 
     camera_update(&app->camera);
 
-    crop_rect.x = start_screen.x;
-    crop_rect.y = start_screen.y;
-    crop_rect.w = end_screen.x - start_screen.x;
-    crop_rect.h = end_screen.y - start_screen.y;
+    draw_rect_flashlight(app->renderer, start_screen.x, start_screen.y, end_screen.x - start_screen.x, end_screen.y - start_screen.y, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.5f, 0.5f, 0.5f);
+
+    SDL_SetRenderDrawColor(app->renderer, 200, 200, 200, 200);
+    SDL_RenderLine(app->renderer, start_screen.x, start_screen.y, end_screen.x, start_screen.y);
+    SDL_RenderLine(app->renderer, start_screen.x, start_screen.y, start_screen.x, end_screen.y);
+    SDL_RenderLine(app->renderer, start_screen.x, end_screen.y, end_screen.x, end_screen.y);
+    SDL_RenderLine(app->renderer, end_screen.x, start_screen.y, end_screen.x, end_screen.y);
+
+    if (app->recompute_text) {
+      int width  = (int)(app->end_crop.x - app->start_crop.x);
+      int height = (int)(app->end_crop.y - app->start_crop.y);
+      int x      = (int)(app->end_crop.x - width);
+      int y      = (int)(app->end_crop.y - height);
+
+      recompute_header_text(app, x, y, width, height);
+    }
+
+    int w, h;
+    SDL_GetWindowSize(SDL_GetRenderWindow(app->renderer), &w, &h);
+
+    float rect_x = w - (float)app->text_texture->w - 2.0f * text_padding;
+    float rect_y = h - (float)app->text_texture->h;
+
+    SDL_FRect text_rect = {rect_x + text_padding, rect_y, (float)app->text_texture->w, (float)app->text_texture->h};
+
+    SDL_FRect text_boundry_rect = text_rect;
+    text_boundry_rect.x -= text_padding;
+    text_boundry_rect.w += 2.0f * text_padding;
+
+    SDL_SetRenderDrawColor(app->renderer, 125, 125, 125, 255);
+    SDL_RenderFillRect(app->renderer, &text_boundry_rect);
+    SDL_SetRenderDrawColor(app->renderer, 0, 0, 0, 255);
+    SDL_RenderRect(app->renderer, &text_boundry_rect);
+
+    SDL_RenderTexture(app->renderer, app->text_texture, NULL, &text_rect);
   }
-
-  draw_rect_flashlight(app->renderer, crop_rect.x, crop_rect.y, crop_rect.w, crop_rect.h, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.5f, 0.5f, 0.5f);
-
-  SDL_SetRenderDrawColor(app->renderer, 200, 200, 200, 200);
-  SDL_RenderLine(app->renderer, crop_rect.x, crop_rect.y, crop_rect.x + crop_rect.w, crop_rect.y);
-  SDL_RenderLine(app->renderer, crop_rect.x, crop_rect.y, crop_rect.x, crop_rect.y + crop_rect.h);
-  SDL_RenderLine(app->renderer, crop_rect.x + crop_rect.w, crop_rect.y + crop_rect.h, crop_rect.x + crop_rect.w, crop_rect.y);
-  SDL_RenderLine(app->renderer, crop_rect.x + crop_rect.w, crop_rect.y + crop_rect.h, crop_rect.x, crop_rect.y + crop_rect.h);
 }
 
 static bool point_in_rect(float x, float y, float rx, float ry, float rw, float rh) {
