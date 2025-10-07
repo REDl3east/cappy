@@ -2,6 +2,8 @@
 #include "renderer.h"
 #include "state.h"
 
+static void recompute_mouse_text(app_t* app, float selection_x, float selection_y, float width, float height);
+static void recompute_header_text(app_t* app, int x, int y, int width, int height);
 static bool point_in_rect(float x, float y, float rx, float ry, float rw, float rh);
 static crop_resize_selection_t get_resize_direction(float x, float y, SDL_FPoint start_screen, SDL_FPoint end_screen);
 
@@ -170,62 +172,6 @@ bool app_event_draw(app_t* app, SDL_Event* event) {
     }
   }
   return false;
-}
-
-static void recompute_mouse_text(app_t* app, float selection_x, float selection_y, float width, float height) {
-  char text_buf[128];
-  SDL_snprintf(text_buf, sizeof(text_buf), "x: %.2f y: %.2f\nw: %.2f h: %.2f", selection_x, selection_y, width, height);
-
-  SDL_Color white = {255, 255, 255, 255};
-
-  SDL_Surface* text_surface = TTF_RenderText_Solid_Wrapped(app->font, text_buf, 0, white, 0);
-  if (text_surface == NULL) {
-    SDL_Log("Failed to render text surface: %s", SDL_GetError());
-  } else {
-    if (app->text_texture != NULL) {
-      SDL_DestroyTexture(app->text_texture);
-      app->text_texture = NULL;
-    }
-
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(app->renderer, text_surface);
-    if (texture == NULL) {
-      SDL_Log("Failed to create text texture: %s", SDL_GetError());
-    } else {
-      app->text_texture = texture;
-    }
-
-    SDL_DestroySurface(text_surface);
-  }
-
-  app->recompute_text = false;
-}
-
-static void recompute_header_text(app_t* app, int x, int y, int width, int height) {
-  char text_buf[128];
-  SDL_snprintf(text_buf, sizeof(text_buf), "x: %d y: %d\nw: %d h: %d", x, y, width, height);
-
-  SDL_Color white = {255, 255, 255, 255};
-
-  SDL_Surface* text_surface = TTF_RenderText_Solid_Wrapped(app->font, text_buf, 0, white, 0);
-  if (text_surface == NULL) {
-    SDL_Log("Failed to render text surface: %s", SDL_GetError());
-  } else {
-    if (app->text_texture != NULL) {
-      SDL_DestroyTexture(app->text_texture);
-      app->text_texture = NULL;
-    }
-
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(app->renderer, text_surface);
-    if (texture == NULL) {
-      SDL_Log("Failed to create text texture: %s", SDL_GetError());
-    } else {
-      app->text_texture = texture;
-    }
-
-    SDL_DestroySurface(text_surface);
-  }
-
-  app->recompute_text = false;
 }
 
 void app_iterate_draw(app_t* app) {
@@ -442,4 +388,60 @@ static crop_resize_selection_t get_resize_direction(float x, float y, SDL_FPoint
   }
 
   return RESIZE_SELECTION_NONE;
-};
+}
+
+static void recompute_mouse_text(app_t* app, float selection_x, float selection_y, float width, float height) {
+  char text_buf[128];
+  SDL_snprintf(text_buf, sizeof(text_buf), "x: %.2f y: %.2f\nw: %.2f h: %.2f", selection_x, selection_y, width, height);
+
+  SDL_Color white = {255, 255, 255, 255};
+
+  SDL_Surface* text_surface = TTF_RenderText_Solid_Wrapped(app->font, text_buf, 0, white, 0);
+  if (text_surface == NULL) {
+    SDL_Log("Failed to render text surface: %s", SDL_GetError());
+  } else {
+    if (app->text_texture != NULL) {
+      SDL_DestroyTexture(app->text_texture);
+      app->text_texture = NULL;
+    }
+
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(app->renderer, text_surface);
+    if (texture == NULL) {
+      SDL_Log("Failed to create text texture: %s", SDL_GetError());
+    } else {
+      app->text_texture = texture;
+    }
+
+    SDL_DestroySurface(text_surface);
+  }
+
+  app->recompute_text = false;
+}
+
+static void recompute_header_text(app_t* app, int x, int y, int width, int height) {
+  char text_buf[128];
+  SDL_snprintf(text_buf, sizeof(text_buf), "x: %d y: %d\nw: %d h: %d", x, y, width, height);
+
+  SDL_Color white = {255, 255, 255, 255};
+
+  SDL_Surface* text_surface = TTF_RenderText_Solid_Wrapped(app->font, text_buf, 0, white, 0);
+  if (text_surface == NULL) {
+    SDL_Log("Failed to render text surface: %s", SDL_GetError());
+  } else {
+    if (app->text_texture != NULL) {
+      SDL_DestroyTexture(app->text_texture);
+      app->text_texture = NULL;
+    }
+
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(app->renderer, text_surface);
+    if (texture == NULL) {
+      SDL_Log("Failed to create text texture: %s", SDL_GetError());
+    } else {
+      app->text_texture = texture;
+    }
+
+    SDL_DestroySurface(text_surface);
+  }
+
+  app->recompute_text = false;
+}
