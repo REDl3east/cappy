@@ -86,7 +86,7 @@ bool capture_screen(capture_t* capture) {
     return false;
   }
 
-  capture->pixels = (capture_rgb_t *)calloc(capture->width * capture->height, sizeof(capture_rgb_t));
+  capture->pixels = (capture_rgb_t*)calloc(capture->width * capture->height, sizeof(capture_rgb_t));
 
   int i = 0;
   for (int y = capture->height - 1; y >= 0; --y) {
@@ -109,7 +109,7 @@ bool capture_screen(capture_t* capture) {
   return false;
 }
 
-void capture_free(capture_t* capture){
+void capture_free(capture_t* capture) {
   free(capture->pixels);
 }
 
@@ -122,9 +122,9 @@ bool capture_in_bound(capture_t* capture, int x, int y) {
 bool capture_at(capture_t* capture, int x, int y, capture_rgb_t* rgb) {
   if (x >= capture->width || x < 0) return false;
   if (y >= capture->height || y < 0) return false;
-  capture_rgb_t* tmp_rgb =  capture->pixels + (y * capture->width + x);
-  (*rgb).r = tmp_rgb->r;
-  (*rgb).g = tmp_rgb->g;
-  (*rgb).b = tmp_rgb->b;
+  capture_rgb_t* tmp_rgb = capture->pixels + (y * capture->width + x);
+  (*rgb).r               = tmp_rgb->r;
+  (*rgb).g               = tmp_rgb->g;
+  (*rgb).b               = tmp_rgb->b;
   return true;
 }

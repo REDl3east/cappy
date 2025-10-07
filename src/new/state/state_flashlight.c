@@ -1,6 +1,6 @@
 #include "app.h"
-#include "state.h"
 #include "renderer.h"
+#include "state.h"
 
 static void flashlight_zoom(flashlight_zoom_t* zoom, bool in);
 static bool flashlight_update(flashlight_zoom_t* zoom);

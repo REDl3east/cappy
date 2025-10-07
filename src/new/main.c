@@ -277,11 +277,11 @@ SDL_AppResult app_event(app_t* app, SDL_Event* event) {
           app->state = APP_DRAW_STATE;
 
           app->recompute_text = true;
-          app->drawing      = true;
-          app->start_crop.x = mx;
-          app->start_crop.y = my;
-          app->end_crop.x   = mx;
-          app->end_crop.y   = my;
+          app->drawing        = true;
+          app->start_crop.x   = mx;
+          app->start_crop.y   = my;
+          app->end_crop.x     = mx;
+          app->end_crop.y     = my;
 
           SDL_ShowCursor();
           SDL_SetCursor(app->crosshair_cursor);

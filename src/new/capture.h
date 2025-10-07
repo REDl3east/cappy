@@ -4,7 +4,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-
 typedef struct capture_rgb_t {
   uint8_t r;
   uint8_t g;

@@ -802,7 +802,7 @@ int sv_parse_float(cstring_view sv, float* value) {
     return 0;
   }
 
-frac : {
+frac: {
   if (sv_is_empty(sv)) goto end;
   float fraction = 0.0f;
   float denom    = 1.0f;
@@ -828,7 +828,7 @@ frac : {
     goto expon;
   }
 }
-expon : {
+expon: {
   if (sv_is_empty(sv)) return 0; // exponet must have something after it
 
   int negative_expon = 0;
