@@ -11,7 +11,7 @@
 #include <stdio.h>
 
 SDL_Texture* create_capture_texture(SDL_Renderer* renderer, capture_t* capture);
-void render_grid(app_t* app, int grid_size, uint8_t r, uint8_t g, uint8_t b);
+void app_render_grid(app_t* app, int grid_size, uint8_t r, uint8_t g, uint8_t b);
 
 SDL_AppResult app_init(app_t* app, int argc, char** argv) {
   if (!capture_screen(&app->capture)) {
@@ -91,6 +91,13 @@ SDL_AppResult app_init(app_t* app, int argc, char** argv) {
 
   app->state          = APP_MOVE_STATE;
   app->recompute_text = true;
+
+  app->drawing          = false;
+  app->start_crop.x     = 0;
+  app->start_crop.y     = 0;
+  app->end_crop.x       = 0;
+  app->end_crop.y       = 0;
+  app->resize_selection = RESIZE_SELECTION_NONE;
 
   app->flashlight_zoom.size             = 150.0f;
   app->flashlight_zoom.zooming          = false;
@@ -217,18 +224,15 @@ SDL_AppResult app_event(app_t* app, SDL_Event* event) {
         } else {
           return SDL_APP_FAILURE;
         }
-      } // else if (code == SDLK_r) {
-      // TODO:
-
-      //   // camera.reset();
-      //   machine->current_x = 0;
-      //   machine->current_y = 0;
-      //   machine->current_w = capture.width;
-      //   machine->current_h = capture.height;
-      //   machine->set_state<MoveState>();
-      //   continue;
-      // }
-      else if (code == SDLK_M) {
+      } else if (code == SDLK_R) {
+        // camera_reset(&app->camera);
+        app->current_x = 0;
+        app->current_y = 0;
+        app->current_w = app->capture.width;
+        app->current_h = app->capture.height;
+        app->state     = APP_MOVE_STATE;
+        SDL_ShowCursor();
+      } else if (code == SDLK_M) {
         SDL_MinimizeWindow(app->window);
       }
       // TODO:
@@ -266,11 +270,23 @@ SDL_AppResult app_event(app_t* app, SDL_Event* event) {
 
         SDL_SetCursor(app->move_cursor);
       } else if (event->button.button == SDL_BUTTON_RIGHT) {
-        // TODO:
-        // float mx, my;
-        // SDL_GetMouseState(&mx, &my);
-        // machine->set_state<DrawCropState>(mx, my);
-        // continue;
+        if (app->state == APP_MOVE_STATE || app->state == APP_FLASHLIGHT_STATE || app->state == APP_COLOR_STATE || app->state == APP_DRAW_STATE) {
+          float mx, my;
+          SDL_GetMouseState(&mx, &my);
+
+          app->state = APP_DRAW_STATE;
+
+          app->drawing      = true;
+          app->start_crop.x = mx;
+          app->start_crop.y = my;
+          app->end_crop.x   = mx;
+          app->end_crop.y   = my;
+
+          SDL_ShowCursor();
+          SDL_SetCursor(app->crosshair_cursor);
+        } else {
+          return SDL_APP_FAILURE;
+        }
       }
       break;
     }
@@ -371,14 +387,14 @@ SDL_AppResult app_iterate(app_t* app) {
   SDL_SetRenderDrawColor(app->renderer, app->config.background_color[0], app->config.background_color[1], app->config.background_color[2], 255);
   SDL_RenderClear(app->renderer);
 
-  // render texture
+  // render capture texture
   SDL_FPoint pos = camera_world_to_screen(&app->camera, (float)(float)(float)app->current_x, (float)app->current_y);
   SDL_FRect r1   = {(float)app->current_x, (float)app->current_y, (float)app->current_w, (float)app->current_h};
   SDL_FRect r2   = {pos.x, pos.y, (float)app->current_w * app->camera.scale, (float)app->current_h * app->camera.scale};
   SDL_RenderTexture(app->renderer, app->capture_texture, &r1, &r2);
 
   // render grid
-  render_grid(app, app->config.grid_size, app->config.grid_color[0], app->config.grid_color[1], app->config.grid_color[2]);
+  app_render_grid(app, app->config.grid_size, app->config.grid_color[0], app->config.grid_color[1], app->config.grid_color[2]);
 
   // render state
   if (app->state == APP_MOVE_STATE) {
@@ -435,10 +451,8 @@ SDL_Texture* create_capture_texture(SDL_Renderer* renderer, capture_t* capture) 
   return texture;
 }
 
-void render_grid(app_t* app, int grid_size, uint8_t r, uint8_t g, uint8_t b) {
-  if (!app->grid_enabled) {
-    return;
-  }
+void app_render_grid(app_t* app, int grid_size, uint8_t r, uint8_t g, uint8_t b) {
+  if (!app->grid_enabled) return;
 
   int x1 = app->current_x;
   int y1 = app->current_y;

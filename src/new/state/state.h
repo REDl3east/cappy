@@ -12,6 +12,19 @@ typedef struct flashlight_zoom_t {
   float zoom_size_per_ms;
 } flashlight_zoom_t;
 
+typedef enum crop_resize_selection_t {
+  RESIZE_SELECTION_NONE,
+  RESIZE_SELECTION_CENTER,
+  RESIZE_SELECTION_N,
+  RESIZE_SELECTION_E,
+  RESIZE_SELECTION_S,
+  RESIZE_SELECTION_W,
+  RESIZE_SELECTION_NE,
+  RESIZE_SELECTION_SE,
+  RESIZE_SELECTION_SW,
+  RESIZE_SELECTION_NW,
+} crop_resize_selection_t;
+
 typedef enum app_state_t {
   APP_MOVE_STATE,
   APP_COLOR_STATE,
@@ -30,7 +43,5 @@ bool app_event_flashlight(app_t* app, SDL_Event* event);
 void app_iterate_flashlight(app_t* app);
 bool app_event_draw(app_t* app, SDL_Event* event);
 void app_iterate_draw(app_t* app);
-
-
 
 #endif // _STATE_H_

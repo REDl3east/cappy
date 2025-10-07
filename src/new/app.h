@@ -40,6 +40,11 @@ typedef struct app_t {
 
   flashlight_zoom_t flashlight_zoom;
 
+  bool drawing;
+  SDL_FPoint start_crop;
+  SDL_FPoint end_crop;
+  crop_resize_selection_t resize_selection;
+
   app_state_t state;
 } app_t;
 
