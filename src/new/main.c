@@ -202,9 +202,13 @@ SDL_AppResult app_event(app_t* app, SDL_Event* event) {
           return SDL_APP_FAILURE;
         }
       } else if (code == SDLK_C) {
-        if (app->state == APP_MOVE_STATE || app->state == APP_FLASHLIGHT_STATE || app->state == APP_DRAW_STATE) {
+        if (app->state == APP_MOVE_STATE || app->state == APP_FLASHLIGHT_STATE) {
           app->state          = APP_COLOR_STATE;
           app->recompute_text = true;
+        } else if (app->state == APP_DRAW_STATE) {
+          app->state          = APP_COLOR_STATE;
+          app->recompute_text = true;
+          SDL_SetCursor(app->default_cursor);
         } else if (app->state == APP_COLOR_STATE) {
           app->state = APP_MOVE_STATE;
           SDL_ShowCursor();
@@ -214,16 +218,6 @@ SDL_AppResult app_event(app_t* app, SDL_Event* event) {
 
       } else if (code == SDLK_G) {
         app->grid_enabled = !app->grid_enabled;
-      } else if (code == SDLK_D) {
-        if (app->state == APP_MOVE_STATE || app->state == APP_FLASHLIGHT_STATE || app->state == APP_COLOR_STATE) {
-          app->state = APP_DRAW_STATE;
-          SDL_ShowCursor();
-        } else if (app->state == APP_DRAW_STATE) {
-          app->state = APP_MOVE_STATE;
-          SDL_ShowCursor();
-        } else {
-          return SDL_APP_FAILURE;
-        }
       } else if (code == SDLK_R) {
         // camera_reset(&app->camera);
         app->current_x = 0;
