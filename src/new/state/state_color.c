@@ -90,7 +90,7 @@ void app_iterate_color(app_t* app) {
   mouse.y          = roundf(mouse.y);
 
   capture_rgb_t rgb;
-  if (capture_at(&app->capture, mouse.x, mouse.y, &rgb) && !(mouse.x < app->current_x || mouse.x > app->current_x + app->current_w - 1 || mouse.y < app->current_y || mouse.y > app->current_y + app->current_h - 1)) {
+  if (capture_at(&app->capture, (int)mouse.x, (int)mouse.y, &rgb) && !(mouse.x < app->current_x || mouse.x > app->current_x + app->current_w - 1 || mouse.y < app->current_y || mouse.y > app->current_y + app->current_h - 1)) {
     if (app->camera.scale > 7.5f) {
       SDL_FPoint p = camera_world_to_screen(&app->camera, mouse.x, mouse.y);
 
