@@ -4,15 +4,15 @@
 bool app_event_color(app_t* app, SDL_Event* event) {
   // TODO:
   // auto handle_clipboard = [this, machine](auto func) {
-  //   Capture& capture     = machine->get_capture();
-  //   CameraSmooth& camera = machine->get_camera();
+  //   Capture& capture     = app->get_capture();
+  //   CameraSmooth& camera = app->get_camera();
   //   float mx, my;
   //   SDL_GetMouseState(&mx, &my);
   //   SDL_FPoint mouse = camera.screen_to_world(mx, my);
   //   mouse.x          = std::round(mouse.x);
   //   mouse.y          = std::round(mouse.y);
   //   RGB rgb;
-  //   if (capture.at(mouse.x, mouse.y, rgb) && !(mouse.x < machine->current_x || mouse.x > machine->current_x + machine->current_w - 1 || mouse.y < machine->current_y || mouse.y > machine->current_y + machine->current_h - 1)) {
+  //   if (capture.at(mouse.x, mouse.y, rgb) && !(mouse.x < app->current_x || mouse.x > app->current_x + app->current_w - 1 || mouse.y < app->current_y || mouse.y > app->current_y + app->current_h - 1)) {
   //     SDL_SetClipboardText(func(rgb).c_str());
   //   }
   // };
@@ -90,7 +90,7 @@ void app_iterate_color(app_t* app) {
   mouse.y          = roundf(mouse.y);
 
   capture_rgb_t rgb;
-  if (capture_at(&app->capture, (int)mouse.x, (int)mouse.y, &rgb) && !(mouse.x < app->current_x || mouse.x > app->current_x + app->current_w - 1 || mouse.y < app->current_y || mouse.y > app->current_y + app->current_h - 1)) {
+  if (capture_at(&app->capture, mouse.x, mouse.y, &rgb) && !(mouse.x < app->current_x || mouse.x > app->current_x + app->current_w - 1 || mouse.y < app->current_y || mouse.y > app->current_y + app->current_h - 1)) {
     if (app->camera.scale > 7.5f) {
       SDL_FPoint p = camera_world_to_screen(&app->camera, mouse.x, mouse.y);
 
