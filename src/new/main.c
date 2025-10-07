@@ -270,6 +270,7 @@ SDL_AppResult app_event(app_t* app, SDL_Event* event) {
 
           app->state = APP_DRAW_STATE;
 
+          app->resize_selection = RESIZE_SELECTION_NONE;
           app->recompute_text = true;
           app->drawing        = true;
           app->start_crop.x   = mx;
