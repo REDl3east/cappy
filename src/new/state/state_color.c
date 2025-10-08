@@ -1,45 +1,43 @@
 #include "app.h"
 #include "state.h"
 
-bool app_event_color(app_t* app, SDL_Event* event) {
-  // TODO:
-  // auto handle_clipboard = [this, machine](auto func) {
-  //   Capture& capture     = app->get_capture();
-  //   CameraSmooth& camera = app->get_camera();
-  //   float mx, my;
-  //   SDL_GetMouseState(&mx, &my);
-  //   SDL_FPoint mouse = camera.screen_to_world(mx, my);
-  //   mouse.x          = std::round(mouse.x);
-  //   mouse.y          = std::round(mouse.y);
-  //   RGB rgb;
-  //   if (capture.at(mouse.x, mouse.y, rgb) && !(mouse.x < app->current_x || mouse.x > app->current_x + app->current_w - 1 || mouse.y < app->current_y || mouse.y > app->current_y + app->current_h - 1)) {
-  //     SDL_SetClipboardText(func(rgb).c_str());
-  //   }
-  // };
+#include "sb.h"
 
+typedef void (*color_formatter_t)(const capture_rgb_t* rgb, string_builder_t* sb);
+
+static void handle_clipboard(app_t* app, int x, int y, color_formatter_t formatter);
+static void to_decimal_string(const capture_rgb_t* rgb, string_builder_t* sb);
+static void to_decimal_sep_string(const capture_rgb_t* rgb, string_builder_t* sb);
+static void to_hex_string(const capture_rgb_t* rgb, string_builder_t* sb);
+static void to_hex_sep_string(const capture_rgb_t* rgb, string_builder_t* sb);
+static void to_binary_string(const capture_rgb_t* rgb, string_builder_t* sb);
+static void to_binary_sep_string(const capture_rgb_t* rgb, string_builder_t* sb);
+
+bool app_event_color(app_t* app, SDL_Event* event) {
   switch (event->type) {
     case SDL_EVENT_KEY_DOWN: {
       SDL_Keycode code = event->key.key;
       SDL_Keymod mod   = SDL_GetModState();
-      if (code == SDLK_C) {
-        app->state = APP_MOVE_STATE;
-        SDL_ShowCursor();
-        return true;
+
+      float mx, my;
+      SDL_GetMouseState(&mx, &my);
+      SDL_FPoint mouse = camera_screen_to_world(&app->camera, mx, my);
+      int x            = (int)roundf(mouse.x);
+      int y            = (int)roundf(mouse.y);
+
+      if (code == SDLK_D && (mod & SDL_KMOD_CTRL) && (mod & SDL_KMOD_LSHIFT)) {
+        handle_clipboard(app, x, y, to_decimal_sep_string);
+      } else if (code == SDLK_D && (mod & SDL_KMOD_CTRL)) {
+        handle_clipboard(app, x, y, to_decimal_string);
+      } else if (code == SDLK_H && (mod & SDL_KMOD_CTRL) && (mod & SDL_KMOD_LSHIFT)) {
+        handle_clipboard(app, x, y, to_hex_sep_string);
+      } else if (code == SDLK_H && (mod & SDL_KMOD_CTRL)) {
+        handle_clipboard(app, x, y, to_hex_string);
+      } else if (code == SDLK_B && (mod & SDL_KMOD_CTRL) && (mod & SDL_KMOD_LSHIFT)) {
+        handle_clipboard(app, x, y, to_binary_sep_string);
+      } else if (code == SDLK_B && (mod & SDL_KMOD_CTRL)) {
+        handle_clipboard(app, x, y, to_binary_string);
       }
-      // TODO:
-      // else if (code == SDLK_d && (mod & SDL_KMOD_CTRL) && (mod & SDL_KMOD_LSHIFT)) {
-      //   handle_clipboard(toDecimalSepString);
-      // } else if (code == SDLK_d && (mod & SDL_KMOD_CTRL)) {
-      //   handle_clipboard(toDecimalString);
-      // } else if (code == SDLK_h && (mod & SDL_KMOD_CTRL) && (mod & SDL_KMOD_LSHIFT)) {
-      //   handle_clipboard(toHexSepString);
-      // } else if (code == SDLK_h && (mod & SDL_KMOD_CTRL)) {
-      //   handle_clipboard(toHexString);
-      // } else if (code == SDLK_b && (mod & SDL_KMOD_CTRL) && (mod & SDL_KMOD_LSHIFT)) {
-      //   handle_clipboard(toBinarySepString);
-      // } else if (code == SDLK_b && (mod & SDL_KMOD_CTRL)) {
-      //   handle_clipboard(toBinaryString);
-      // }
       break;
     }
     case SDL_EVENT_MOUSE_MOTION: {
@@ -176,4 +174,40 @@ void app_iterate_color(app_t* app) {
   } else {
     SDL_ShowCursor();
   }
+}
+
+static void handle_clipboard(app_t* app, int x, int y, color_formatter_t formatter) {
+  capture_rgb_t rgb;
+  if (capture_at(&app->capture, x, y, &rgb) && !(x < app->current_x || x > app->current_x + app->current_w - 1 || y < app->current_y || y > app->current_y + app->current_h - 1)) {
+    string_builder_t sb = {0};
+    formatter(&rgb, &sb);
+    sb_append_null(&sb);
+    SDL_SetClipboardText(sb.string);
+    sb_free(&sb);
+  }
+}
+
+static void to_decimal_string(const capture_rgb_t* rgb, string_builder_t* sb) {
+  int x = (rgb->r << 16) | (rgb->g << 8) | rgb->b;
+  sb_appendf(sb, "%d", x);
+}
+
+static void to_decimal_sep_string(const capture_rgb_t* rgb, string_builder_t* sb) {
+  sb_appendf(sb, "%d, %d, %d", rgb->r, rgb->g, rgb->b);
+}
+
+static void to_hex_string(const capture_rgb_t* rgb, string_builder_t* sb) {
+  sb_appendf(sb, "0x%02X%02X%02X", rgb->r, rgb->g, rgb->b);
+}
+
+static void to_hex_sep_string(const capture_rgb_t* rgb, string_builder_t* sb) {
+  sb_appendf(sb, "0x%02X, 0x%02X, 0x%02X", rgb->r, rgb->g, rgb->b);
+}
+
+static void to_binary_string(const capture_rgb_t* rgb, string_builder_t* sb) {
+  sb_appendf(sb, "0b%08b%08b%08b", rgb->r, rgb->g, rgb->b);
+}
+
+static void to_binary_sep_string(const capture_rgb_t* rgb, string_builder_t* sb) {
+  sb_appendf(sb, "0x%08b, 0x%08b, 0x%08b", rgb->r, rgb->g, rgb->b);
 }

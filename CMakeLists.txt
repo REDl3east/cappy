@@ -15,6 +15,7 @@ set(MAIN_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/src/new/config.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/new/camera.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/new/renderer.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/new/stb.c
   
   ${CMAKE_CURRENT_SOURCE_DIR}/src/new/state/state_move.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/new/state/state_color.c
