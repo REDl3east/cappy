@@ -1,7 +1,6 @@
 #include "app.h"
-#include "state.h"
-
 #include "sb.h"
+#include "state.h"
 
 typedef void (*color_formatter_t)(const capture_rgb_t* rgb, string_builder_t* sb);
 
