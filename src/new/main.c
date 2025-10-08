@@ -11,7 +11,7 @@
 #include <stdio.h>
 
 SDL_Texture* create_capture_texture(SDL_Renderer* renderer, capture_t* capture);
-void app_render_grid(app_t* app, int grid_size, uint8_t r, uint8_t g, uint8_t b);
+void app_iterate_grid(app_t* app, int grid_size, uint8_t r, uint8_t g, uint8_t b);
 
 SDL_AppResult app_init(app_t* app, int argc, char** argv) {
   if (!capture_screen(&app->capture)) {
@@ -390,7 +390,7 @@ SDL_AppResult app_iterate(app_t* app) {
   SDL_RenderTexture(app->renderer, app->capture_texture, &r1, &r2);
 
   // render grid
-  app_render_grid(app, app->config.grid_size, app->config.grid_color[0], app->config.grid_color[1], app->config.grid_color[2]);
+  app_iterate_grid(app, app->config.grid_size, app->config.grid_color[0], app->config.grid_color[1], app->config.grid_color[2]);
 
   // render state
   if (app->state == APP_MOVE_STATE) {
@@ -447,7 +447,7 @@ SDL_Texture* create_capture_texture(SDL_Renderer* renderer, capture_t* capture) 
   return texture;
 }
 
-void app_render_grid(app_t* app, int grid_size, uint8_t r, uint8_t g, uint8_t b) {
+void app_iterate_grid(app_t* app, int grid_size, uint8_t r, uint8_t g, uint8_t b) {
   if (!app->grid_enabled) return;
 
   int x1 = app->current_x;
