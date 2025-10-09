@@ -52,11 +52,11 @@ bool app_event_color(app_t* app, SDL_Event* event) {
 static void check_recompute_text(app_t* app, int x, int y, capture_rgb_t rgb) {
   if (app->recompute_text) {
     char text_buf[128];
-    SDL_snprintf(text_buf, sizeof(text_buf), "r: %3d g: %3d b: %3d\nx: %d y: %d", rgb.r, rgb.g, rgb.b, x, y);
+    SDL_snprintf(text_buf, sizeof(text_buf), "r=%3d g=%3d b=%3d\nx=%d y=%d", rgb.r, rgb.g, rgb.b, x, y);
 
     SDL_Color white = {255, 255, 255, 255};
 
-    SDL_Surface* text_surface = TTF_RenderText_Solid_Wrapped(app->font, text_buf, 0, white, 0);
+    SDL_Surface* text_surface = TTF_RenderText_Solid_Wrapped(app->font, text_buf, 0, (SDL_Color){255, 117, 24, 200}, 0);
     if (text_surface == NULL) {
       SDL_Log("Failed to render text surface: %s", SDL_GetError());
     } else {
@@ -130,20 +130,23 @@ void app_iterate_color(app_t* app) {
 
     check_recompute_text(app, (int)mouse.x, (int)mouse.y, rgb);
 
-    const float panel_width  = 275.0f;
+    const float panel_lr_padding = 25.0f;
+    const float panel_tr_padding = 25.0f;
     const float panel_offset = 50.0f;
+    const float panel_width  = app->text_texture->w + panel_lr_padding;
 
     SDL_FRect text_panel = {
         mx,
         my - app->text_texture->h - 1,
         panel_width,
-        (float)app->text_texture->h,
+        (float)app->text_texture->h+panel_tr_padding,
     };
     text_panel.x += panel_offset;
     text_panel.y -= panel_offset;
 
-    SDL_SetRenderDrawColor(app->renderer, 125, 125, 125, 255);
+    SDL_SetRenderDrawColor(app->renderer, 125, 125, 125, 150);
     SDL_RenderFillRect(app->renderer, &text_panel);
+
     SDL_SetRenderDrawColor(app->renderer, 0, 0, 0, 255);
     SDL_RenderRect(app->renderer, &text_panel);
 
@@ -164,7 +167,7 @@ void app_iterate_color(app_t* app) {
 
     SDL_FRect text_rect = {
         mx + (0.5f * (panel_width - app->text_texture->w)),
-        my - app->text_texture->h - 1,
+        my - app->text_texture->h + (0.5f * panel_tr_padding),
         (float)app->text_texture->w,
         (float)app->text_texture->h,
     };

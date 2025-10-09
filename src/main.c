@@ -1,6 +1,6 @@
 #include "app.h"
 
-#include "assets/advanced_pixel_7.h"
+#include "assets/intelone_mono_bold.h"
 #include "assets/icon.h"
 #include "sb.h"
 #include "state/state.h"
@@ -79,7 +79,7 @@ SDL_AppResult app_init(app_t* app, int argc, char** argv) {
     return SDL_APP_FAILURE;
   }
 
-  app->font = TTF_OpenFontIO(SDL_IOFromConstMem(advanced_pixel_7, sizeof(advanced_pixel_7)), true, 36);
+  app->font = TTF_OpenFontIO(SDL_IOFromConstMem(intelone_mono_bold, sizeof(intelone_mono_bold)), true, 72);
   if (app->font == NULL) {
     SDL_Log("Failed to load font: %s", SDL_GetError());
     return SDL_APP_FAILURE;
@@ -135,13 +135,13 @@ SDL_AppResult app_init(app_t* app, int argc, char** argv) {
   app->current_w = (int)abs(app->config.window_pre_crop[2] - app->config.window_pre_crop[0]);
   app->current_h = (int)abs(app->config.window_pre_crop[3] - app->config.window_pre_crop[1]);
 
-#define INIT_CURSOR(name, id)                                             \
-  do {                                                                    \
-    name = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT);             \
-    if (name == NULL) {                                                   \
+#define INIT_CURSOR(name, id)                                         \
+  do {                                                                \
+    name = SDL_CreateSystemCursor(id);                                \
+    if (name == NULL) {                                               \
       SDL_Log("Failed to create " #id " cursor: %s", SDL_GetError()); \
-      return SDL_APP_FAILURE;                                             \
-    }                                                                     \
+      return SDL_APP_FAILURE;                                         \
+    }                                                                 \
   } while (0)
 
   INIT_CURSOR(app->default_cursor, SDL_SYSTEM_CURSOR_DEFAULT);
@@ -152,13 +152,12 @@ SDL_AppResult app_init(app_t* app, int argc, char** argv) {
   INIT_CURSOR(app->nwse_cursor, SDL_SYSTEM_CURSOR_NWSE_RESIZE);
   INIT_CURSOR(app->nesw_cursor, SDL_SYSTEM_CURSOR_NESW_RESIZE);
   INIT_CURSOR(app->wait_cursor, SDL_SYSTEM_CURSOR_WAIT);
-  
-  #undef INIT_CURSOR
+
+#undef INIT_CURSOR
 
   SDL_SetCursor(app->default_cursor);
 
   return SDL_APP_CONTINUE;
-
 }
 
 SDL_AppResult app_event(app_t* app, SDL_Event* event) {

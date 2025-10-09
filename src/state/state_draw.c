@@ -184,7 +184,9 @@ void app_iterate_draw(app_t* app) {
     app->recompute_text = true;
   }
 
-  float text_padding = 10.0f;
+  float text_padding = 25.0f;
+  uint8_t alpha = 150;
+
 
   if (app->drawing) {
     if (app->resize_selection != RESIZE_SELECTION_CENTER) {
@@ -235,7 +237,7 @@ void app_iterate_draw(app_t* app) {
 
     draw_rect_flashlight(app->renderer, x1, y1, x2 - x1, y2 - y1, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.5f, 0.5f, 0.5f);
 
-    SDL_SetRenderDrawColor(app->renderer, 200, 200, 200, 200);
+    SDL_SetRenderDrawColor(app->renderer, 200, 200, 200, alpha);
     SDL_RenderLine(app->renderer, x1, y1, x2, y1);
     SDL_RenderLine(app->renderer, x1, y1, x1, y2);
     SDL_RenderLine(app->renderer, x1, y2, x2, y2);
@@ -263,7 +265,7 @@ void app_iterate_draw(app_t* app) {
       recompute_mouse_text(app, selection_x, selection_y, fabsf(width), fabsf(height));
     }
 
-    float offset = 25.0f;
+    float offset = 50.0f;
 
     float text_x, text_y;
     if (width == 0 && height == 0 || width > 0 && height > 0) {
@@ -288,9 +290,9 @@ void app_iterate_draw(app_t* app) {
     text_boundry_rect.w += 2.0f * text_padding;
     text_boundry_rect.h += 2.0f * text_padding;
 
-    SDL_SetRenderDrawColor(app->renderer, 125, 125, 125, 255);
+    SDL_SetRenderDrawColor(app->renderer, 125, 125, 125, alpha);
     SDL_RenderFillRect(app->renderer, &text_boundry_rect);
-    SDL_SetRenderDrawColor(app->renderer, 0, 0, 0, 255);
+    SDL_SetRenderDrawColor(app->renderer, 0, 0, 0, alpha);
     SDL_RenderRect(app->renderer, &text_boundry_rect);
 
     SDL_RenderTexture(app->renderer, app->text_texture, NULL, &text_rect);
@@ -303,7 +305,7 @@ void app_iterate_draw(app_t* app) {
 
     draw_rect_flashlight(app->renderer, start_screen.x, start_screen.y, end_screen.x - start_screen.x, end_screen.y - start_screen.y, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.5f, 0.5f, 0.5f);
 
-    SDL_SetRenderDrawColor(app->renderer, 200, 200, 200, 200);
+    SDL_SetRenderDrawColor(app->renderer, 200, 200, 200, alpha);
     SDL_RenderLine(app->renderer, start_screen.x, start_screen.y, end_screen.x, start_screen.y);
     SDL_RenderLine(app->renderer, start_screen.x, start_screen.y, start_screen.x, end_screen.y);
     SDL_RenderLine(app->renderer, start_screen.x, end_screen.y, end_screen.x, end_screen.y);
@@ -321,18 +323,24 @@ void app_iterate_draw(app_t* app) {
     int w, h;
     SDL_GetWindowSize(SDL_GetRenderWindow(app->renderer), &w, &h);
 
-    float rect_x = w - (float)app->text_texture->w - 2.0f * text_padding;
-    float rect_y = h - (float)app->text_texture->h;
+    SDL_FRect text_rect = {
+        text_padding,
+        text_padding,
+        (float)app->text_texture->w,
+        (float)app->text_texture->h,
+    };
 
-    SDL_FRect text_rect = {rect_x + text_padding, rect_y, (float)app->text_texture->w, (float)app->text_texture->h};
+    SDL_FRect text_boundry_rect = {
+        0,
+        0,
+        (float)app->text_texture->w + (text_padding * 2.0f),
+        (float)app->text_texture->h + (text_padding * 2.0f),
+    };
 
-    SDL_FRect text_boundry_rect = text_rect;
-    text_boundry_rect.x -= text_padding;
-    text_boundry_rect.w += 2.0f * text_padding;
-
-    SDL_SetRenderDrawColor(app->renderer, 125, 125, 125, 255);
+    SDL_SetRenderDrawColor(app->renderer, 125, 125, 125, alpha);
     SDL_RenderFillRect(app->renderer, &text_boundry_rect);
-    SDL_SetRenderDrawColor(app->renderer, 0, 0, 0, 255);
+
+    SDL_SetRenderDrawColor(app->renderer, 0, 0, 0, alpha);
     SDL_RenderRect(app->renderer, &text_boundry_rect);
 
     SDL_RenderTexture(app->renderer, app->text_texture, NULL, &text_rect);
@@ -394,11 +402,9 @@ static crop_resize_selection_t get_resize_direction(float x, float y, SDL_FPoint
 
 static void recompute_mouse_text(app_t* app, float selection_x, float selection_y, float width, float height) {
   char text_buf[128];
-  SDL_snprintf(text_buf, sizeof(text_buf), "x: %.2f y: %.2f\nw: %.2f h: %.2f", selection_x, selection_y, width, height);
+  SDL_snprintf(text_buf, sizeof(text_buf), "x=%.2f y=%.2f\nw=%.2f h=%.2f", selection_x, selection_y, width, height);
 
-  SDL_Color white = {255, 255, 255, 255};
-
-  SDL_Surface* text_surface = TTF_RenderText_Solid_Wrapped(app->font, text_buf, 0, white, 0);
+  SDL_Surface* text_surface = TTF_RenderText_Solid_Wrapped(app->font, text_buf, 0, (SDL_Color){255, 117, 24, 200}, 0);
   if (text_surface == NULL) {
     SDL_Log("Failed to render text surface: %s", SDL_GetError());
   } else {
@@ -422,11 +428,9 @@ static void recompute_mouse_text(app_t* app, float selection_x, float selection_
 
 static void recompute_header_text(app_t* app, int x, int y, int width, int height) {
   char text_buf[128];
-  SDL_snprintf(text_buf, sizeof(text_buf), "x: %d y: %d\nw: %d h: %d", x, y, width, height);
+  SDL_snprintf(text_buf, sizeof(text_buf), "x=%d y=%d\nw=%d h=%d", x, y, width, height);
 
-  SDL_Color white = {255, 255, 255, 255};
-
-  SDL_Surface* text_surface = TTF_RenderText_Solid_Wrapped(app->font, text_buf, 0, white, 0);
+  SDL_Surface* text_surface = TTF_RenderText_Solid_Wrapped(app->font, text_buf, 0, (SDL_Color){255, 117, 24, 200}, 0);
   if (text_surface == NULL) {
     SDL_Log("Failed to render text surface: %s", SDL_GetError());
   } else {
