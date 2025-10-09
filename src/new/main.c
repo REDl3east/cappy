@@ -509,8 +509,7 @@ static void save_dialog_callback(void* userdata, const char* const* filelist, in
       return;
     }
 
-    SDL_Event event;
-    SDL_memset(&event, 0, sizeof(event));
+    SDL_Event event  = {0};
     event.type       = app->save_file_event;
     event.user.data1 = SDL_strdup(*filelist);
     SDL_PushEvent(&event);
