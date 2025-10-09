@@ -2,6 +2,8 @@
 #include "sb.h"
 #include "state.h"
 
+#include <math.h>
+
 typedef void (*color_formatter_t)(const capture_rgb_t* rgb, string_builder_t* sb);
 
 static void handle_clipboard(app_t* app, int x, int y, color_formatter_t formatter);

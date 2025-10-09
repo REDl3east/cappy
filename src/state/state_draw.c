@@ -2,6 +2,8 @@
 #include "renderer.h"
 #include "state.h"
 
+#include <math.h>
+
 static void recompute_mouse_text(app_t* app, float selection_x, float selection_y, float width, float height);
 static void recompute_header_text(app_t* app, int x, int y, int width, int height);
 static bool point_in_rect(float x, float y, float rx, float ry, float rw, float rh);
