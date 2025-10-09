@@ -132,14 +132,14 @@ void app_iterate_color(app_t* app) {
 
     const float panel_lr_padding = 25.0f;
     const float panel_tr_padding = 25.0f;
-    const float panel_offset = 50.0f;
-    const float panel_width  = app->text_texture->w + panel_lr_padding;
+    const float panel_offset     = 50.0f;
+    const float panel_width      = app->text_texture->w + panel_lr_padding;
 
     SDL_FRect text_panel = {
         mx,
         my - app->text_texture->h - 1,
         panel_width,
-        (float)app->text_texture->h+panel_tr_padding,
+        (float)app->text_texture->h + panel_tr_padding,
     };
     text_panel.x += panel_offset;
     text_panel.y -= panel_offset;

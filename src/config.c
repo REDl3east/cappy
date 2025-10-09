@@ -29,6 +29,7 @@ bool config_init(config_t* config) {
         "flashlight_center_outer_color = 255 255 204 25\n"
         "flashlight_outer_color        = 51 51 0 50\n"
         "background_color              = 50 50 50\n"
+        "font_size                     = 36\n"
         "grid_size                     = 100\n"
         "grid_color                    = 200 200 200\n";
 
@@ -109,6 +110,7 @@ void config_init_default(config_t* config) {
   config->window_fullscreen = false;
   config->flashlight_size   = 150;
   config->grid_size         = 100;
+  config->font_size         = 36;
 
   config->window_pre_crop[0] = 0;
   config->window_pre_crop[1] = 0;
@@ -162,6 +164,8 @@ static void config_handler(config_t* config, cstring_view key, cstring_view valu
     sv_parse_int(value, &config->grid_size);
   } else if (sv_compare(key, svl("grid_color"))) {
     config_parse_color3(value, config->grid_color);
+  } else if (sv_compare(key, svl("font_size"))) {
+    sv_parse_int(value, &config->font_size);
   }
 }
 
@@ -236,6 +240,7 @@ void config_print(const config_t* config) {
   SDL_Log("window_fullscreen             = %s", config->window_fullscreen ? "true" : "false");
   SDL_Log("flashlight_size               = %d", config->flashlight_size);
   SDL_Log("grid_size                     = %d", config->grid_size);
+  SDL_Log("font_size                     = %d", config->font_size);
   SDL_Log("window_pre_crop               = %d %d %d %d", config->window_pre_crop[0], config->window_pre_crop[1], config->window_pre_crop[2], config->window_pre_crop[3]);
   SDL_Log("flashlight_center_inner_color = %d %d %d %d", config->flashlight_center_inner_color[0], config->flashlight_center_inner_color[1], config->flashlight_center_inner_color[2], config->flashlight_center_inner_color[3]);
   SDL_Log("flashlight_center_outer_color = %d %d %d %d", config->flashlight_center_outer_color[0], config->flashlight_center_outer_color[1], config->flashlight_center_outer_color[2], config->flashlight_center_outer_color[3]);

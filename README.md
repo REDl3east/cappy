@@ -81,6 +81,7 @@ A configuration file is automatically generated when the program is ran for the 
 | background_color              | The center color of the flashlight. Requires 3 integers between 0-255 in the format: REG GREEN BLUE.       | `50 50 50`       |
 | grid_size                     | The size of the grid in pixels.                                                                            | `100`            |
 | grid_color                    | The color of the grid. Requires 3 integers between 0-255 in the format: REG GREEN BLUE.                    | `200 200 200`    |
+| font_size                     | The font size.                                                                                             | `36`             |
 
 
 ### Controls

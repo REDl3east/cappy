@@ -9,6 +9,7 @@ typedef struct config_t {
   bool window_fullscreen;
   int window_pre_crop[4];
   int flashlight_size;
+  int font_size;
   uint8_t flashlight_center_inner_color[4];
   uint8_t flashlight_center_outer_color[4];
   uint8_t flashlight_outer_color[4];

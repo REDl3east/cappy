@@ -1,7 +1,7 @@
 #include "app.h"
 
-#include "assets/intelone_mono_bold.h"
 #include "assets/icon.h"
+#include "assets/intelone_mono_bold.h"
 #include "sb.h"
 #include "state/state.h"
 #include "stb_image_write.h"
@@ -79,7 +79,7 @@ SDL_AppResult app_init(app_t* app, int argc, char** argv) {
     return SDL_APP_FAILURE;
   }
 
-  app->font = TTF_OpenFontIO(SDL_IOFromConstMem(intelone_mono_bold, sizeof(intelone_mono_bold)), true, 72);
+  app->font = TTF_OpenFontIO(SDL_IOFromConstMem(intelone_mono_bold, sizeof(intelone_mono_bold)), true, app->config.font_size);
   if (app->font == NULL) {
     SDL_Log("Failed to load font: %s", SDL_GetError());
     return SDL_APP_FAILURE;

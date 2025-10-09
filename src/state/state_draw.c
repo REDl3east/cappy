@@ -185,8 +185,7 @@ void app_iterate_draw(app_t* app) {
   }
 
   float text_padding = 25.0f;
-  uint8_t alpha = 150;
-
+  uint8_t alpha      = 150;
 
   if (app->drawing) {
     if (app->resize_selection != RESIZE_SELECTION_CENTER) {
