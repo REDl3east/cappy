@@ -487,10 +487,10 @@ static void save_capture(const char* file, app_t* app) {
 
   sb_append_null(&sb);
 
-  const int comp        = 3;
-  int stride            = app->capture.stride;
-  int index             = app->current_y * stride + app->current_x;
-  capture_rgb_t* pixels = app->capture.pixels + index;
+  const int comp              = 3;
+  const int stride            = app->capture.stride;
+  const int index             = app->current_y * stride + app->current_x;
+  const capture_rgb_t* pixels = app->capture.pixels + index;
 
   if (stbi_write_png(sb.string, app->current_w, app->current_h, comp, pixels, comp * stride) == 0) {
     SDL_Log("Failed to save file: '%s'", sb.string);
