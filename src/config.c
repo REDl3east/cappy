@@ -1,6 +1,4 @@
 #include "config.h"
-
-#define SV_IMPLEMENTATION
 #include "sv.h"
 
 #include "SDL3/SDL.h"
