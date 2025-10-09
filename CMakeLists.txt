@@ -2,63 +2,31 @@ cmake_minimum_required(VERSION 3.27.1...3.27.1)
 project(cappy VERSION 0.1.0 LANGUAGES C)
 
 
-set(SDL3_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs/sdl3)
+set(SDL3_SRC_DIR     ${CMAKE_CURRENT_SOURCE_DIR}/libs/sdl3)
 set(SDL3_TTF_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs/sdl3_ttf)
-set(STB_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs/stb)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs)
 
 set(MAIN_SRC
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/new/main.c
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/new/sdl_callback.c
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/new/capture.c
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/new/config.c
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/new/camera.c
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/new/renderer.c
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/new/stb.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/main.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/sdl_callback.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/capture.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/config.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/camera.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/stb.c
   
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/new/state/state_move.c
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/new/state/state_color.c
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/new/state/state_flashlight.c
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/new/state/state_draw.c
-  # ${CMAKE_CURRENT_SOURCE_DIR}/src/camera.cpp
-  # ${CMAKE_CURRENT_SOURCE_DIR}/src/capture.cpp
-  # ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer.cpp
-  # ${CMAKE_CURRENT_SOURCE_DIR}/src/stb.cpp
-  # ${CMAKE_CURRENT_SOURCE_DIR}/src/machine/cappyMachine.cpp
-  # ${CMAKE_CURRENT_SOURCE_DIR}/src/state/colorState.cpp
-  # ${CMAKE_CURRENT_SOURCE_DIR}/src/state/drawCropState.cpp
-  # ${CMAKE_CURRENT_SOURCE_DIR}/src/state/flashlightState.cpp
-  # ${CMAKE_CURRENT_SOURCE_DIR}/src/state/moveState.cpp
-  # ${CMAKE_CURRENT_SOURCE_DIR}/src/config.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/state/state_move.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/state/state_color.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/state/state_flashlight.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/state/state_draw.c
 )
 
 add_executable(cappy ${MAIN_SRC})
 target_include_directories(cappy PRIVATE 
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/new
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/new/state
-#   ${CMAKE_CURRENT_SOURCE_DIR}/src/machine
-#   ${CMAKE_CURRENT_SOURCE_DIR}/src/state
-#   ${SDL3_SRC_DIR}/include
-#   ${SDL3_TTF_SRC_DIR}/include
-#   ${STB_SRC_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/state
 )
-
-# if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-#   set_target_properties(cappy
-#     PROPERTIES
-#     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/debug/lib"
-#     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/debug/lib"
-#     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/debug/bin"
-#   )
-# elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-#   set_target_properties(cappy
-#     PROPERTIES
-#     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/release/lib"
-#     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/release/lib"
-#     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/release/bin"
-#   )
-# endif()
 
 if (UNIX)
     target_link_libraries(cappy SDL3-static SDL3_ttf-static X11)
@@ -67,4 +35,4 @@ elseif(WIN32)
     target_link_libraries(cappy SDL3-static SDL3_ttf-static)
 endif()
     
-# install(TARGETS cappy DESTINATION bin)
+install(TARGETS cappy DESTINATION bin)

@@ -1,55 +1,33 @@
 #ifndef _CAPTURE_H_
 #define _CAPTURE_H_
 
-#include <cstdint>
-#include <fstream>
-#include <iostream>
+#include <stdbool.h>
+#include <stdint.h>
 
-struct RGB {
+typedef struct capture_rgb_t {
   uint8_t r;
   uint8_t g;
   uint8_t b;
-};
+} capture_rgb_t;
 
-struct Capture {
-public:
-  ~Capture();
-
-  bool capture();
-  bool capture(const char* filename);
-
-  bool in_bound(int x, int y) {
-    if (!captured) return false;
-    if (x >= width || x < 0) return false;
-    if (y >= height || y < 0) return false;
-    return true;
-  }
-
-  bool at(int x, int y, RGB& rgb) {
-    if (!captured) return false;
-    if (x >= width || x < 0) return false;
-    if (y >= height || y < 0) return false;
-
-    int index = y * width + x;
-    rgb       = pixels[index];
-
-    return true;
-  }
-
-  bool captured = false;
+typedef struct capture_t {
   int width;
   int height;
+  capture_rgb_t* pixels;
   int stride;
-  RGB* pixels;
+} capture_t;
 
-private:
-};
+bool capture_screen(capture_t* capture);
+void capture_free(capture_t* capture);
 
-std::string toDecimalString(const RGB& color);
-std::string toDecimalSepString(const RGB& color);
-std::string toHexString(const RGB& color);
-std::string toHexSepString(const RGB& color);
-std::string toBinaryString(const RGB& color);
-std::string toBinarySepString(const RGB& color);
+bool capture_in_bound(capture_t* capture, int x, int y);
+bool capture_at(capture_t* capture, int x, int y, capture_rgb_t* rgb);
+
+// std::string toDecimalString(const RGB& color);
+// std::string toDecimalSepString(const RGB& color);
+// std::string toHexString(const RGB& color);
+// std::string toHexSepString(const RGB& color);
+// std::string toBinaryString(const RGB& color);
+// std::string toBinarySepString(const RGB& color);
 
 #endif

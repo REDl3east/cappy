@@ -1,22 +1,25 @@
 #ifndef _CONFIG_H
 #define _CONFIG_H
 
-#include <cstdint>
-#include <string>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
 
-typedef struct cappyConfig {
-  bool window_fullscreen                   = false;
-  int window_pre_crop[4]                   = {0, 0, 0, 0};
-  int flashlight_size                      = 100;
-  uint8_t flashlight_center_inner_color[4] = {255, 255, 255, 0};
-  uint8_t flashlight_center_outer_color[4] = {255, 255, 255, 0};
-  uint8_t flashlight_outer_color[4]        = {0, 0, 0, 255};
-  uint8_t background_color[3]              = {50, 50, 50};
-  int grid_size                            = 100;
-  uint8_t grid_color[3]                    = {50, 50, 50};
-} cappyConfig;
+typedef struct config_t {
+  bool window_fullscreen;
+  int window_pre_crop[4];
+  int flashlight_size;
+  uint8_t flashlight_center_inner_color[4];
+  uint8_t flashlight_center_outer_color[4];
+  uint8_t flashlight_outer_color[4];
+  uint8_t background_color[3];
+  int grid_size;
+  uint8_t grid_color[3];
+} config_t;
 
-void config_init(const std::string& file, cappyConfig& config);
-void config_init(cappyConfig& config);
+bool config_init(config_t* config);
+bool config_init_file(const char* file, config_t* config);
+void config_init_default(config_t* config);
+void config_print(const config_t* config);
 
 #endif
