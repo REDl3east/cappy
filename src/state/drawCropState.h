@@ -23,8 +23,8 @@ public:
   DrawCropState(float x, float y);
 
 private:
-  SDL_FPoint start;
-  SDL_FPoint end;
+  SDL_FPoint start_crop;
+  SDL_FPoint end_crop;
   bool drawing                            = true;
   static constexpr float resize_rect_size = 15.0f;
   ResizeSelection resize_selection        = ResizeSelection::NONE;
@@ -35,9 +35,6 @@ private:
   std::shared_ptr<SDL_Cursor> nesw_cursor;
   std::shared_ptr<SDL_Cursor> move_cursor;
 
-  std::shared_ptr<SDL_Surface> text_surface;
-  std::shared_ptr<SDL_Texture> text_texture;
-  bool recompute_text = true;
 };
 
 #endif

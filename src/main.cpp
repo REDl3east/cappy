@@ -56,12 +56,14 @@ int main(int argc, char** argv) {
   }
   SDL_DestroyProperties(props);
 
-  std::shared_ptr<SDL_Renderer> renderer = std::shared_ptr<SDL_Renderer>(SDL_CreateRenderer(window.get(), NULL, SDL_RENDERER_PRESENTVSYNC), SDL_DestroyRenderer);
+  std::shared_ptr<SDL_Renderer> renderer = std::shared_ptr<SDL_Renderer>(SDL_CreateRenderer(window.get(), NULL), SDL_DestroyRenderer);
   if (!renderer) {
     SDL_Log("Failed to create renderer!");
     return 1;
   }
 
+  /* In SDL3, renderer flags are gone; enable VSync explicitly. */
+  SDL_SetRenderVSync(renderer.get(), 1);
   SDL_SetRenderDrawBlendMode(renderer.get(), SDL_BLENDMODE_BLEND);
 
   std::shared_ptr<SDL_Texture> texture = create_capture_texture(renderer, capture);
