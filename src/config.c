@@ -43,7 +43,7 @@ bool config_init(config_t* config) {
 }
 
 bool config_init_file(const char* file, config_t* config) {
-  SDL_Log("Reading config file: '%s'", file);
+  SDL_Log("Loading config file: '%s'", file);
   config_init_default(config);
 
   size_t file_size = 0;

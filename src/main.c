@@ -135,48 +135,30 @@ SDL_AppResult app_init(app_t* app, int argc, char** argv) {
   app->current_w = (int)abs(app->config.window_pre_crop[2] - app->config.window_pre_crop[0]);
   app->current_h = (int)abs(app->config.window_pre_crop[3] - app->config.window_pre_crop[1]);
 
-  app->move_cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_MOVE);
-  if (app->move_cursor == NULL) {
-    SDL_Log("Failed to create move cursor: %s", SDL_GetError());
-    return SDL_APP_FAILURE;
-  }
-  app->default_cursor = SDL_GetDefaultCursor();
-  if (app->default_cursor == NULL) {
-    SDL_Log("Failed to create default cursor: %s", SDL_GetError());
-    return SDL_APP_FAILURE;
-  }
-  app->crosshair_cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_CROSSHAIR);
-  if (app->crosshair_cursor == NULL) {
-    SDL_Log("Failed to create crosshair cursor: %s", SDL_GetError());
-    return SDL_APP_FAILURE;
-  }
-  app->ns_cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_NS_RESIZE);
-  if (app->ns_cursor == NULL) {
-    SDL_Log("Failed to create NS cursor: %s", SDL_GetError());
-    return SDL_APP_FAILURE;
-  }
-  app->ew_cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_EW_RESIZE);
-  if (app->ew_cursor == NULL) {
-    SDL_Log("Failed to create EW cursor: %s", SDL_GetError());
-    return SDL_APP_FAILURE;
-  }
-  app->nwse_cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_NWSE_RESIZE);
-  if (app->nwse_cursor == NULL) {
-    SDL_Log("Failed to create NWSE cursor: %s", SDL_GetError());
-    return SDL_APP_FAILURE;
-  }
-  app->nesw_cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_NESW_RESIZE);
-  if (app->nesw_cursor == NULL) {
-    SDL_Log("Failed to create NESW cursor: %s", SDL_GetError());
-    return SDL_APP_FAILURE;
-  }
-  app->wait_cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_WAIT);
-  if (app->wait_cursor == NULL) {
-    SDL_Log("Failed to create wait cursor: %s", SDL_GetError());
-    return SDL_APP_FAILURE;
-  }
+#define INIT_CURSOR(name, id)                                             \
+  do {                                                                    \
+    name = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT);             \
+    if (name == NULL) {                                                   \
+      SDL_Log("Failed to create '" #name "' cursor: %s", SDL_GetError()); \
+      return SDL_APP_FAILURE;                                             \
+    }                                                                     \
+  } while (0)
+
+  INIT_CURSOR(app->default_cursor, SDL_SYSTEM_CURSOR_DEFAULT);
+  INIT_CURSOR(app->move_cursor, SDL_SYSTEM_CURSOR_MOVE);
+  INIT_CURSOR(app->crosshair_cursor, SDL_SYSTEM_CURSOR_CROSSHAIR);
+  INIT_CURSOR(app->ns_cursor, SDL_SYSTEM_CURSOR_NS_RESIZE);
+  INIT_CURSOR(app->ew_cursor, SDL_SYSTEM_CURSOR_EW_RESIZE);
+  INIT_CURSOR(app->nwse_cursor, SDL_SYSTEM_CURSOR_NWSE_RESIZE);
+  INIT_CURSOR(app->nesw_cursor, SDL_SYSTEM_CURSOR_NESW_RESIZE);
+  INIT_CURSOR(app->wait_cursor, SDL_SYSTEM_CURSOR_WAIT);
+  
+  #undef INIT_CURSOR
+
+  SDL_SetCursor(app->default_cursor);
 
   return SDL_APP_CONTINUE;
+
 }
 
 SDL_AppResult app_event(app_t* app, SDL_Event* event) {
