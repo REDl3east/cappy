@@ -2,7 +2,10 @@
 
 #include "assets/advanced_pixel_7.h"
 #include "assets/icon.h"
+#include "sb.h"
 #include "state/state.h"
+#include "stb_image_write.h"
+#include "sv.h"
 
 #define SDL_MAIN_USE_CALLBACKS
 #include "SDL3/SDL_main.h"
@@ -10,8 +13,11 @@
 #include <math.h>
 #include <stdio.h>
 
-SDL_Texture* create_capture_texture(SDL_Renderer* renderer, capture_t* capture);
-void app_iterate_grid(app_t* app, int grid_size, uint8_t r, uint8_t g, uint8_t b);
+static SDL_Texture* create_capture_texture(SDL_Renderer* renderer, capture_t* capture);
+static void app_iterate_grid(app_t* app, int grid_size, uint8_t r, uint8_t g, uint8_t b);
+
+static void save_capture(const char* file, app_t* app);
+static void save_dialog_callback(void* userdata, const char* const* filelist, int filter);
 
 SDL_AppResult app_init(app_t* app, int argc, char** argv) {
   if (!capture_screen(&app->capture)) {
@@ -108,6 +114,8 @@ SDL_AppResult app_init(app_t* app, int argc, char** argv) {
   app->flashlight_zoom.zoom_elapsed     = 0.0f;
   app->flashlight_zoom.zoom_size_per_ms = 0.0f;
 
+  app->save_file_event = SDL_RegisterEvents(1);
+
   // setting bounds in capture, if width or height is <= 0
   // then it sets the crop to the capture width or height.
   if (app->config.window_pre_crop[0] < 0) app->config.window_pre_crop[0] = 0;
@@ -160,6 +168,11 @@ SDL_AppResult app_init(app_t* app, int argc, char** argv) {
   app->nesw_cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_NESW_RESIZE);
   if (app->nesw_cursor == NULL) {
     SDL_Log("Failed to create NESW cursor: %s", SDL_GetError());
+    return SDL_APP_FAILURE;
+  }
+  app->wait_cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_WAIT);
+  if (app->wait_cursor == NULL) {
+    SDL_Log("Failed to create wait cursor: %s", SDL_GetError());
     return SDL_APP_FAILURE;
   }
 
@@ -228,33 +241,11 @@ SDL_AppResult app_event(app_t* app, SDL_Event* event) {
         SDL_ShowCursor();
       } else if (code == SDLK_M) {
         SDL_MinimizeWindow(app->window);
+      } else if (code == SDLK_S && mod & SDL_KMOD_CTRL) {
+        static const SDL_DialogFileFilter filters[] = {
+            {"PNG images", "png"}};
+        SDL_ShowSaveFileDialog(save_dialog_callback, (void*)app, app->window, filters, SDL_arraysize(filters), NULL);
       }
-      // TODO:
-      // else if (code == SDLK_s && mod & SDL_KMOD_CTRL) {
-      //   static const SDL_DialogFileFilter filters[] = {
-      //       {"PNG images", "png"},
-      //       {NULL, NULL},
-      //   };
-
-      //   SDL_ShowSaveFileDialog([](void* userdata, const char* const* filelist, int filter) {
-      //     if (filelist) {
-      //       if (!*filelist) {
-      //         SDL_Log("Save dialog canceled.");
-      //         return;
-      //       }
-
-      //       SDL_Event event;
-      //       SDL_memset(&event, 0, sizeof(event));
-      //       event.type       = SAVE_FILE_EVENT;
-      //       event.user.data1 = strdup(*filelist);
-      //       SDL_PushEvent(&event);
-
-      //     } else {
-      //       SDL_Log("Error: %s\n", SDL_GetError());
-      //     }
-      //   },
-      //                          machine.get(), window.get(), filters, NULL);
-      // }
 
       break;
     }
@@ -271,12 +262,12 @@ SDL_AppResult app_event(app_t* app, SDL_Event* event) {
           app->state = APP_DRAW_STATE;
 
           app->resize_selection = RESIZE_SELECTION_NONE;
-          app->recompute_text = true;
-          app->drawing        = true;
-          app->start_crop.x   = mx;
-          app->start_crop.y   = my;
-          app->end_crop.x     = mx;
-          app->end_crop.y     = my;
+          app->recompute_text   = true;
+          app->drawing          = true;
+          app->start_crop.x     = mx;
+          app->start_crop.y     = my;
+          app->end_crop.x       = mx;
+          app->end_crop.y       = my;
 
           SDL_ShowCursor();
           SDL_SetCursor(app->crosshair_cursor);
@@ -335,40 +326,18 @@ SDL_AppResult app_event(app_t* app, SDL_Event* event) {
       }
       break;
     }
+  }
 
-      // TODO:
-      // case SAVE_FILE_EVENT: {
-      //   std::shared_ptr<SDL_Cursor> wait_cursor = std::shared_ptr<SDL_Cursor>(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_WAIT), SDL_DestroyCursor);
-      //   SDL_SetCursor(wait_cursor.get());
+  // custom events
+  if (event->type == app->save_file_event) {
+    SDL_SetCursor(app->wait_cursor);
 
-      //   std::string path = std::string((char*)(event.user.data1));
-      //   free(event.user.data1);
+    char* path = (char*)(event->user.data1);
 
-      //   constexpr int comp = 3;
-      //   int stride         = machine->get_capture().stride;
-      //   int index          = machine->current_y * stride + machine->current_x;
-      //   RGB* pixels        = &machine->get_capture().pixels[index];
+    save_capture(path, app);
 
-      //   if (path.starts_with("file://")) {
-      //     path.erase(0, 7);
-      //   } else if (path.starts_with("file:/")) {
-      //     path.erase(0, 6);
-      //   }
-
-      //   if (!path.ends_with(".png")) {
-      //     path += ".png";
-      //   }
-
-      //   if (stbi_write_png(path.c_str(), machine->current_w, machine->current_h, comp, pixels, comp * stride) == 0) {
-      //     SDL_Log("Failed to save file: '%s': %s", path.c_str(), strerror(errno));
-      //   } else {
-      //     SDL_Log("Saved file: '%s'", path.c_str());
-      //   }
-
-      //   SDL_SetCursor(SDL_GetDefaultCursor());
-
-      //   break;
-      // }
+    SDL_SetCursor(app->default_cursor);
+    SDL_free(path);
   }
 
   return SDL_APP_CONTINUE;
@@ -421,15 +390,14 @@ void app_quit(app_t* app, SDL_AppResult result) {
     if (app->ew_cursor != NULL) SDL_DestroyCursor(app->ew_cursor);
     if (app->nwse_cursor != NULL) SDL_DestroyCursor(app->nwse_cursor);
     if (app->nesw_cursor != NULL) SDL_DestroyCursor(app->nesw_cursor);
+    if (app->wait_cursor != NULL) SDL_DestroyCursor(app->wait_cursor);
 
     TTF_Quit();
     SDL_Quit();
   }
 }
 
-SDL_Texture* create_capture_texture(SDL_Renderer* renderer, capture_t* capture) {
-  if (renderer == NULL || capture == NULL || capture->pixels == NULL) return NULL;
-
+static SDL_Texture* create_capture_texture(SDL_Renderer* renderer, capture_t* capture) {
   SDL_Surface* surface = SDL_CreateSurfaceFrom(capture->width, capture->height, SDL_PIXELFORMAT_RGB24, capture->pixels, capture->stride * 3);
   if (surface == NULL) {
     SDL_Log("Failed to create surface from capture pixels: %s", SDL_GetError());
@@ -447,7 +415,7 @@ SDL_Texture* create_capture_texture(SDL_Renderer* renderer, capture_t* capture) 
   return texture;
 }
 
-void app_iterate_grid(app_t* app, int grid_size, uint8_t r, uint8_t g, uint8_t b) {
+static void app_iterate_grid(app_t* app, int grid_size, uint8_t r, uint8_t g, uint8_t b) {
   if (!app->grid_enabled) return;
 
   int x1 = app->current_x;
@@ -498,5 +466,55 @@ void app_iterate_grid(app_t* app, int grid_size, uint8_t r, uint8_t g, uint8_t b
       SDL_RenderLine(app->renderer, start.x, start.y, end.x, end.y);
       lines_rendered++;
     }
+  }
+}
+
+static void save_capture(const char* file, app_t* app) {
+  cstring_view sv = sv_create_from_cstr(file);
+
+  if (sv_starts_with(sv, svl("file://"))) {
+    sv = sv_remove_prefix(sv, 7);
+  } else if (sv_starts_with(sv, svl("file:/"))) {
+    sv = sv_remove_prefix(sv, 6);
+  }
+
+  string_builder_t sb = {0};
+  sb_append_buffer(&sb, sv.data, sv.length);
+
+  if (!sv_ends_with(sv, svl(".png"))) {
+    sb_append_buffer(&sb, ".png", 4);
+  }
+
+  sb_append_null(&sb);
+
+  const int comp        = 3;
+  int stride            = app->capture.stride;
+  int index             = app->current_y * stride + app->current_x;
+  capture_rgb_t* pixels = app->capture.pixels + index;
+
+  if (stbi_write_png(sb.string, app->current_w, app->current_h, comp, pixels, comp * stride) == 0) {
+    SDL_Log("Failed to save file: '%s'", sb.string);
+  } else {
+    SDL_Log("Saved file: '%s'", sb.string);
+  }
+
+  sb_free(&sb);
+}
+
+static void save_dialog_callback(void* userdata, const char* const* filelist, int filter) {
+  app_t* app = (app_t*)userdata;
+  if (filelist) {
+    if (!*filelist) {
+      SDL_Log("Save dialog canceled.");
+      return;
+    }
+
+    SDL_Event event;
+    SDL_memset(&event, 0, sizeof(event));
+    event.type       = app->save_file_event;
+    event.user.data1 = SDL_strdup(*filelist);
+    SDL_PushEvent(&event);
+  } else {
+    SDL_Log("Error: %s\n", SDL_GetError());
   }
 }

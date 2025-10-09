@@ -26,6 +26,7 @@ typedef struct app_t {
   SDL_Cursor* ew_cursor;
   SDL_Cursor* nwse_cursor;
   SDL_Cursor* nesw_cursor;
+  SDL_Cursor* wait_cursor;
 
   int current_x;
   int current_y;
@@ -44,6 +45,8 @@ typedef struct app_t {
   SDL_FPoint start_crop;
   SDL_FPoint end_crop;
   crop_resize_selection_t resize_selection;
+
+  int save_file_event;
 
   app_state_t state;
 } app_t;
