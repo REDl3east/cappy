@@ -26,6 +26,7 @@ add_executable(cappy ${MAIN_SRC})
 target_include_directories(cappy PRIVATE 
   ${CMAKE_CURRENT_SOURCE_DIR}/src
   ${CMAKE_CURRENT_SOURCE_DIR}/src/state
+  ${CMAKE_CURRENT_SOURCE_DIR}/libs
 )
 
 if (UNIX)
