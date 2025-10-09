@@ -31,7 +31,7 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release  # or Debug for debug build
 cmake --build build
 ```
 
-The compiled executable will be stored in `./build/release/bin/cappy` for release, and `./build/debug/bin/cappy` for debug. Since this program is statically linked, there is no external dependencies and it can be stored anywhere on your PC. You can use the install command to move it to an appropriate folder on your OS. 
+This program is statically linked mostly, there is no external shared libraries and it can be stored anywhere on your PC. You can use the install command to move it to an appropriate folder on your OS. 
 
 ### Install
 ``` bash
