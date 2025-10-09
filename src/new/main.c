@@ -470,7 +470,8 @@ static void app_iterate_grid(app_t* app, int grid_size, uint8_t r, uint8_t g, ui
 }
 
 static void save_capture(const char* file, app_t* app) {
-  cstring_view sv = sv_create_from_cstr(file);
+  cstring_view sv     = sv_create_from_cstr(file);
+  string_builder_t sb = {0};
 
   if (sv_starts_with(sv, svl("file://"))) {
     sv = sv_remove_prefix(sv, 7);
@@ -478,7 +479,6 @@ static void save_capture(const char* file, app_t* app) {
     sv = sv_remove_prefix(sv, 6);
   }
 
-  string_builder_t sb = {0};
   sb_append_buffer(&sb, sv.data, sv.length);
 
   if (!sv_ends_with(sv, svl(".png"))) {
