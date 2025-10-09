@@ -139,7 +139,7 @@ SDL_AppResult app_init(app_t* app, int argc, char** argv) {
   do {                                                                    \
     name = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT);             \
     if (name == NULL) {                                                   \
-      SDL_Log("Failed to create '" #name "' cursor: %s", SDL_GetError()); \
+      SDL_Log("Failed to create " #id " cursor: %s", SDL_GetError()); \
       return SDL_APP_FAILURE;                                             \
     }                                                                     \
   } while (0)
