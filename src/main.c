@@ -204,10 +204,10 @@ SDL_AppResult app_event(app_t* app, SDL_Event* event) {
         app->grid_enabled = !app->grid_enabled;
       } else if (code == SDLK_R) {
         // camera_reset(&app->camera);
-        app->current_x = 0;
-        app->current_y = 0;
-        app->current_w = app->capture.width;
-        app->current_h = app->capture.height;
+        app->current_x = (int)MIN(app->config.window_pre_crop[0], app->config.window_pre_crop[2]);
+        app->current_y = (int)MIN(app->config.window_pre_crop[1], app->config.window_pre_crop[3]);
+        app->current_w = (int)abs(app->config.window_pre_crop[2] - app->config.window_pre_crop[0]);
+        app->current_h = (int)abs(app->config.window_pre_crop[3] - app->config.window_pre_crop[1]);
         app->state     = APP_MOVE_STATE;
         SDL_ShowCursor();
       } else if (code == SDLK_M) {
