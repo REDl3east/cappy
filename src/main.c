@@ -13,6 +13,9 @@
 #include <math.h>
 #include <stdio.h>
 
+bool app_event_state(app_t* app, SDL_Event* event);
+void app_iterate_state(app_t* app);
+
 static SDL_Texture* create_capture_texture(SDL_Renderer* renderer, capture_t* capture);
 static void app_iterate_grid(app_t* app, int grid_size, uint8_t r, uint8_t g, uint8_t b);
 
@@ -161,20 +164,7 @@ SDL_AppResult app_init(app_t* app, int argc, char** argv) {
 }
 
 SDL_AppResult app_event(app_t* app, SDL_Event* event) {
-  bool handled = false;
-  if (app->state == APP_MOVE_STATE) {
-    handled = app_event_move(app, event);
-  } else if (app->state == APP_COLOR_STATE) {
-    handled = app_event_color(app, event);
-  } else if (app->state == APP_FLASHLIGHT_STATE) {
-    handled = app_event_flashlight(app, event);
-  } else if (app->state == APP_DRAW_STATE) {
-    handled = app_event_draw(app, event);
-  } else {
-    return SDL_APP_FAILURE;
-  }
-
-  if (handled) return SDL_APP_CONTINUE;
+  if (app_event_state(app, event)) return SDL_APP_CONTINUE;
 
   switch (event->type) {
     case SDL_EVENT_QUIT: {
@@ -342,18 +332,7 @@ SDL_AppResult app_iterate(app_t* app) {
   // render grid
   app_iterate_grid(app, app->config.grid_size, app->config.grid_color[0], app->config.grid_color[1], app->config.grid_color[2]);
 
-  // render state
-  if (app->state == APP_MOVE_STATE) {
-    app_iterate_move(app);
-  } else if (app->state == APP_COLOR_STATE) {
-    app_iterate_color(app);
-  } else if (app->state == APP_FLASHLIGHT_STATE) {
-    app_iterate_flashlight(app);
-  } else if (app->state == APP_DRAW_STATE) {
-    app_iterate_draw(app);
-  } else {
-    return SDL_APP_FAILURE;
-  }
+  app_iterate_state(app);
 
   return SDL_APP_CONTINUE;
 }
@@ -375,6 +354,32 @@ void app_quit(app_t* app, SDL_AppResult result) {
 
     TTF_Quit();
     SDL_Quit();
+  }
+}
+
+bool app_event_state(app_t* app, SDL_Event* event) {
+  if (app->state == APP_MOVE_STATE) {
+    return app_event_move(app, event);
+  } else if (app->state == APP_COLOR_STATE) {
+    return app_event_color(app, event);
+  } else if (app->state == APP_FLASHLIGHT_STATE) {
+    return app_event_flashlight(app, event);
+  } else if (app->state == APP_DRAW_STATE) {
+    return app_event_draw(app, event);
+  }
+
+  return false;
+}
+
+void app_iterate_state(app_t* app) {
+  if (app->state == APP_MOVE_STATE) {
+    app_iterate_move(app);
+  } else if (app->state == APP_COLOR_STATE) {
+    app_iterate_color(app);
+  } else if (app->state == APP_FLASHLIGHT_STATE) {
+    app_iterate_flashlight(app);
+  } else if (app->state == APP_DRAW_STATE) {
+    app_iterate_draw(app);
   }
 }
 
