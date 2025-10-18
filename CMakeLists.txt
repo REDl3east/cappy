@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.27.1...3.27.1)
+cmake_minimum_required(VERSION 3.22.1...3.22.1)
 project(cappy VERSION 0.1.0 LANGUAGES C)
 
 set(SDL3_SRC_DIR     ${CMAKE_CURRENT_SOURCE_DIR}/libs/sdl3)

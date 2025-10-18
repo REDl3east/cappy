@@ -7,7 +7,7 @@
   #include <windows.h>
 #endif
 
-#include <math.h>
+#include <stdlib.h>
 
 bool capture_screen(capture_t* capture) {
 #if __linux__
@@ -30,26 +30,25 @@ bool capture_screen(capture_t* capture) {
     return false;
   }
 
-  width  = attr.width;
-  stride = attr.width;
-  height = attr.height;
-  pixels = new RGB[width * height];
+  capture->width  = attr.width;
+  capture->stride = attr.width;
+  capture->height = attr.height;
+  capture->pixels = (capture_rgb_t*)calloc(capture->width * capture->height, sizeof(capture_rgb_t));
 
-  for (int x = 0; x < width; x++) {
-    for (int y = 0; y < height; y++) {
-      int index       = y * width + x;
+  for (int x = 0; x < capture->width; x++) {
+    for (int y = 0; y < capture->height; y++) {
+      int index       = y * capture->width + x;
       unsigned long p = XGetPixel(image, x, y);
 
-      pixels[index].r = (p >> 16) & 0xFF;
-      pixels[index].g = (p >> 8) & 0xFF;
-      pixels[index].b = (p >> 0) & 0xFF;
+      capture->pixels[index].r = (p >> 16) & 0xFF;
+      capture->pixels[index].g = (p >> 8) & 0xFF;
+      capture->pixels[index].b = (p >> 0) & 0xFF;
     }
   }
 
   XDestroyImage(image);
   XCloseDisplay(display);
 
-  captured = true;
   return true;
 #elif _WIN32
   SetProcessDPIAware();
