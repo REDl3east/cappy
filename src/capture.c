@@ -74,54 +74,77 @@ bool capture_screen_x11(capture_t* capture) {
 bool capture_screen_windows(capture_t* capture) {
   SetProcessDPIAware();
   HDC hScreenDC = GetDC(NULL);
+  if (hScreenDC == NULL) return false;
+
   HDC hMemoryDC = CreateCompatibleDC(hScreenDC);
+  if (hMemoryDC == NULL) {
+    ReleaseDC(NULL, hScreenDC);
+    return false;
+  }
 
-  capture->width     = GetSystemMetrics(SM_CXVIRTUALSCREEN);
-  capture->height    = GetSystemMetrics(SM_CYVIRTUALSCREEN);
-  capture->stride    = capture->width;
-  HBITMAP hBitmap    = CreateCompatibleBitmap(hScreenDC, capture->width, capture->height);
+  int sx = GetSystemMetrics(SM_XVIRTUALSCREEN);
+  int sy = GetSystemMetrics(SM_YVIRTUALSCREEN);
+  int w  = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+  int h  = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+
+  capture->width  = w;
+  capture->height = h;
+  capture->stride = w;
+
+  BITMAPINFO bmi;
+  memset(&bmi, 0, sizeof(bmi));
+  bmi.bmiHeader.biSize        = sizeof(BITMAPINFOHEADER);
+  bmi.bmiHeader.biWidth       = w;
+  bmi.bmiHeader.biHeight      = -h;
+  bmi.bmiHeader.biPlanes      = 1;
+  bmi.bmiHeader.biBitCount    = 32;
+  bmi.bmiHeader.biCompression = BI_RGB;
+
+  void* bits      = NULL;
+  HBITMAP hBitmap = CreateDIBSection(hScreenDC, &bmi, DIB_RGB_COLORS, &bits, NULL, 0);
+  if (hBitmap == NULL || bits == NULL) {
+    DeleteDC(hMemoryDC);
+    ReleaseDC(NULL, hScreenDC);
+    if (hBitmap) DeleteObject(hBitmap);
+    return false;
+  }
+
   HBITMAP hOldBitmap = (HBITMAP)SelectObject(hMemoryDC, hBitmap);
-  BitBlt(hMemoryDC, GetSystemMetrics(SM_XVIRTUALSCREEN), GetSystemMetrics(SM_YVIRTUALSCREEN), capture->width, capture->height, hScreenDC, 0, 0, SRCCOPY);
-  hBitmap = (HBITMAP)SelectObject(hMemoryDC, hOldBitmap);
 
-  BITMAPINFO MyBMInfo       = {0};
-  MyBMInfo.bmiHeader.biSize = sizeof(MyBMInfo.bmiHeader);
-
-  if (!GetDIBits(hMemoryDC, hBitmap, 0, 0, NULL, &MyBMInfo, DIB_RGB_COLORS)) {
+  if (!BitBlt(hMemoryDC, 0, 0, w, h, hScreenDC, sx, sy, SRCCOPY)) {
+    SelectObject(hMemoryDC, hOldBitmap);
+    DeleteObject(hBitmap);
     DeleteDC(hMemoryDC);
-    DeleteDC(hScreenDC);
+    ReleaseDC(NULL, hScreenDC);
     return false;
   }
 
-  BYTE* pixel_bytes = (BYTE*)calloc(MyBMInfo.bmiHeader.biSizeImage, sizeof(BYTE));
-
-  MyBMInfo.bmiHeader.biBitCount    = 32;
-  MyBMInfo.bmiHeader.biCompression = BI_RGB;
-  MyBMInfo.bmiHeader.biHeight      = abs(MyBMInfo.bmiHeader.biHeight);
-
-  if (!GetDIBits(hMemoryDC, hBitmap, 0, MyBMInfo.bmiHeader.biHeight, pixel_bytes, &MyBMInfo, DIB_RGB_COLORS)) {
+  capture->pixels = (capture_rgb_t*)calloc((size_t)w * (size_t)h, sizeof(capture_rgb_t));
+  if (capture->pixels == NULL) {
+    SelectObject(hMemoryDC, hOldBitmap);
+    DeleteObject(hBitmap);
     DeleteDC(hMemoryDC);
-    DeleteDC(hScreenDC);
-    free(pixel_bytes);
+    ReleaseDC(NULL, hScreenDC);
     return false;
   }
 
-  capture->pixels = (capture_rgb_t*)calloc(capture->width * capture->height, sizeof(capture_rgb_t));
-
-  int i = 0;
-  for (int y = capture->height - 1; y >= 0; --y) {
-    for (int x = 0; x < capture->width; ++x) {
-      capture_rgb_t* rgb = capture->pixels + i;
-      rgb->b             = pixel_bytes[(y * capture->width + x) * 4 + 0];
-      rgb->g             = pixel_bytes[(y * capture->width + x) * 4 + 1];
-      rgb->r             = pixel_bytes[(y * capture->width + x) * 4 + 2];
-      i++;
+  uint8_t* src = (uint8_t*)bits;
+  for (int y = 0; y < h; ++y) {
+    uint8_t* row = src + (size_t)y * (size_t)w * 4;
+    for (int x = 0; x < w; ++x) {
+      uint8_t b                    = row[x * 4 + 0];
+      uint8_t g                    = row[x * 4 + 1];
+      uint8_t r                    = row[x * 4 + 2];
+      capture->pixels[y * w + x].r = r;
+      capture->pixels[y * w + x].g = g;
+      capture->pixels[y * w + x].b = b;
     }
   }
 
+  SelectObject(hMemoryDC, hOldBitmap);
+  DeleteObject(hBitmap);
   DeleteDC(hMemoryDC);
-  DeleteDC(hScreenDC);
-  free(pixel_bytes);
+  ReleaseDC(NULL, hScreenDC);
 
   return true;
 }
