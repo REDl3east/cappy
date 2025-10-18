@@ -1,5 +1,7 @@
 #include "capture.h"
 
+#include <stdlib.h>
+
 #if __linux__
   #include <X11/Xlib.h>
   #include <X11/Xutil.h>
@@ -7,10 +9,25 @@
   #include <windows.h>
 #endif
 
-#include <stdlib.h>
+#if __linux__
+bool capture_screen_x11(capture_t* capture);
+#elif _WIN32
+bool capture_screen_windows(capture_t* capture);
+#endif
 
 bool capture_screen(capture_t* capture) {
 #if __linux__
+  return capture_screen_x11(capture);
+#elif _WIN32
+  return capture_screen_windows(capture);
+#else
+  return false;
+#endif
+}
+
+#if __linux__
+
+bool capture_screen_x11(capture_t* capture) {
   Display* display = XOpenDisplay(NULL);
   if (!display) {
     return false;
@@ -50,7 +67,11 @@ bool capture_screen(capture_t* capture) {
   XCloseDisplay(display);
 
   return true;
+}
+
 #elif _WIN32
+
+bool capture_screen_windows(capture_t* capture) {
   SetProcessDPIAware();
   HDC hScreenDC = GetDC(NULL);
   HDC hMemoryDC = CreateCompatibleDC(hScreenDC);
@@ -103,10 +124,9 @@ bool capture_screen(capture_t* capture) {
   free(pixel_bytes);
 
   return true;
-#endif
-
-  return false;
 }
+
+#endif
 
 void capture_free(capture_t* capture) {
   free(capture->pixels);
