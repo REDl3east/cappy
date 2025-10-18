@@ -105,7 +105,7 @@ SDL_AppResult app_init(app_t* app, int argc, char** argv) {
   app->end_crop.y       = 0;
   app->resize_selection = RESIZE_SELECTION_NONE;
 
-  app->flashlight_zoom.size             = 150.0f;
+  app->flashlight_zoom.size             = app->config.flashlight_size;
   app->flashlight_zoom.zooming          = false;
   app->flashlight_zoom.zoom_in          = false;
   app->flashlight_zoom.zoom_amount      = 150.0f;
