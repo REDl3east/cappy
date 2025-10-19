@@ -70,10 +70,10 @@ The way to do this depends on the OS. Find the path to the executable.
 ### Configuration
 A configuration file is automatically generated when the program is ran for the first time. The location depends on the platform. On Linux: `$HOME/.local/share/cappy/cappy.ini`, on Windows: `$HOME\AppData\Roaming\cappy\cappy.ini`, and on Mac: `$HOME/Library/Application Support/cappy/cappy.ini`. All possible configuration is as follows:
 
-| Option                        | Description                                                                | Default        |
-| ----------------------------- | -------------------------------------------------------------------------- |--------------- |
-| window_fullscreen             | Sets the window to fullscreen, otherwise sets it as fullscreen borderless. | `false`          |
-| window_pre_crop               | Pre-crop the image at initial startup. Requires 4 integers in the format: X Y WIDTH HEIGHT. If WIDTH is 0, then it is replaced with the capture width. If HEIGHT is 0, then it is replaced with the capture height.                                                                                   | `0 0 0 0`        |
+| Option                        | Description                                                                | Default          |
+| ----------------------------- | -------------------------------------------------------------------------- | ---------------- |
+| window                        | Sets the window to borderless or fullscreen borderless. Accepts `borderless` or `fullscreen`. | `borderless` |
+| window_pre_crop               | Window size and pre-crop the image at initial startup. Requires 4 integers in the format: X Y WIDTH HEIGHT. If WIDTH is 0, then it is replaced with the capture width. If HEIGHT is 0, then it is replaced with the capture height. | `0 0 0 0` |
 | flashlight_size               | The initial flashlight radius in pixels.                                                                   | `150`            |
 | flashlight_center_inner_color | The center color of the flashlight. Requires 4 integers between 0-255 in the format: REG GREEN BLUE ALPHA. | `255 255 204 25` |
 | flashlight_center_outer_color | The center color of the flashlight. Requires 4 integers between 0-255 in the format: REG GREEN BLUE ALPHA. | `255 255 204 25` |

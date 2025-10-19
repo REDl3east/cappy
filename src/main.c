@@ -53,6 +53,8 @@ SDL_AppResult app_init(app_t* app, int argc, char** argv) {
   }
 
   app->window = SDL_CreateWindowWithProperties(props);
+  SDL_HideWindow(app->window);
+
   SDL_DestroyProperties(props);
 
   if (app->window == NULL) {
@@ -146,7 +148,6 @@ SDL_AppResult app_init(app_t* app, int argc, char** argv) {
       return SDL_APP_FAILURE;                                         \
     }                                                                 \
   } while (0)
-
   INIT_CURSOR(app->default_cursor, SDL_SYSTEM_CURSOR_DEFAULT);
   INIT_CURSOR(app->move_cursor, SDL_SYSTEM_CURSOR_MOVE);
   INIT_CURSOR(app->crosshair_cursor, SDL_SYSTEM_CURSOR_CROSSHAIR);
@@ -155,10 +156,12 @@ SDL_AppResult app_init(app_t* app, int argc, char** argv) {
   INIT_CURSOR(app->nwse_cursor, SDL_SYSTEM_CURSOR_NWSE_RESIZE);
   INIT_CURSOR(app->nesw_cursor, SDL_SYSTEM_CURSOR_NESW_RESIZE);
   INIT_CURSOR(app->wait_cursor, SDL_SYSTEM_CURSOR_WAIT);
-
 #undef INIT_CURSOR
 
   SDL_SetCursor(app->default_cursor);
+
+  SDL_SetWindowSize(app->window, app->config.window_pre_crop[2], app->config.window_pre_crop[3]);
+  SDL_ShowWindow(app->window);
 
   return SDL_APP_CONTINUE;
 }

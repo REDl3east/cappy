@@ -22,7 +22,7 @@ bool config_init(config_t* config) {
     }
 
     const char* config_str =
-        "window_fullscreen             = false\n"
+        "window                        = borderless\n"
         "window_pre_crop               = 0 0 0 0\n"
         "flashlight_size               = 150\n"
         "flashlight_center_inner_color = 255 255 204 25\n"
@@ -150,10 +150,10 @@ static void config_handler(config_t* config, cstring_view key, cstring_view valu
     config_parse_color(value, config->flashlight_center_outer_color);
   } else if (sv_compare(key, svl("flashlight_outer_color"))) {
     config_parse_color(value, config->flashlight_outer_color);
-  } else if (sv_compare(key, svl("window_fullscreen"))) {
-    if (sv_compare_insensitive(value, svl("true")) || sv_compare(value, svl("1"))) {
+  } else if (sv_compare(key, svl("window"))) {
+    if (sv_compare_insensitive(value, svl("fullscreen"))) {
       config->window_fullscreen = true;
-    } else if (sv_compare_insensitive(value, svl("false")) || sv_compare(value, svl("0"))) {
+    } else if (sv_compare_insensitive(value, svl("borderless"))) {
       config->window_fullscreen = false;
     }
   } else if (sv_compare(key, svl("window_pre_crop"))) {
@@ -237,7 +237,7 @@ static void config_parse_bound(cstring_view value, int* bounds) {
 
 void config_print(const config_t* config) {
   if (config == NULL) return;
-  SDL_Log("window_fullscreen             = %s", config->window_fullscreen ? "true" : "false");
+  SDL_Log("window                        = %s", config->window_fullscreen ? "fullscreen" : "borderless");
   SDL_Log("flashlight_size               = %d", config->flashlight_size);
   SDL_Log("grid_size                     = %d", config->grid_size);
   SDL_Log("font_size                     = %d", config->font_size);
