@@ -93,6 +93,7 @@ A configuration file is automatically generated when the program is ran for the 
 | C            | Enter/Exit color mode      |
 | F            | Enter/Exit flashlight mode |
 | R            | Reset capture              |
+| Ctrl+R       | Reset capture and camera   |
 | G            | Toggle grid                |
 | M            | Minimize window            |
 | Right Click  | Enter crop drawing mode    |

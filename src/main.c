@@ -203,7 +203,9 @@ SDL_AppResult app_event(app_t* app, SDL_Event* event) {
       } else if (code == SDLK_G) {
         app->grid_enabled = !app->grid_enabled;
       } else if (code == SDLK_R) {
-        // camera_reset(&app->camera);
+        if (mod & SDL_KMOD_CTRL) {
+          camera_reset(&app->camera);
+        }
         app->current_x = (int)MIN(app->config.window_pre_crop[0], app->config.window_pre_crop[2]);
         app->current_y = (int)MIN(app->config.window_pre_crop[1], app->config.window_pre_crop[3]);
         app->current_w = (int)abs(app->config.window_pre_crop[2] - app->config.window_pre_crop[0]);
