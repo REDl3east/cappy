@@ -2,75 +2,32 @@
 
 #include <stdlib.h>
 
-#if __linux__
+#ifdef CAPPY_BUILD_WINDOWS
+  #include <windows.h>
+bool capture_screen_windows(capture_t* capture);
+#elif CAPPY_BUILD_X11
   #include <X11/Xlib.h>
   #include <X11/Xutil.h>
-#elif _WIN32
-  #include <windows.h>
-#endif
-
-#if __linux__
 bool capture_screen_x11(capture_t* capture);
-#elif _WIN32
-bool capture_screen_windows(capture_t* capture);
+#elif CAPPY_BUILD_WAYLAND
+bool capture_screen_wayland(capture_t* capture);
+#else
+bool capture_screen_stub(capture_t* capture);
 #endif
 
 bool capture_screen(capture_t* capture) {
-#if __linux__
-  return capture_screen_x11(capture);
-#elif _WIN32
+#ifdef CAPPY_BUILD_WINDOWS
   return capture_screen_windows(capture);
+#elif CAPPY_BUILD_X11
+  return capture_screen_x11(capture);
+#elif CAPPY_BUILD_WAYLAND
+  return capture_screen_wayland(capture);
 #else
-  return false;
+  return capture_screen_stub(capture);
 #endif
 }
 
-#if __linux__
-
-bool capture_screen_x11(capture_t* capture) {
-  Display* display = XOpenDisplay(NULL);
-  if (!display) {
-    return false;
-  }
-
-  Window root = DefaultRootWindow(display);
-
-  XWindowAttributes attr;
-  if (!XGetWindowAttributes(display, root, &attr)) {
-    XCloseDisplay(display);
-    return false;
-  }
-
-  XImage* image = XGetImage(display, root, 0, 0, attr.width, attr.height, AllPlanes, ZPixmap);
-  if (!image) {
-    XCloseDisplay(display);
-    return false;
-  }
-
-  capture->width  = attr.width;
-  capture->stride = attr.width;
-  capture->height = attr.height;
-  capture->pixels = (capture_rgb_t*)calloc(capture->width * capture->height, sizeof(capture_rgb_t));
-
-  for (int x = 0; x < capture->width; x++) {
-    for (int y = 0; y < capture->height; y++) {
-      int index       = y * capture->width + x;
-      unsigned long p = XGetPixel(image, x, y);
-
-      capture->pixels[index].r = (p >> 16) & 0xFF;
-      capture->pixels[index].g = (p >> 8) & 0xFF;
-      capture->pixels[index].b = (p >> 0) & 0xFF;
-    }
-  }
-
-  XDestroyImage(image);
-  XCloseDisplay(display);
-
-  return true;
-}
-
-#elif _WIN32
-
+#ifdef CAPPY_BUILD_WINDOWS
 bool capture_screen_windows(capture_t* capture) {
   SetProcessDPIAware();
   HDC hScreenDC = GetDC(NULL);
@@ -149,6 +106,60 @@ bool capture_screen_windows(capture_t* capture) {
   return true;
 }
 
+#elif CAPPY_BUILD_X11
+
+bool capture_screen_x11(capture_t* capture) {
+  Display* display = XOpenDisplay(NULL);
+  if (!display) {
+    return false;
+  }
+
+  Window root = DefaultRootWindow(display);
+
+  XWindowAttributes attr;
+  if (!XGetWindowAttributes(display, root, &attr)) {
+    XCloseDisplay(display);
+    return false;
+  }
+
+  XImage* image = XGetImage(display, root, 0, 0, attr.width, attr.height, AllPlanes, ZPixmap);
+  if (!image) {
+    XCloseDisplay(display);
+    return false;
+  }
+
+  capture->width  = attr.width;
+  capture->stride = attr.width;
+  capture->height = attr.height;
+  capture->pixels = (capture_rgb_t*)calloc(capture->width * capture->height, sizeof(capture_rgb_t));
+
+  for (int x = 0; x < capture->width; x++) {
+    for (int y = 0; y < capture->height; y++) {
+      int index       = y * capture->width + x;
+      unsigned long p = XGetPixel(image, x, y);
+
+      capture->pixels[index].r = (p >> 16) & 0xFF;
+      capture->pixels[index].g = (p >> 8) & 0xFF;
+      capture->pixels[index].b = (p >> 0) & 0xFF;
+    }
+  }
+
+  XDestroyImage(image);
+  XCloseDisplay(display);
+
+  return true;
+}
+
+#elif CAPPY_BUILD_WAYLAND
+
+bool capture_screen_wayland(capture_t* capture) {
+  return false;
+}
+
+#else
+bool capture_screen_stub(capture_t* capture) {
+  return false;
+}
 #endif
 
 void capture_free(capture_t* capture) {

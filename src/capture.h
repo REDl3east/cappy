@@ -23,11 +23,4 @@ void capture_free(capture_t* capture);
 bool capture_in_bound(capture_t* capture, int x, int y);
 bool capture_at(capture_t* capture, int x, int y, capture_rgb_t* rgb);
 
-// std::string toDecimalString(const RGB& color);
-// std::string toDecimalSepString(const RGB& color);
-// std::string toHexString(const RGB& color);
-// std::string toHexSepString(const RGB& color);
-// std::string toBinaryString(const RGB& color);
-// std::string toBinarySepString(const RGB& color);
-
 #endif

@@ -6,6 +6,8 @@ set(SDL3_TTF_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs/sdl3_ttf)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs)
 
+option(WAYLAND_WINDOWS_BACKEND "If under UNIX, use wayland instead of X11" OFF)
+
 set(MAIN_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/src/main.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/sdl_callback.c
@@ -28,11 +30,18 @@ target_include_directories(cappy PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/libs
 )
 
-if (UNIX)
-    target_link_libraries(cappy SDL3-static SDL3_ttf-static X11)
-elseif(WIN32)
+if (WIN32)
     set_property(TARGET cappy PROPERTY WIN32_EXECUTABLE true)
     target_link_libraries(cappy SDL3-static SDL3_ttf-static)
+    target_compile_definitions(cappy PRIVATE CAPPY_BUILD_WINDOWS=1)
+elseif(UNIX)
+    if(WAYLAND_WINDOWS_BACKEND)
+      message(FATAL_ERROR "Wayland support not implemented!")
+      target_compile_definitions(cappy PRIVATE CAPPY_BUILD_WAYLAND=1)
+    else()
+      target_link_libraries(cappy SDL3-static SDL3_ttf-static X11)
+      target_compile_definitions(cappy PRIVATE CAPPY_BUILD_X11=1)
+    endif()
 endif()
     
 install(TARGETS cappy DESTINATION bin)
