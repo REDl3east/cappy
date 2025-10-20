@@ -54,14 +54,16 @@ The way to do this depends on the OS. Find the path to the executable.
 7. Set the Command to the path of the executable.
 8. Set the shortcut to whatever you'd like. I like using ```ctrl+left_shift+z```.
 
-
 #### Setting shortcut for Windows 10/11 (Way 1)
+You can use [AutoHotKey](https://www.autohotkey.com/) to create a global shortcut. Just run AutoHotKey with [./scripts/cappy.ahk](./scripts/cappy.ahk) after installation.
+
+#### Setting shortcut for Windows 10/11 (Way 2)
 1. Right-click the blank area on the desktop and select New -> Shortcut. Type the location of the item and click Next. If you don’t know the path of the app, you can click the Browse button. Then you can select the target app’s executable file and click OK. Type a name for the shortcut and click Finish to create a shortcut for the app.
 2. Then you can right-click the app’s shortcut and select Properties.
 3. In the Properties window, you can click the Shortcut tab.
 4. Next to the Shortcut key field, you can set a keyboard shortcut that you want to use to open the app. Click OK to save the setting.
 
-#### Setting shortcut for Windows 10/11 (Way 2)
+#### Setting shortcut for Windows 10/11 (Way 3)
 1. You can click Start Menu on your Windows 10 computer. For Windows 11, you need to click the All apps icon to view all apps in the Start Menu.
 2. Next, you can scroll down to find the target app. Right-click the app and select Pin to taskbar or More -> Pin to taskbar to add the program to the Windows taskbar. Alternatively, you can also directly drag the app onto the taskbar to pin the program to the taskbar. You can follow the same operation to pin other apps to the taskbar.
 3. Then you can use the Windows key along with the corresponding number key to open the programs on the taskbar with a keyboard shortcut. Based on the position of the pinned apps on the taskbar, they get a number from 1 to 9 from the left to the right. For instance, you can press Windows + 1 keyboard shortcut to open the first pinned app on the taskbar.
