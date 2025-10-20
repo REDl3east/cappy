@@ -19,9 +19,10 @@ static bool capture_screen_windows(capture_t* capture);
 #elif CAPPY_BUILD_X11
 static bool capture_screen_x11(capture_t* capture);
 #elif CAPPY_BUILD_WAYLAND
+static bool capture_screen_wayland(capture_t* capture);
+
 static int sdbus_on_screenshot(sd_bus_message* m, void* userdata, sd_bus_error* ret_error);
 static char* sdbus_screenshot_get_uri();
-static bool capture_screen_wayland(capture_t* capture);
 #else
 static bool capture_screen_stub(capture_t* capture);
 #endif
