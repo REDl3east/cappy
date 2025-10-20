@@ -99,6 +99,7 @@ SDL_AppResult app_init(app_t* app, int argc, char** argv) {
   SDL_SetWindowIcon(app->window, app->icon);
 
   camera_reset(&app->camera);
+  app->camera_scale_to_change = 7.5f;
 
   app->state          = APP_MOVE_STATE;
   app->recompute_text = true;
@@ -417,7 +418,7 @@ static void app_iterate_grid(app_t* app, int grid_size, uint8_t r, uint8_t g, ui
 
   int lines_rendered = 0;
 
-  if (app->camera.scale > 7.5f) {
+  if (app->camera.scale > app->camera_scale_to_change) {
     SDL_SetRenderDrawColor(app->renderer, r, g, b, 75);
     // Draw vertical grid lines
     for (int x = x1; x <= x2; ++x) {
@@ -495,7 +496,7 @@ static void save_capture(const char* file, app_t* app) {
 
 static void save_dialog_callback(void* userdata, const char* const* filelist, int filter) {
   app_t* app = (app_t*)userdata;
-  
+
   if (filelist != NULL) {
     if (*filelist == NULL) {
       SDL_Log("Save dialog canceled.");

@@ -90,7 +90,7 @@ void app_iterate_color(app_t* app) {
 
   capture_rgb_t rgb;
   if (capture_at(&app->capture, (int)mouse.x, (int)mouse.y, &rgb) && !(mouse.x < app->current_x || mouse.x > app->current_x + app->current_w - 1 || mouse.y < app->current_y || mouse.y > app->current_y + app->current_h - 1)) {
-    if (app->camera.scale > 7.5f) {
+    if (app->camera.scale > app->camera_scale_to_change) {
       SDL_FPoint p = camera_world_to_screen(&app->camera, mouse.x, mouse.y);
 
       float r          = rgb.r / 255.0f;
@@ -111,7 +111,7 @@ void app_iterate_color(app_t* app) {
         SDL_SetRenderDrawColor(app->renderer, 255, 255, 255, 255);
       }
 
-      int size = (int)(app->camera.scale / 7.5f);
+      int size = (int)(app->camera.scale / app->camera_scale_to_change);
       for (int i = 0; i < size; i++) {
         SDL_RenderRect(app->renderer, &r1);
         r1.x += 1;

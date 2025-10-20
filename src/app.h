@@ -16,6 +16,7 @@ typedef struct app_t {
   SDL_Texture* capture_texture;
   config_t config;
   camera_t camera;
+  float camera_scale_to_change;
   TTF_Font* font;
   SDL_Surface* icon;
 
