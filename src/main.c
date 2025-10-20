@@ -219,7 +219,8 @@ SDL_AppResult app_event(app_t* app, SDL_Event* event) {
         SDL_MinimizeWindow(app->window);
       } else if (code == SDLK_S && mod & SDL_KMOD_CTRL) {
         static const SDL_DialogFileFilter filters[] = {
-            {"PNG images", "png"}};
+            {"PNG images", "png"},
+        };
         SDL_ShowSaveFileDialog(save_dialog_callback, (void*)app, app->window, filters, SDL_arraysize(filters), NULL);
       }
 
