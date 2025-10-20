@@ -6,7 +6,7 @@ set(SDL3_TTF_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs/sdl3_ttf)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs)
 
-option(WAYLAND_WINDOWS_BACKEND "If under UNIX, use wayland instead of X11" OFF)
+option(WAYLAND_WINDOWS_BACKEND "If under UNIX, use wayland instead of X11" ON)
 
 set(MAIN_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/src/main.c
@@ -15,12 +15,13 @@ set(MAIN_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/src/config.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/camera.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/renderer.c
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/stb.c
-  
+
   ${CMAKE_CURRENT_SOURCE_DIR}/src/state/state_move.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/state/state_color.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/state/state_flashlight.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/state/state_draw.c
+
+  ${CMAKE_CURRENT_SOURCE_DIR}/libs/stb.c
 )
 
 add_executable(cappy ${MAIN_SRC})
@@ -36,8 +37,8 @@ if (WIN32)
     target_compile_definitions(cappy PRIVATE CAPPY_BUILD_WINDOWS=1)
 elseif(UNIX)
     if(WAYLAND_WINDOWS_BACKEND)
-      message(FATAL_ERROR "Wayland support not implemented!")
       target_compile_definitions(cappy PRIVATE CAPPY_BUILD_WAYLAND=1)
+      target_link_libraries(cappy SDL3-static SDL3_ttf-static systemd)
     else()
       target_link_libraries(cappy SDL3-static SDL3_ttf-static X11)
       target_compile_definitions(cappy PRIVATE CAPPY_BUILD_X11=1)
