@@ -495,8 +495,8 @@ static void save_capture(const char* file, app_t* app) {
 
 static void save_dialog_callback(void* userdata, const char* const* filelist, int filter) {
   app_t* app = (app_t*)userdata;
-  if (filelist) {
-    if (!*filelist) {
+  if (filelist != NULL) {
+    if (*filelist == NULL) {
       SDL_Log("Save dialog canceled.");
       return;
     }
