@@ -6,7 +6,7 @@ set(SDL3_TTF_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs/sdl3_ttf)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs)
 
-option(WAYLAND_WINDOWS_BACKEND "If under UNIX, use wayland instead of X11" ON)
+option(WAYLAND_WINDOWS_BACKEND "If under UNIX, use wayland instead of X11" OFF)
 
 set(MAIN_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/src/main.c
