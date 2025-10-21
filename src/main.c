@@ -177,7 +177,7 @@ SDL_AppResult app_event(app_t* app, SDL_Event* event) {
     case SDL_EVENT_KEY_DOWN: {
       SDL_Keycode code = event->key.key;
       SDL_Keymod mod   = SDL_GetModState();
-      if (code == SDLK_Q) {
+      if (code == SDLK_Q || code == SDLK_ESCAPE) {
         return SDL_APP_SUCCESS;
       } else if (code == SDLK_F) {
         if (app->state == APP_MOVE_STATE || app->state == APP_COLOR_STATE || app->state == APP_DRAW_STATE) {
