@@ -93,6 +93,7 @@ A configuration file is automatically generated when the program is ran for the 
 
 | Key          | Description                |
 | ------------ | -------------------------- |
+| Q or ESC     | Close the application      |
 | C            | Enter/Exit color mode      |
 | F            | Enter/Exit flashlight mode |
 | R            | Reset capture              |
