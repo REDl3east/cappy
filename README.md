@@ -25,10 +25,10 @@ This demo is heavily compressed to save space. When you run the application it w
 * Windows
 
 ### Build
-Cappy is built using CMake. CMake will take care of downloading all necessary dependencies. It may take a while to build because everything is built from scratch and statically linked. On Linux, you may need to install some additional packages. If you are building for X11, you need to install libx11-dev with `sudo apt-get install libx11-dev`. If you are building for Wayland, you need to install libsystemd-dev with `sudo apt-get install libsystemd-dev`. If you want to specify which you
+Cappy is built using CMake. CMake will take care of downloading all necessary dependencies. It may take a while to build because everything is built from scratch and statically linked. On Linux, you may need to install some additional packages. If you are building for X11, you need to install libx11-dev with `sudo apt-get install libx11-dev`. If you are building for Wayland, you need to install libsystemd-dev with `sudo apt-get install libsystemd-dev`. If you want to specify which one you
 want to build with, you can define `-DCAPPY_BUILD_X11=ON` or `-DCAPPY_BUILD_WAYLAND=ON` in the following CMake command. It will default to X11 if neither is defined.
 ``` bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -G Ninja
 cmake --build build
 ```
 
