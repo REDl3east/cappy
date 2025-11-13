@@ -246,12 +246,12 @@ SDL_AppResult app_event(app_t* app, SDL_Event* event) {
         if (mod & SDL_KMOD_CTRL) {
           camera_reset(&app->camera);
         }
-        if (!app->using_file) {
-          app->current_x = (int)MIN(app->config.window_pre_crop[0], app->config.window_pre_crop[2]);
-          app->current_y = (int)MIN(app->config.window_pre_crop[1], app->config.window_pre_crop[3]);
-          app->current_w = (int)abs(app->config.window_pre_crop[2] - app->config.window_pre_crop[0]);
-          app->current_h = (int)abs(app->config.window_pre_crop[3] - app->config.window_pre_crop[1]);
-        } else {
+        app->current_x = (int)MIN(app->config.window_pre_crop[0], app->config.window_pre_crop[2]);
+        app->current_y = (int)MIN(app->config.window_pre_crop[1], app->config.window_pre_crop[3]);
+        app->current_w = (int)abs(app->config.window_pre_crop[2] - app->config.window_pre_crop[0]);
+        app->current_h = (int)abs(app->config.window_pre_crop[3] - app->config.window_pre_crop[1]);
+
+        if (app->using_file) {
           int w, h;
           SDL_GetWindowSize(app->window, &w, &h);
           app->camera.position.x = -(w * 0.5f - app->capture.width * 0.5f);
