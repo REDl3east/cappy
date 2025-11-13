@@ -47,6 +47,8 @@ typedef struct app_t {
   SDL_FPoint end_crop;
   crop_resize_selection_t resize_selection;
 
+  int using_file;
+
   int save_file_event;
 
   app_state_t state;

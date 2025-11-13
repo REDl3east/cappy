@@ -7,6 +7,7 @@ static void config_handler(config_t* config, cstring_view key, cstring_view valu
 static void config_parse_color(cstring_view value, uint8_t* color);
 static void config_parse_color3(cstring_view value, uint8_t* color);
 static void config_parse_bound(cstring_view value, int* bound);
+static void config_parse_two_int(cstring_view value, int* input);
 
 bool config_init(config_t* config) {
   char tmp_buffer[256];
@@ -31,7 +32,8 @@ bool config_init(config_t* config) {
         "background_color              = 50 50 50\n"
         "font_size                     = 36\n"
         "grid_size                     = 100\n"
-        "grid_color                    = 200 200 200\n";
+        "grid_color                    = 200 200 200\n"
+        "file_window_size                     = 1920 1080\n";
 
     SDL_WriteIO(io, config_str, SDL_strlen(config_str));
 
@@ -139,6 +141,9 @@ void config_init_default(config_t* config) {
   config->grid_color[0] = 50;
   config->grid_color[1] = 50;
   config->grid_color[2] = 50;
+
+  config->file_window_size[0] = 1920;
+  config->file_window_size[1] = 1080;
 }
 
 static void config_handler(config_t* config, cstring_view key, cstring_view value) {
@@ -166,6 +171,8 @@ static void config_handler(config_t* config, cstring_view key, cstring_view valu
     config_parse_color3(value, config->grid_color);
   } else if (sv_compare(key, svl("font_size"))) {
     sv_parse_int(value, &config->font_size);
+  } else if (sv_compare(key, svl("file_window_size"))) {
+    config_parse_two_int(value, config->file_window_size);
   }
 }
 
@@ -235,6 +242,26 @@ static void config_parse_bound(cstring_view value, int* bounds) {
   }
 }
 
+static void config_parse_two_int(cstring_view value, int* input) {
+  int index          = 0;
+  cstring_view token = sv_empty;
+  cstring_view delim = sv_create(" ", 1);
+  for (cstring_view sv = sv_split_next(value, delim, &token); !sv_is_empty(sv) || !sv_is_empty(token); sv = sv_split_next(sv, delim, &token)) {
+    int value;
+    if (!sv_parse_int(token, &value)) return;
+
+    if (index == 0) {
+      input[0] = value;
+    }
+    if (index == 1) {
+      input[1] = value;
+    }
+
+    index++;
+    if (index == 2) break;
+  }
+}
+
 void config_print(const config_t* config) {
   if (config == NULL) return;
   SDL_Log("window                        = %s", config->window_fullscreen ? "fullscreen" : "borderless");
@@ -247,4 +274,5 @@ void config_print(const config_t* config) {
   SDL_Log("flashlight_outer_color        = %d %d %d %d", config->flashlight_outer_color[0], config->flashlight_outer_color[1], config->flashlight_outer_color[2], config->flashlight_outer_color[3]);
   SDL_Log("background_color              = %d %d %d", config->background_color[0], config->background_color[1], config->background_color[2]);
   SDL_Log("grid_color                    = %d %d %d", config->grid_color[0], config->grid_color[1], config->grid_color[2]);
+  SDL_Log("file_window_size              = %d %d", config->file_window_size[0], config->file_window_size[1]);
 }

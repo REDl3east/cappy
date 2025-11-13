@@ -23,9 +23,27 @@ static void save_capture(const char* file, app_t* app);
 static void save_dialog_callback(void* userdata, const char* const* filelist, int filter);
 
 SDL_AppResult app_init(app_t* app, int argc, char** argv) {
-  if (!capture_screen(&app->capture)) {
-    SDL_Log("Failed to capture screen!");
-    return SDL_APP_FAILURE;
+  const char* progname = argv[0];
+  argv++;
+  argc--;
+
+  const char* file = NULL;
+  app->using_file  = 0;
+  if (argc != 0) {
+    file            = argv[0];
+    app->using_file = 1;
+  }
+
+  if (app->using_file) {
+    if (!capture_image(&app->capture, file)) {
+      SDL_Log("Failed to capture image: '%s'.", file);
+      return SDL_APP_FAILURE;
+    }
+  } else {
+    if (!capture_screen(&app->capture)) {
+      SDL_Log("Failed to capture screen!");
+      return SDL_APP_FAILURE;
+    }
   }
 
   if (!config_init(&app->config)) {
@@ -41,10 +59,19 @@ SDL_AppResult app_init(app_t* app, int argc, char** argv) {
 
   SDL_PropertiesID props = SDL_CreateProperties();
   SDL_SetStringProperty(props, SDL_PROP_WINDOW_CREATE_TITLE_STRING, "Cappy");
-  SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, app->capture.width);
-  SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, app->capture.height);
-  SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_X_NUMBER, 0);
-  SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_Y_NUMBER, 0);
+
+  if (!app->using_file) {
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, app->capture.width);
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, app->capture.height);
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_X_NUMBER, 0);
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_Y_NUMBER, 0);
+  } else {
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_RESIZABLE_BOOLEAN, 1);
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, app->config.file_window_size[0]);
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, app->config.file_window_size[1]);
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_X_NUMBER, SDL_WINDOWPOS_CENTERED);
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_Y_NUMBER, SDL_WINDOWPOS_CENTERED);
+  }
 
   if (app->config.window_fullscreen) {
     SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_FULLSCREEN_BOOLEAN, 1);
@@ -161,7 +188,15 @@ SDL_AppResult app_init(app_t* app, int argc, char** argv) {
 
   SDL_SetCursor(app->default_cursor);
 
-  SDL_SetWindowSize(app->window, app->config.window_pre_crop[2], app->config.window_pre_crop[3]);
+  if (!app->using_file) {
+    SDL_SetWindowSize(app->window, app->config.window_pre_crop[2], app->config.window_pre_crop[3]);
+  } else {
+    int w, h;
+    SDL_GetWindowSize(app->window, &w, &h);
+    app->camera.position.x = -(w * 0.5f - app->capture.width * 0.5f);
+    app->camera.position.y = -(h * 0.5f - app->capture.height * 0.5f);
+  }
+
   SDL_ShowWindow(app->window);
 
   return SDL_APP_CONTINUE;
@@ -210,11 +245,18 @@ SDL_AppResult app_event(app_t* app, SDL_Event* event) {
         if (mod & SDL_KMOD_CTRL) {
           camera_reset(&app->camera);
         }
-        app->current_x = (int)MIN(app->config.window_pre_crop[0], app->config.window_pre_crop[2]);
-        app->current_y = (int)MIN(app->config.window_pre_crop[1], app->config.window_pre_crop[3]);
-        app->current_w = (int)abs(app->config.window_pre_crop[2] - app->config.window_pre_crop[0]);
-        app->current_h = (int)abs(app->config.window_pre_crop[3] - app->config.window_pre_crop[1]);
-        app->state     = APP_MOVE_STATE;
+        if (!app->using_file) {
+          app->current_x = (int)MIN(app->config.window_pre_crop[0], app->config.window_pre_crop[2]);
+          app->current_y = (int)MIN(app->config.window_pre_crop[1], app->config.window_pre_crop[3]);
+          app->current_w = (int)abs(app->config.window_pre_crop[2] - app->config.window_pre_crop[0]);
+          app->current_h = (int)abs(app->config.window_pre_crop[3] - app->config.window_pre_crop[1]);
+        } else {
+          int w, h;
+          SDL_GetWindowSize(app->window, &w, &h);
+          app->camera.position.x = -(w * 0.5f - app->capture.width * 0.5f);
+          app->camera.position.y = -(h * 0.5f - app->capture.height * 0.5f);
+        }
+        app->state = APP_MOVE_STATE;
         SDL_ShowCursor();
       } else if (code == SDLK_M) {
         SDL_MinimizeWindow(app->window);

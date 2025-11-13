@@ -18,6 +18,7 @@ typedef struct capture_t {
 } capture_t;
 
 bool capture_screen(capture_t* capture);
+bool capture_image(capture_t* capture, const char* file);
 void capture_free(capture_t* capture);
 
 bool capture_in_bound(capture_t* capture, int x, int y);

@@ -2,13 +2,14 @@
 
 #include <stdlib.h>
 
+#include "stb_image.h"
+
 #ifdef CAPPY_BUILD_WINDOWS
   #include <windows.h>
 #elif CAPPY_BUILD_X11
   #include <X11/Xlib.h>
   #include <X11/Xutil.h>
 #elif CAPPY_BUILD_WAYLAND
-  #include "stb_image.h"
   #include <systemd/sd-bus.h>
 #else
 // nothing
@@ -365,3 +366,31 @@ finish:
 #else
 // Stub: Nothing
 #endif
+
+bool capture_image(capture_t* capture, const char* file) {
+  int width, height, n;
+  unsigned char* data = stbi_load(file, &width, &height, &n, 4);
+  if (data == NULL) {
+    return false;
+  }
+
+  capture->width  = width;
+  capture->height = height;
+  capture->stride = width;
+  capture->pixels = malloc(width * height * sizeof(capture_rgb_t));
+
+  if (capture->pixels == NULL) {
+    stbi_image_free(data);
+    return false;
+  }
+
+  for (int i = 0; i < width * height; ++i) {
+    capture->pixels[i].r = data[i * 4 + 0];
+    capture->pixels[i].g = data[i * 4 + 1];
+    capture->pixels[i].b = data[i * 4 + 2];
+  }
+
+  stbi_image_free(data);
+
+  return true;
+}

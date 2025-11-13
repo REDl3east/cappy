@@ -16,6 +16,7 @@ typedef struct config_t {
   uint8_t background_color[3];
   int grid_size;
   uint8_t grid_color[3];
+  int file_window_size[2];
 } config_t;
 
 bool config_init(config_t* config);
