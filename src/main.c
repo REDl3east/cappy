@@ -195,6 +195,7 @@ SDL_AppResult app_init(app_t* app, int argc, char** argv) {
     SDL_GetWindowSize(app->window, &w, &h);
     app->camera.position.x = -(w * 0.5f - app->capture.width * 0.5f);
     app->camera.position.y = -(h * 0.5f - app->capture.height * 0.5f);
+    app->camera.scale      = 1.0f;
   }
 
   SDL_ShowWindow(app->window);
@@ -255,6 +256,7 @@ SDL_AppResult app_event(app_t* app, SDL_Event* event) {
           SDL_GetWindowSize(app->window, &w, &h);
           app->camera.position.x = -(w * 0.5f - app->capture.width * 0.5f);
           app->camera.position.y = -(h * 0.5f - app->capture.height * 0.5f);
+          app->camera.scale      = 1.0f;
         }
         app->state = APP_MOVE_STATE;
         SDL_ShowCursor();
